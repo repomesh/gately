@@ -11,6 +11,7 @@
   "unnamedListener": "未命名监听",
   "acceptProxyTag": "接收 PROXY",
   "defaultSite": "默认站点",
+  "setDefaultSite": "设置默认站点",
   "unmatchedDomains": "未匹配的域名",
   "statusOff": "已停用",
   "webAuthTag": "网页认证",

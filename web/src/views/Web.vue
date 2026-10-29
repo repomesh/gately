@@ -169,6 +169,8 @@
         </template>
         <template v-else #actions>
           <el-button text size="small" type="primary" :icon="Plus" @click="openSite(l)">{{ t('web.addSite') }}</el-button>
+          <!-- 默认站点未配置时不在站点列表中显示，这里提供配置入口 -->
+          <el-button v-if="!hasDefaultRow(l)" text size="small" :icon="Shield" @click="openDefaultSite(l)">{{ t('web.setDefaultSite') }}</el-button>
           <el-button text size="small" :icon="Pencil" @click="openListener(l)">{{ t('web.editListener') }}</el-button>
           <el-popconfirm :title="t('web.deleteListenerConfirm')" width="240" @confirm="removeListener(l)">
             <template #reference>
@@ -481,6 +483,7 @@ import {
   Plus,
   Search,
   Server,
+  Shield,
   SlidersHorizontal,
   Trash2,
 } from 'lucide-vue-next'
@@ -828,6 +831,11 @@ function summary(s: Site) {
   }
 }
 
+// hasDefaultRow 判断默认站点是否已配置（已配置时显示在站点列表最后）
+function hasDefaultRow(l: ListenerView) {
+  return siteRows(l).some((r) => r.isDefault)
+}
+
 function siteRows(l: ListenerView): SiteRow[] {
   const rows = (l.sites ?? []).map((s, i) => ({ site: s, index: i, isDefault: false }))
   if (l.default.enable || (l.default.targets ?? []).length || l.default.type !== 'proxy') {
@@ -1095,6 +1103,12 @@ function openSite(l: ListenerView, row?: SiteRow) {
   site.value = draft
   siteTab.value = 'basic'
   siteVisible.value = true
+}
+
+// openDefaultSite 打开未配置的默认站点：用户主动配置兜底规则，编辑框里默认打开启用开关
+function openDefaultSite(l: ListenerView) {
+  openSite(l, { site: l.default, index: -1, isDefault: true })
+  site.value.enable = true
 }
 
 async function saveSite() {

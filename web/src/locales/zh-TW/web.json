@@ -11,6 +11,7 @@
   "unnamedListener": "未命名監聽",
   "acceptProxyTag": "接收 PROXY",
   "defaultSite": "預設站台",
+  "setDefaultSite": "設定預設站台",
   "unmatchedDomains": "未符合的網域名稱",
   "statusOff": "已停用",
   "webAuthTag": "網頁驗證",

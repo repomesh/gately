@@ -11,6 +11,7 @@
   "unnamedListener": "Listener sem nome",
   "acceptProxyTag": "Aceita PROXY",
   "defaultSite": "Site padrão",
+  "setDefaultSite": "Configurar site padrão",
   "unmatchedDomains": "Domínios sem correspondência",
   "statusOff": "Desativado",
   "webAuthTag": "Autenticação web",

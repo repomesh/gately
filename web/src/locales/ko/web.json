@@ -11,6 +11,7 @@
   "unnamedListener": "이름 없는 리스너",
   "acceptProxyTag": "PROXY 수신",
   "defaultSite": "기본 사이트",
+  "setDefaultSite": "기본 사이트 설정",
   "unmatchedDomains": "일치하지 않는 도메인",
   "statusOff": "사용 안 함",
   "webAuthTag": "웹 인증",

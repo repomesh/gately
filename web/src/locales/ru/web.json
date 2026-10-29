@@ -11,6 +11,7 @@
   "unnamedListener": "Слушатель без имени",
   "acceptProxyTag": "Принимает PROXY",
   "defaultSite": "Сайт по умолчанию",
+  "setDefaultSite": "Настроить сайт по умолчанию",
   "unmatchedDomains": "Несовпавшие домены",
   "statusOff": "Отключено",
   "webAuthTag": "Веб-аутентификация",

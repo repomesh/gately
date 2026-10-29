@@ -11,6 +11,7 @@
   "unnamedListener": "名称未設定のリスナー",
   "acceptProxyTag": "PROXY 受信",
   "defaultSite": "デフォルトサイト",
+  "setDefaultSite": "デフォルトサイトを設定",
   "unmatchedDomains": "一致しないドメイン",
   "statusOff": "無効",
   "webAuthTag": "Web 認証",

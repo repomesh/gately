@@ -11,6 +11,7 @@
   "unnamedListener": "Unbenannter Listener",
   "acceptProxyTag": "Akzeptiert PROXY",
   "defaultSite": "Standard-Website",
+  "setDefaultSite": "Standard-Website festlegen",
   "unmatchedDomains": "Nicht zugeordnete Domains",
   "statusOff": "Deaktiviert",
   "webAuthTag": "Web-Auth",
