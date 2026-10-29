@@ -561,6 +561,16 @@ func (m *Module) composeDown(ctx context.Context, c *Client, p *composeProject, 
 	return nil
 }
 
+// projectHasSelf 判断 Compose 项目是否包含 Gately 自身所在的容器。
+func projectHasSelf(p *composeProject) bool {
+	for _, ct := range p.Containers {
+		if isSelfContainer(ct.ID) {
+			return true
+		}
+	}
+	return false
+}
+
 func (m *Module) handleComposeAction(w http.ResponseWriter, r *http.Request) {
 	c, ok := m.withClient(w)
 	if !ok {
@@ -581,13 +591,9 @@ func (m *Module) handleComposeAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 项目包含 Gately 自身时，停止、暂停、down 会让 Gately 无法再被访问，直接拒绝
-	if action == "stop" || action == "pause" || action == "down" {
-		for _, ct := range p.Containers {
-			if isSelfContainer(ct.ID) {
-				httpx.Error(w, http.StatusBadRequest, "项目 %s 包含 Gately 自身所在的容器，不能执行 %s", name, action)
-				return
-			}
-		}
+	if (action == "stop" || action == "pause" || action == "down") && projectHasSelf(p) {
+		httpx.Error(w, http.StatusBadRequest, "项目 %s 包含 Gately 自身所在的容器，不能执行 %s", name, action)
+		return
 	}
 	if len(p.Containers) == 0 {
 		httpx.Error(w, http.StatusBadRequest, "项目还没有容器，请先执行 up")
@@ -649,6 +655,11 @@ func (m *Module) handleComposeUp(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := checkProjectFiles(p); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	// up 在配置或镜像变化时会停止并重建 Gately 自身，compose 进程随之退出，容器停在停止状态
+	if projectHasSelf(p) {
+		httpx.Error(w, http.StatusBadRequest, "项目 %s 包含 Gately 自身所在的容器，不能在 Gately 内执行 up，请在宿主机上执行 docker compose up -d", p.Name)
 		return
 	}
 	extra := []string{"up", "-d"}
@@ -920,6 +931,10 @@ func (m *Module) handleComposeDelete(w http.ResponseWriter, r *http.Request) {
 	dir := m.composeDir(name)
 	if !p.Managed || dir == "" {
 		httpx.Error(w, http.StatusBadRequest, "只能删除由 Gately 创建的项目")
+		return
+	}
+	if projectHasSelf(p) {
+		httpx.Error(w, http.StatusBadRequest, "项目 %s 包含 Gately 自身所在的容器，不能执行 %s", name, "delete")
 		return
 	}
 	if err := m.composeDown(ctx, c, p, r.URL.Query().Get("volumes") == "1"); err != nil {

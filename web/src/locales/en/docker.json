@@ -71,7 +71,8 @@
       "deleteConfirm": "This runs down on project {name} and deletes its Compose directory. This cannot be undone.",
       "downDone": "Down completed",
       "noLogs": "(No logs)",
-      "selfHint": "This project contains the container running Gately and cannot be stopped"
+      "selfHint": "This project contains the container running Gately and cannot be stopped",
+      "selfUpHint": "This project contains the container running Gately. Run docker compose up -d on the host"
     }
   },
   "container": {
@@ -91,7 +92,8 @@
       "commit": "Commit as image",
       "checkUpdate": "Check for updates",
       "upgrade": "Upgrade",
-      "selfHint": "This is the container running Gately and cannot be stopped"
+      "selfHint": "This is the container running Gately and cannot be stopped",
+      "selfRebuildHint": "The container running Gately cannot be upgraded or edited here. Run docker pull on the host and recreate the container"
     },
     "detail": {
       "overview": "Overview",

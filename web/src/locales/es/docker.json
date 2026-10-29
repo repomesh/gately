@@ -71,7 +71,8 @@
       "deleteConfirm": "Esto ejecuta down en el proyecto {name} y elimina su directorio Compose. No se puede deshacer.",
       "downDone": "Down completado",
       "noLogs": "(Sin registros)",
-      "selfHint": "Este proyecto contiene el contenedor donde se ejecuta Gately y no se puede detener"
+      "selfHint": "Este proyecto contiene el contenedor donde se ejecuta Gately y no se puede detener",
+      "selfUpHint": "Este proyecto contiene el contenedor que ejecuta Gately. Ejecute docker compose up -d en el host"
     }
   },
   "container": {
@@ -91,7 +92,8 @@
       "commit": "Guardar como imagen",
       "checkUpdate": "Buscar actualizaciones",
       "upgrade": "Actualizar",
-      "selfHint": "Este es el contenedor donde se ejecuta Gately y no se puede detener"
+      "selfHint": "Este es el contenedor donde se ejecuta Gately y no se puede detener",
+      "selfRebuildHint": "El contenedor que ejecuta Gately no se puede actualizar ni editar aquí. Ejecute docker pull en el host y vuelva a crear el contenedor"
     },
     "detail": {
       "overview": "Resumen",

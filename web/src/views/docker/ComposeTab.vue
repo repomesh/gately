@@ -45,7 +45,7 @@
             <el-button text :icon="Ellipsis" class="btn">{{ t('common.more') }}</el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="up" :icon="Rocket">{{ t('docker.compose.tab.up') }}</el-dropdown-item>
+                <el-dropdown-item command="up" :icon="Rocket" :disabled="p.self" :title="p.self ? t('docker.compose.tab.selfUpHint') : ''">{{ t('docker.compose.tab.up') }}</el-dropdown-item>
                 <el-dropdown-item command="pull" :icon="CloudDownload">{{ t('docker.compose.tab.pull') }}</el-dropdown-item>
                 <el-dropdown-item command="edit" :icon="FilePen">{{ t('docker.compose.tab.editFile') }}</el-dropdown-item>
                 <el-dropdown-item v-if="!p.self" command="down" :icon="ArrowDownToLine" divided>{{ t('docker.compose.tab.down') }}</el-dropdown-item>

@@ -71,7 +71,8 @@
       "deleteConfirm": "プロジェクト {name} を down し、その Compose ディレクトリを削除します。元に戻せません。",
       "downDone": "down しました",
       "noLogs": "(ログなし)",
-      "selfHint": "このプロジェクトには Gately 自身が動作しているコンテナが含まれるため停止できません"
+      "selfHint": "このプロジェクトには Gately 自身が動作しているコンテナが含まれるため停止できません",
+      "selfUpHint": "このプロジェクトには Gately 自身が動作するコンテナが含まれます。ホストで docker compose up -d を実行してください"
     }
   },
   "container": {
@@ -91,7 +92,8 @@
       "commit": "イメージとしてコミット",
       "checkUpdate": "更新を確認",
       "upgrade": "アップグレード",
-      "selfHint": "Gately 自身が動作しているコンテナのため停止できません"
+      "selfHint": "Gately 自身が動作しているコンテナのため停止できません",
+      "selfRebuildHint": "Gately 自身が動作するコンテナはここでアップグレード・編集できません。ホストで docker pull を実行してからコンテナを再作成してください"
     },
     "detail": {
       "overview": "概要",

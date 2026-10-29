@@ -41,8 +41,14 @@ func detectSelf() {
 	}
 }
 
-// isSelfContainer 判断给定容器 ID 是否为运行 Gately 的容器。
-func isSelfContainer(id string) bool {
+// selfRebuildError 是拒绝重建 Gately 自身所在容器的提示：重建的第一步是停止旧容器，
+// 停止后执行重建的 Gately 进程随之退出，创建、启动新容器与失败恢复都无法完成。
+const selfRebuildError = "不能在 Gately 内升级或重建 Gately 自身所在的容器，请在宿主机上执行 docker pull 后重建容器（Compose 部署执行 docker compose pull && docker compose up -d）"
+
+// isSelfContainer 判断给定容器 ID 是否为运行 Gately 的容器；测试中可替换。
+var isSelfContainer = detectIsSelf
+
+func detectIsSelf(id string) bool {
 	selfOnce.Do(detectSelf)
 	if id == "" {
 		return false

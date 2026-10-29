@@ -71,7 +71,8 @@
       "deleteConfirm": "프로젝트 {name}을(를) down하고 Compose 디렉터리를 삭제합니다. 복구할 수 없습니다.",
       "downDone": "down 완료",
       "noLogs": "(로그 없음)",
-      "selfHint": "이 프로젝트에 Gately가 실행 중인 컨테이너가 포함되어 있어 중지할 수 없습니다"
+      "selfHint": "이 프로젝트에 Gately가 실행 중인 컨테이너가 포함되어 있어 중지할 수 없습니다",
+      "selfUpHint": "이 프로젝트에는 Gately가 실행 중인 컨테이너가 포함되어 있습니다. 호스트에서 docker compose up -d를 실행하세요"
     }
   },
   "container": {
@@ -91,7 +92,8 @@
       "commit": "이미지로 커밋",
       "checkUpdate": "업데이트 확인",
       "upgrade": "업그레이드",
-      "selfHint": "Gately가 실행 중인 컨테이너이므로 중지할 수 없습니다"
+      "selfHint": "Gately가 실행 중인 컨테이너이므로 중지할 수 없습니다",
+      "selfRebuildHint": "Gately가 실행 중인 컨테이너는 여기에서 업그레이드하거나 편집할 수 없습니다. 호스트에서 docker pull을 실행한 뒤 컨테이너를 다시 생성하세요"
     },
     "detail": {
       "overview": "개요",

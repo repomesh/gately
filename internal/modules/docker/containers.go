@@ -572,6 +572,11 @@ func (m *Module) handleEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
+	// 按新配置重建会先停止旧容器，对自身执行会让 Gately 中途退出、容器停在停止状态
+	if isSelfContainer(id) {
+		httpx.Error(w, http.StatusBadRequest, selfRebuildError)
+		return
+	}
 	release, ok := m.acquire(id)
 	if !ok {
 		httpx.Error(w, http.StatusConflict, "容器正在升级或编辑")
@@ -649,6 +654,11 @@ func (m *Module) handleUpgrade(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
+	// 升级会先停止旧容器，对自身执行会让 Gately 中途退出、无法创建新容器，也无法恢复旧容器
+	if isSelfContainer(id) {
+		httpx.Error(w, http.StatusBadRequest, selfRebuildError)
+		return
+	}
 	release, ok := m.acquire(id)
 	if !ok {
 		httpx.Error(w, http.StatusConflict, "正在升级")
@@ -745,6 +755,12 @@ func (m *Module) handleUpgradeBatch(w http.ResponseWriter, r *http.Request) {
 				if name != "" {
 					label = trimSlash(name)
 				}
+			}
+			// 自身所在的容器跳过并计为失败，其余容器照常升级
+			if isSelfContainer(cid) {
+				failed++
+				progress(fmt.Sprintf("%s: Gately 自身所在的容器不能在 Gately 内升级，已跳过，请在宿主机上更新", label))
+				continue
 			}
 			release, ok := m.acquire(cid)
 			if !ok {

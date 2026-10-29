@@ -71,7 +71,8 @@
       "deleteConfirm": "Cette action exécute down sur le projet {name} et supprime son dossier Compose. Elle est irréversible.",
       "downDone": "down terminé",
       "noLogs": "(Aucun journal)",
-      "selfHint": "Ce projet contient le conteneur qui exécute Gately et ne peut pas être arrêté"
+      "selfHint": "Ce projet contient le conteneur qui exécute Gately et ne peut pas être arrêté",
+      "selfUpHint": "Ce projet contient le conteneur qui exécute Gately. Exécutez docker compose up -d sur l'hôte"
     }
   },
   "container": {
@@ -91,7 +92,8 @@
       "commit": "Valider en image",
       "checkUpdate": "Rechercher les mises à jour",
       "upgrade": "Mettre à niveau",
-      "selfHint": "Ce conteneur exécute Gately et ne peut pas être arrêté"
+      "selfHint": "Ce conteneur exécute Gately et ne peut pas être arrêté",
+      "selfRebuildHint": "Le conteneur qui exécute Gately ne peut pas être mis à jour ni modifié ici. Exécutez docker pull sur l'hôte puis recréez le conteneur"
     },
     "detail": {
       "overview": "Vue d'ensemble",

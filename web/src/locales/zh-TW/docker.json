@@ -71,7 +71,8 @@
       "deleteConfirm": "將 down 專案 {name} 並刪除其 Compose 目錄，無法復原。",
       "downDone": "已 down",
       "noLogs": "(無日誌)",
-      "selfHint": "該專案包含 Gately 自身所在的容器，無法停止"
+      "selfHint": "該專案包含 Gately 自身所在的容器，無法停止",
+      "selfUpHint": "此專案包含 Gately 本身所在的容器，請在主機上執行 docker compose up -d"
     }
   },
   "container": {
@@ -91,7 +92,8 @@
       "commit": "提交為映像檔",
       "checkUpdate": "檢查更新",
       "upgrade": "升級",
-      "selfHint": "這是 Gately 自身所在的容器，無法停止"
+      "selfHint": "這是 Gately 自身所在的容器，無法停止",
+      "selfRebuildHint": "Gately 本身所在的容器無法在這裡升級或編輯，請在主機上執行 docker pull 後重建容器"
     },
     "detail": {
       "overview": "概覽",
