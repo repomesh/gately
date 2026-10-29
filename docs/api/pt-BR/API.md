@@ -1243,6 +1243,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `network` | string |
 | `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |

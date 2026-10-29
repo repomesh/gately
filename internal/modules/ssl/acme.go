@@ -178,6 +178,11 @@ func obtain(cfg ACMEConfig, acc *Account, log *logbuf.Logger) (*obtainResult, er
 	if acmeHTTPClient != nil {
 		lc.HTTPClient = acmeHTTPClient()
 	}
+	if cfg.Network != "" {
+		// 限定 ACME 接口只走 IPv4 或 IPv6
+		lc.HTTPClient = forceNetwork(lc.HTTPClient, cfg.Network)
+		log.Infof("签发只使用 %s 网络", networkName(cfg.Network))
+	}
 	client, err := lego.NewClient(lc)
 	if err != nil {
 		return nil, fmt.Errorf("连接 ACME 服务失败: %w", err)
@@ -248,7 +253,11 @@ var systemNameservers = sync.OnceValue(func() []string {
 
 // setupDNS01 为客户端配置 DNS-01 验证。
 func setupDNS01(client *lego.Client, cfg ACMEConfig, log *logbuf.Logger) error {
-	p, err := dnsprovider.New(cfg.Provider, cfg.Credentials, &http.Client{Timeout: 30 * time.Second})
+	hc := &http.Client{Timeout: 30 * time.Second}
+	if cfg.Network != "" {
+		hc = forceNetwork(hc, cfg.Network)
+	}
+	p, err := dnsprovider.New(cfg.Provider, cfg.Credentials, hc)
 	if err != nil {
 		return err
 	}
@@ -261,6 +270,13 @@ func setupDNS01(client *lego.Client, cfg ACMEConfig, log *logbuf.Logger) error {
 	if len(cfg.Resolvers) > 0 {
 		ns = dns01.ParseNameservers(cfg.Resolvers)
 	}
+	if cfg.Network != "" {
+		// 只保留当前地址族的 DNS 服务器，其他地址族的服务器在该网络下无法访问
+		ns = filterNameservers(ns, cfg.Network)
+		if len(ns) == 0 {
+			return fmt.Errorf("检查 TXT 生效所用的 DNS 服务器中没有 %s 地址，请在「检查用 DNS」中填写 %s 的 DNS 服务器", networkName(cfg.Network), networkName(cfg.Network))
+		}
+	}
 	solver := &dnsSolver{txt: txt, zone: strings.Trim(cfg.Zone, "."), timeout: time.Duration(cfg.PropagationTimeout) * time.Second, log: log, nameservers: ns}
 	opts := []dns01.ChallengeOption{dns01.AddRecursiveNameservers(ns)}
 	if cfg.DisableAuthoritativeCheck {
@@ -269,6 +285,10 @@ func setupDNS01(client *lego.Client, cfg ACMEConfig, log *logbuf.Logger) error {
 	if cfg.SkipPropagationCheck {
 		// 跳过本地检查，留出固定时间让 TXT 生效后再交给 CA 验证
 		opts = append(opts, dns01.PropagationWait(skipPropagationWait, true))
+	} else if cfg.Network != "" {
+		// lego 的默认检查不能限定地址族，改用同样规则的检查
+		pc := netPreCheck{network: cfg.Network, nameservers: ns, authoritative: !cfg.DisableAuthoritativeCheck}
+		opts = append(opts, dns01.WrapPreCheck(pc.check))
 	}
 	return client.Challenge.SetDNS01Provider(solver, opts...)
 }

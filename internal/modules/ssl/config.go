@@ -38,6 +38,12 @@ const (
 	ChallengeHTTP = "http"
 )
 
+// 签发使用的网络（ACMEConfig.Network），留空为自动
+const (
+	NetworkIPv4 = "tcp4"
+	NetworkIPv6 = "tcp6"
+)
+
 var validKeyTypes = map[string]bool{"P256": true, "P384": true, "2048": true, "4096": true}
 
 // ProfileShortLived 是 Let's Encrypt 的短期证书配置（约 6 天有效期），也是其签发 IP 地址证书的唯一配置。
@@ -76,6 +82,9 @@ type ACMEConfig struct {
 	SkipPropagationCheck bool `json:"skipPropagationCheck"`
 	// DisableAuthoritativeCheck 只通过递归 DNS 检查 TXT 是否生效，不查询权威服务器
 	DisableAuthoritativeCheck bool `json:"disableAuthoritativeCheck"`
+	// Network 限定签发时的出站网络：留空自动选择，tcp4 只用 IPv4，tcp6 只用 IPv6。
+	// 作用于 ACME 接口、DNS 服务商接口与 TXT 生效检查，适用于有 IPv6 地址但 IPv6 不通的主机
+	Network string `json:"network,omitempty"`
 }
 
 // Mapping 把证书写到目录供其他服务使用，文件名为 <备注>.crt/.key/.pem/_issuerCertificate.crt（与 Lucky 一致）。
@@ -303,6 +312,11 @@ func (a *ACMEConfig) validate(settings Settings) error {
 	}
 	if a.PropagationTimeout <= 0 {
 		a.PropagationTimeout = 300
+	}
+	switch a.Network {
+	case "", NetworkIPv4, NetworkIPv6:
+	default:
+		return fmt.Errorf("未知的网络类型 %q", a.Network)
 	}
 	return nil
 }

@@ -1243,6 +1243,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `network` | string |
 | `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |

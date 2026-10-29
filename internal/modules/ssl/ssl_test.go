@@ -465,6 +465,20 @@ func TestPebbleEndToEnd(t *testing.T) {
 	if len(m.cfg.Accounts) != 1 {
 		t.Fatal("续签不应重复注册账户")
 	}
+
+	// 限定 IPv4：ACME 接口、DNS 服务商与 TXT 生效检查都只走 IPv4，续签照常成功
+	m.cfg.Certs[0].ACME.Network = NetworkIPv4
+	m.checkAll(true)
+	info3, _ := certInfo(m.cfg.Certs[0].CertPEM)
+	if info3.Fingerprint == info2.Fingerprint {
+		t.Fatalf("限定 IPv4 后续签应成功，错误: %s", m.stateLocked("p").LastError)
+	}
+	// 限定 IPv6：测试 CA 只监听 127.0.0.1，连接 ACME 服务就应失败，不会回退到 IPv4
+	m.cfg.Certs[0].ACME.Network = NetworkIPv6
+	m.obtainNow("p")
+	if e := m.stateLocked("p").LastError; !strings.Contains(e, "tcp6") {
+		t.Fatalf("限定 IPv6 时不应回退到 IPv4: %s", e)
+	}
 }
 
 func encodeB64(s string) string {

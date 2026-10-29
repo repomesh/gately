@@ -1243,6 +1243,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `network` | string |
 | `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |

@@ -121,6 +121,15 @@
             </el-select>
             <span class="help">{{ editing.acme.profile === 'shortlived' ? t('ssl.profileShortLivedHelp', { hours: renewHours }) : t('ssl.profileHelp') }}</span>
           </el-form-item>
+          <el-form-item :label="t('ssl.network')">
+            <!-- 限定签发时的出站网络：有 IPv6 地址但 IPv6 不通的主机选择仅 IPv4 -->
+            <el-select v-model="editing.acme.network" class="w-160" :empty-values="[null, undefined]">
+              <el-option :label="t('ssl.networkAuto')" value="" />
+              <el-option :label="t('ssl.networkIpv4')" value="tcp4" />
+              <el-option :label="t('ssl.networkIpv6')" value="tcp6" />
+            </el-select>
+            <span class="help">{{ t('ssl.networkHelp') }}</span>
+          </el-form-item>
           <el-divider content-position="left">{{ t('ssl.verifyMethod') }}</el-divider>
           <el-form-item :label="t('ssl.challenge')">
             <el-radio-group v-model="editing.acme.challenge">
@@ -309,6 +318,8 @@ interface Cert {
     propagationTimeout: number
     skipPropagationCheck: boolean
     disableAuthoritativeCheck: boolean
+    // network 限定签发时的出站网络：空为自动，tcp4 仅 IPv4，tcp6 仅 IPv6
+    network?: string
   }
   certFile: string
   keyFile: string
@@ -448,6 +459,7 @@ function emptyCert(): Cert {
       propagationTimeout: 300,
       skipPropagationCheck: false,
       disableAuthoritativeCheck: false,
+      network: '',
     },
     certFile: '',
     keyFile: '',

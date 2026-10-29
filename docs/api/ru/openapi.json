@@ -1341,6 +1341,9 @@
           "keyType": {
             "type": "string"
           },
+          "network": {
+            "type": "string"
+          },
           "profile": {
             "type": "string"
           },

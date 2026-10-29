@@ -1243,6 +1243,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `network` | string |
 | `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |

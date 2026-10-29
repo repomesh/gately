@@ -1243,6 +1243,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `network` | string |
 | `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
