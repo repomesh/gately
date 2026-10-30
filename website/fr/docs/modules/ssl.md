@@ -18,6 +18,10 @@ Choisissez DNS-01 dans la « Méthode » du certificat, puis sélectionnez un fo
 
 Le « Domaine racine » est la zone DNS qui contient l'enregistrement. S'il est laissé vide, Gately recherche la zone faisant autorité pour l'enregistrement de validation au moyen d'une requête SOA : un sous-domaine délégué à un autre fournisseur DNS (par exemple `web.example.com` hébergé séparément de `example.com`) et les suffixes à plusieurs niveaux comme `example.com.cn` sont ainsi correctement détectés. Si la recherche échoue, la zone est déduite du nom de domaine et la raison est consignée dans le journal. Vous pouvez aussi saisir vous-même le domaine racine, par exemple `web.example.com`.
 
+## Réseau d'émission
+
+L'option « Réseau » du certificat limite le réseau sortant utilisé lors de l'émission : « Automatique » laisse le système choisir, et « IPv4 uniquement » ou « IPv6 uniquement » fait que l'accès à l'autorité de certification, les appels à l'API du fournisseur DNS et la vérification de la propagation de l'enregistrement TXT n'utilisent que cette famille d'adresses. Si l'hôte a une adresse IPv6 mais qu'IPv6 ne fonctionne pas réellement, la vérification de propagation en mode automatique peut expirer lors de l'interrogation des serveurs DNS faisant autorité ; choisissez alors « IPv4 uniquement ».
+
 ## Validation HTTP-01
 
 Choisissez HTTP-01 dans la « Méthode » du certificat. Lors de l'émission, l'AC accède à `http://<domaine>/.well-known/acme-challenge/<token>` :

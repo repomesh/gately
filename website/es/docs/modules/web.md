@@ -8,7 +8,7 @@ La configuración tiene tres niveles:
 
 1. Listener: un puerto de escucha. Sus campos incluyen la red (`tcp` doble pila, `tcp4`, `tcp6`), la dirección de escucha (vacía para todas las direcciones), el puerto, el interruptor de HTTPS, la versión mínima de TLS (1.0 / 1.1 / 1.2 / 1.3) y si acepta el protocolo PROXY.
 2. Sitio: un sitio dentro de un listener, que se selecciona por dominio. Los dominios pueden ser un dominio exacto, `*.example.com` (coincide con subdominios de cualquier profundidad) o `*` (coincide con todo). La prioridad de coincidencia es dominio exacto, comodín y después `*`.
-3. Sitio por defecto: se usa cuando ningún sitio coincide. Si no está activado, se devuelve un 404. El sitio por defecto también puede ser de tipo «Cerrar conexión», para que las peticiones a dominios desconocidos no reciban ninguna respuesta.
+3. Sitio por defecto: se usa cuando ningún sitio coincide. Si no está activado, se devuelve un 404. El sitio por defecto también puede ser de tipo «Cerrar conexión», para que las peticiones a dominios desconocidos no reciban ninguna respuesta. Una vez configurado, el sitio por defecto aparece al final de la lista de sitios; si aún no está configurado, haz clic en «Configurar sitio por defecto» en la tarjeta del listener para configurarlo.
 
 Al guardar un cambio en un sitio o en el sitio por defecto, la lista de sitios se sustituye en caliente: el listener sigue funcionando, las conexiones abiertas (incluido WebSocket) se mantienen y cada sitio conserva sus estadísticas. Si la nueva configuración no es válida, los sitios anteriores siguen sirviendo. Cambiar los ajustes propios del listener (red, dirección, puerto, HTTPS, TLS mínimo, HTTP/3, protocolo PROXY) reinicia ese listener.
 

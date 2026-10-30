@@ -39,6 +39,8 @@
 | POST | `/containers/{id}/check` `/upgrade` | 既存。変更なし |
 | POST | `/containers/upgrade-batch` | `{ids:string[]}` を順にアップグレードします（タスク）。`{task}` を返します |
 
+`{id}` には完全な ID、ID の接頭辞、コンテナ名のいずれも指定でき、サーバー側で先に完全な ID に解決します。コンテナのアップグレード中または編集による再作成中は、そのコンテナに対する起動・停止、削除、`edit`、`upgrade` は 409 を返します。Gately 自身が動いているコンテナでは stop、kill、pause、削除、`edit`、`upgrade` を拒否し、`upgrade-batch` ではスキップします。自身が属する Compose プロジェクトでは stop、pause、`down`、`up`、削除を拒否します。
+
 ### コンテナ内のファイル
 
 パスはすべてコンテナ内の絶対パスで、Engine の archive API を使って実装しています。
@@ -94,7 +96,7 @@ Docker の書き込み権限を持たない ID（読み取り専用アカウン�
 | メソッド | パス | 説明 |
 | --- | --- | --- |
 | GET | `/images` | `[{id,tags:string[],digests:string[],size,created,containers:number,dangling:bool}]` |
-| GET | `/images/{id}` | 詳細 `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` |
+| GET | `/images/{id}` | 詳細 `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}`。書き込み権限がない場合、`env` は変数名のみを残し、`cmd`、`entrypoint`、各レイヤーの `createdBy` は `********` と表示されます |
 | POST | `/images/pull` | `{ref}` → `{task}`。設定の registries で認証します。pull に失敗し、ミラーが設定されている場合は各ミラーを順に試し、取得したイメージに元の名前のタグを付け直します |
 | POST | `/images/push` | `{ref}` → `{task}` |
 | POST | `/images/search` | `{term,limit?}` → Docker Hub の検索結果 `[{name,description,stars,official}]` |

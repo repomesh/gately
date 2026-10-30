@@ -11,6 +11,10 @@ El Centro de notificaciones se suscribe al bus de eventos interno de Gately y, s
 
 Una entrega individual agota el tiempo a los 45 segundos.
 
+## Idioma de las notificaciones
+
+El contenido de las notificaciones y los registros usan el idioma del servidor definido en «Ajustes del sistema». Cuando el idioma del servidor es «Seguir el sistema», se toma el idioma indicado por la variable de entorno `GATELY_LANG` y después por `LANG`. Los servicios en Docker, fnOS y OpenWrt normalmente no definen ninguna de las dos; en ese caso se sigue el idioma de la interfaz que el administrador usó en su último inicio de sesión o al cambiarlo en la barra superior, y si no hay ninguno se usa el inglés. Los inicios de sesión de cuentas de solo lectura no cambian este idioma. El «Origen» de una notificación se traduce cuando es un nombre generado por el programa (como «Panel de administración»); los nombres de tareas y otros nombres escritos por el usuario se mantienen tal cual.
+
 ## Canales
 
 Pulsa «Añadir canal», elige un tipo y rellena los campos. Todos los canales tienen un nombre (obligatorio), una nota y un interruptor de activación. Los campos secretos no se vuelven a mostrar tras guardar; si los dejas vacíos al editar, se conserva el valor original.

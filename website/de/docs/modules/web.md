@@ -8,7 +8,7 @@ Die Konfiguration hat drei Ebenen:
 
 1. Listener: ein Listen-Port. Zu den Feldern gehören Netzwerk (`tcp` Dual-Stack, `tcp4`, `tcp6`), Listen-Adresse (leer für alle Adressen), Port, HTTPS-Schalter, minimale TLS-Version (1.0 / 1.1 / 1.2 / 1.3) und ob das PROXY-Protokoll akzeptiert wird.
 2. Site: eine Site unter einem Listener, die über die Domain zugeordnet wird. Domains können eine exakte Domain, `*.example.com` (trifft Subdomains beliebiger Tiefe) oder `*` (trifft alles) sein. Die Zuordnungspriorität lautet: exakte Domain, Wildcard, dann `*`.
-3. Standard-Site: wird verwendet, wenn keine Site passt. Ist sie nicht aktiviert, wird 404 zurückgegeben. Die Standard-Site kann auch den Typ „Verbindung schließen“ haben, damit Anfragen an unbekannte Domains gar keine Antwort erhalten.
+3. Standard-Site: wird verwendet, wenn keine Site passt. Ist sie nicht aktiviert, wird 404 zurückgegeben. Die Standard-Site kann auch den Typ „Verbindung schließen“ haben, damit Anfragen an unbekannte Domains gar keine Antwort erhalten. Eine konfigurierte Standard-Site steht am Ende der Site-Liste; ist noch keine konfiguriert, klicken Sie auf der Listener-Karte auf „Standard-Website festlegen“.
 
 Wird eine Site oder die Standard-Site gespeichert, wird die Site-Liste an Ort und Stelle ausgetauscht: Der Listener läuft weiter, offene Verbindungen (auch WebSocket) bleiben bestehen, und jede Site behält ihre Statistik. Ist die neue Konfiguration ungültig, bedienen weiterhin die bisherigen Sites. Eine Änderung der Einstellungen des Listeners selbst (Netzwerk, Adresse, Port, HTTPS, minimale TLS-Version, HTTP/3, PROXY-Protokoll) startet diesen Listener neu.
 

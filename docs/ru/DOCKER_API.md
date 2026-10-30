@@ -39,6 +39,8 @@
 | POST | `/containers/{id}/check` `/upgrade` | Существующие; без изменений |
 | POST | `/containers/upgrade-batch` | `{ids:string[]}` обновляет их по очереди (задача); возвращает `{task}` |
 
+`{id}` может быть полным ID, префиксом ID или именем контейнера; сервер сначала преобразует его в полный ID. Пока контейнер обновляется или пересоздаётся после редактирования, запуск, остановка, удаление, `edit` и `upgrade` для него возвращают 409. Для контейнера, в котором работает сам Gately, отклоняются stop, kill, pause, удаление, `edit` и `upgrade`, а `upgrade-batch` его пропускает; для проекта Compose, к которому относится сам Gately, отклоняются stop, pause, `down`, `up` и удаление.
+
 ### Файлы контейнера
 
 Все пути — абсолютные пути внутри контейнера; реализовано через архивный API Engine.
@@ -94,7 +96,7 @@
 | Метод | Путь | Описание |
 | --- | --- | --- |
 | GET | `/images` | `[{id,tags:string[],digests:string[],size,created,containers:number,dangling:bool}]` |
-| GET | `/images/{id}` | Сведения `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` |
+| GET | `/images/{id}` | Сведения `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}`; без права записи в `env` остаются только имена переменных, а `cmd`, `entrypoint` и `createdBy` каждого слоя отображаются как `********` |
 | POST | `/images/pull` | `{ref}` → `{task}`; аутентификация по реестрам из настроек. Если скачивание не удалось и заданы зеркала, по очереди пробуется каждое зеркало, после чего образу возвращается исходное имя (re-tag) |
 | POST | `/images/push` | `{ref}` → `{task}` |
 | POST | `/images/search` | `{term,limit?}` → результаты поиска в Docker Hub `[{name,description,stars,official}]` |

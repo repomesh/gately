@@ -39,6 +39,8 @@
 | POST | `/containers/{id}/check` `/upgrade` | 已有，保持不变 |
 | POST | `/containers/upgrade-batch` | `{ids:string[]}` 依次升级（任务），返回 `{task}` |
 
+`{id}` 可以是完整 ID、ID 前缀或容器名称，服务端先解析为完整 ID。容器正在升级或编辑重建时，对它的启停、删除、`edit` 与 `upgrade` 返回 409。Gately 自身所在的容器拒绝 stop、kill、pause、删除、`edit` 与 `upgrade`，`upgrade-batch` 跳过它；自身所在的 Compose 项目拒绝 stop、pause、`down`、`up` 与删除。
+
 ### 容器文件
 
 路径均为容器内绝对路径，通过 Engine 的归档 API 实现。
@@ -94,7 +96,7 @@
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
 | GET | `/images` | `[{id,tags:string[],digests:string[],size,created,containers:number,dangling:bool}]` |
-| GET | `/images/{id}` | 详情 `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` |
+| GET | `/images/{id}` | 详情 `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}`；没有写权限时 `env` 只保留变量名，`cmd`、`entrypoint` 与各层 `createdBy` 显示为 `********` |
 | POST | `/images/pull` | `{ref}` → `{task}`，按设置里的 registries 认证，失败且配置了 mirrors 时依次尝试镜像加速地址并 retag 回原名 |
 | POST | `/images/push` | `{ref}` → `{task}` |
 | POST | `/images/search` | `{term,limit?}` → Docker Hub 搜索 `[{name,description,stars,official}]` |

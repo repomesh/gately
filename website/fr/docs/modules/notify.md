@@ -11,6 +11,10 @@ Le Centre de notifications s'abonne au bus d'événements interne de Gately et, 
 
 Un envoi unique expire après 45 secondes.
 
+## Langue des notifications
+
+Le contenu des notifications et les journaux utilisent la langue du serveur définie dans « Paramètres système ». Lorsque la langue du serveur est « Suivre le système », Gately utilise la langue indiquée par la variable d'environnement `GATELY_LANG`, puis par `LANG`. Les services sous Docker, fnOS et OpenWrt ne définissent généralement aucune de ces deux variables ; la langue suit alors celle de l'interface utilisée par l'administrateur lors de sa dernière connexion ou de son dernier changement dans la barre supérieure, et l'anglais est utilisé à défaut. Les connexions des comptes en lecture seule ne modifient pas cette langue. La « Source » d'une notification est traduite lorsqu'il s'agit d'un nom généré par le programme (comme « Interface d'administration ») ; les noms de tâches et autres noms saisis par l'utilisateur restent tels quels.
+
 ## Canaux
 
 Cliquez sur « Ajouter un canal », choisissez un type et renseignez les champs. Chaque canal possède un nom (obligatoire), une remarque et un interrupteur d'activation. Les champs secrets ne sont plus affichés après l'enregistrement ; les laisser vides lors d'une modification conserve la valeur d'origine.

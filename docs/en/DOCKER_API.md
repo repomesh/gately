@@ -39,6 +39,8 @@ Long-running operations (pulling/pushing/building images, compose up, and so on)
 | POST | `/containers/{id}/check` `/upgrade` | Existing; unchanged |
 | POST | `/containers/upgrade-batch` | `{ids:string[]}` upgrades them in sequence (a task); returns `{task}` |
 
+`{id}` can be a full ID, an ID prefix or a container name; the server resolves it to the full ID first. While a container is being upgraded or recreated by an edit, start, stop, delete, `edit` and `upgrade` requests for it return 409. For the container Gately itself runs in, stop, kill, pause, delete, `edit` and `upgrade` are rejected, and `upgrade-batch` skips it; for the Compose project Gately itself belongs to, stop, pause, `down`, `up` and delete are rejected.
+
 ### Container files
 
 All paths are absolute paths inside the container, implemented through the Engine's archive API.
@@ -94,7 +96,7 @@ For identities without Docker write permission (read-only accounts, API tokens w
 | Method | Path | Description |
 | --- | --- | --- |
 | GET | `/images` | `[{id,tags:string[],digests:string[],size,created,containers:number,dangling:bool}]` |
-| GET | `/images/{id}` | Details `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` |
+| GET | `/images/{id}` | Details `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}`; without write access, `env` keeps only variable names, and `cmd`, `entrypoint` and each layer's `createdBy` are shown as `********` |
 | POST | `/images/pull` | `{ref}` → `{task}`; authenticates with the registries from settings. If the pull fails and mirrors are configured, each mirror is tried in turn and the image is re-tagged back to its original name |
 | POST | `/images/push` | `{ref}` → `{task}` |
 | POST | `/images/search` | `{term,limit?}` → Docker Hub search results `[{name,description,stars,official}]` |

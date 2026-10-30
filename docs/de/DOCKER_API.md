@@ -39,6 +39,8 @@ Lang laufende Vorgänge (Images ziehen/pushen/bauen, compose up usw.) liefern `{
 | POST | `/containers/{id}/check` `/upgrade` | Bestehend; unverändert |
 | POST | `/containers/upgrade-batch` | `{ids:string[]}` aktualisiert sie nacheinander (eine Aufgabe); liefert `{task}` |
 
+`{id}` kann eine vollständige ID, ein ID-Präfix oder ein Containername sein; der Server löst ihn zuerst in die vollständige ID auf. Während ein Container aktualisiert oder nach einer Bearbeitung neu erstellt wird, liefern Starten, Stoppen, Löschen, `edit` und `upgrade` für ihn 409. Für den Container, in dem Gately selbst läuft, werden stop, kill, pause, Löschen, `edit` und `upgrade` abgelehnt, und `upgrade-batch` überspringt ihn; für das Compose-Projekt, zu dem Gately selbst gehört, werden stop, pause, `down`, `up` und Löschen abgelehnt.
+
 ### Container-Dateien
 
 Alle Pfade sind absolute Pfade im Container und werden über die Archiv-API der Engine umgesetzt.
@@ -94,7 +96,7 @@ Für Identitäten ohne Docker-Schreibberechtigung (schreibgeschützte Konten, AP
 | Methode | Pfad | Beschreibung |
 | --- | --- | --- |
 | GET | `/images` | `[{id,tags:string[],digests:string[],size,created,containers:number,dangling:bool}]` |
-| GET | `/images/{id}` | Details `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` |
+| GET | `/images/{id}` | Details `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}`; ohne Schreibrecht behält `env` nur die Variablennamen, und `cmd`, `entrypoint` sowie `createdBy` jeder Schicht erscheinen als `********` |
 | POST | `/images/pull` | `{ref}` → `{task}`; authentifiziert sich mit den Registries aus den Einstellungen. Schlägt das Ziehen fehl und sind Mirrors konfiguriert, wird jeder Mirror der Reihe nach versucht und das Image wieder auf seinen ursprünglichen Namen getaggt |
 | POST | `/images/push` | `{ref}` → `{task}` |
 | POST | `/images/search` | `{term,limit?}` → Suchergebnisse von Docker Hub `[{name,description,stars,official}]` |

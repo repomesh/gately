@@ -8,7 +8,7 @@ The configuration has three layers:
 
 1. Listener: one listening port. Fields include network (`tcp` dual-stack, `tcp4`, `tcp6`), listen address (empty for all addresses), port, HTTPS switch, minimum TLS version (1.0 / 1.1 / 1.2 / 1.3), and whether to accept the PROXY protocol.
 2. Site: a site under a listener, matched by domain. Domains can be an exact domain, `*.example.com` (matches subdomains at any depth) or `*` (matches everything). Matching priority is exact domain, wildcard, then `*`.
-3. Default site: used when no site matches. When it is not enabled, a 404 is returned. The default site can also be set to "Close connection" so requests for unknown domains get no response at all.
+3. Default site: used when no site matches. When it is not enabled, a 404 is returned. The default site can also be set to "Close connection" so requests for unknown domains get no response at all. Once configured, the default site is shown last in the site list; until then, click "Set default site" on the listener card to configure it.
 
 Saving a change to a site or to the default site swaps the site list in place: the listener keeps running, open connections (WebSocket included) stay up, and each site keeps its statistics. If the new configuration is invalid, the previous sites keep serving. Changing the listener's own settings (network, address, port, HTTPS, minimum TLS, HTTP/3, PROXY protocol) restarts that listener.
 

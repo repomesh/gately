@@ -39,6 +39,8 @@ Operações demoradas (baixar/enviar/compilar imagens, compose up etc.) retornam
 | POST | `/containers/{id}/check` `/upgrade` | Já existentes; sem alterações |
 | POST | `/containers/upgrade-batch` | `{ids:string[]}` atualiza os contêineres em sequência (uma tarefa); retorna `{task}` |
 
+`{id}` pode ser um ID completo, um prefixo de ID ou o nome do contêiner; o servidor primeiro o resolve para o ID completo. Enquanto um contêiner está sendo atualizado ou recriado por edição, iniciar, parar, excluir, `edit` e `upgrade` nele retornam 409. No contêiner em que o próprio Gately roda, stop, kill, pause, exclusão, `edit` e `upgrade` são rejeitados, e o `upgrade-batch` o ignora; no projeto Compose ao qual o Gately pertence, stop, pause, `down`, `up` e exclusão são rejeitados.
+
 ### Arquivos do contêiner
 
 Todos os caminhos são absolutos dentro do contêiner, implementados pela API de archive do Engine.
@@ -94,7 +96,7 @@ Para identidades sem permissão de escrita do Docker (contas somente leitura, to
 | Método | Caminho | Descrição |
 | --- | --- | --- |
 | GET | `/images` | `[{id,tags:string[],digests:string[],size,created,containers:number,dangling:bool}]` |
-| GET | `/images/{id}` | Detalhes `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` |
+| GET | `/images/{id}` | Detalhes `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}`; sem permissão de escrita, `env` mantém só os nomes das variáveis, e `cmd`, `entrypoint` e o `createdBy` de cada camada aparecem como `********` |
 | POST | `/images/pull` | `{ref}` → `{task}`; autentica com os registries das configurações. Se o pull falhar e houver mirrors configurados, cada mirror é tentado em sequência e a imagem recebe de novo a tag com o nome original |
 | POST | `/images/push` | `{ref}` → `{task}` |
 | POST | `/images/search` | `{term,limit?}` → resultados da pesquisa no Docker Hub `[{name,description,stars,official}]` |

@@ -11,6 +11,10 @@ A Central de notificações assina o barramento interno de eventos do Gately e, 
 
 Um único envio expira em 45 segundos.
 
+## Idioma das notificações
+
+O conteúdo das notificações e os logs usam o idioma do servidor definido em "Configurações do sistema". Quando o idioma do servidor é "Seguir o sistema", o Gately usa o idioma indicado pela variável de ambiente `GATELY_LANG` e depois por `LANG`. Serviços no Docker, fnOS e OpenWrt normalmente não definem nenhuma das duas; nesse caso vale o idioma da interface que o administrador usou no último login ou na última troca pela barra superior, e o inglês é usado quando não há nenhum. Logins de contas somente leitura não alteram esse idioma. A "Origem" de uma notificação é traduzida quando é um nome gerado pelo programa (como "Administração"); nomes de tarefas e outros nomes digitados pelo usuário são mantidos como estão.
+
 ## Canais
 
 Clique em "Adicionar canal", escolha um tipo e preencha os campos. Todo canal tem um nome (obrigatório), uma observação e uma chave de ativação. Campos secretos não são exibidos de novo após salvar; deixá-los em branco ao editar mantém o valor original.

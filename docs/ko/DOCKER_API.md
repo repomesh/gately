@@ -39,6 +39,8 @@
 | POST | `/containers/{id}/check` `/upgrade` | 기존과 동일 |
 | POST | `/containers/upgrade-batch` | `{ids:string[]}`를 순서대로 업그레이드합니다(작업). `{task}`를 반환합니다 |
 
+`{id}`에는 전체 ID, ID 접두사, 컨테이너 이름을 모두 쓸 수 있으며 서버가 먼저 전체 ID로 변환합니다. 컨테이너가 업그레이드 중이거나 편집으로 재생성 중이면 해당 컨테이너에 대한 시작·중지, 삭제, `edit`, `upgrade`는 409를 반환합니다. Gately 자신이 실행 중인 컨테이너는 stop, kill, pause, 삭제, `edit`, `upgrade`를 거부하고 `upgrade-batch`에서는 건너뜁니다. 자신이 속한 Compose 프로젝트는 stop, pause, `down`, `up`, 삭제를 거부합니다.
+
 ### 컨테이너 파일
 
 모든 경로는 컨테이너 내부의 절대 경로이며 Engine의 아카이브 API로 구현됩니다.
@@ -94,7 +96,7 @@ Docker 쓰기 권한이 없는 신원(읽기 전용 계정, `docker:read`만 있
 | 메서드 | 경로 | 설명 |
 | --- | --- | --- |
 | GET | `/images` | `[{id,tags:string[],digests:string[],size,created,containers:number,dangling:bool}]` |
-| GET | `/images/{id}` | 상세 `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` |
+| GET | `/images/{id}` | 상세 `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}`. 쓰기 권한이 없으면 `env`는 변수 이름만 남고 `cmd`, `entrypoint`, 각 레이어의 `createdBy`는 `********`로 표시됩니다 |
 | POST | `/images/pull` | `{ref}` → `{task}`. 설정의 registries로 인증합니다. 풀에 실패했고 mirrors가 설정되어 있으면 미러를 차례로 시도한 뒤 원래 이름으로 다시 태그합니다 |
 | POST | `/images/push` | `{ref}` → `{task}` |
 | POST | `/images/search` | `{term,limit?}` → Docker Hub 검색 결과 `[{name,description,stars,official}]` |

@@ -39,6 +39,8 @@ Les opérations longues (récupération/envoi/construction d'images, compose up,
 | POST | `/containers/{id}/check` `/upgrade` | Existants ; inchangés |
 | POST | `/containers/upgrade-batch` | `{ids:string[]}` les met à niveau l'un après l'autre (une tâche) ; renvoie `{task}` |
 
+`{id}` peut être un ID complet, un préfixe d'ID ou un nom de conteneur ; le serveur le résout d'abord en ID complet. Pendant qu'un conteneur est en cours de mise à niveau ou de recréation après modification, le démarrage, l'arrêt, la suppression, `edit` et `upgrade` sur ce conteneur renvoient 409. Pour le conteneur dans lequel Gately s'exécute, stop, kill, pause, la suppression, `edit` et `upgrade` sont refusés, et `upgrade-batch` l'ignore ; pour le projet Compose auquel Gately appartient, stop, pause, `down`, `up` et la suppression sont refusés.
+
 ### Fichiers des conteneurs
 
 Tous les chemins sont des chemins absolus à l'intérieur du conteneur, implémentés via l'API archive du Engine.
@@ -94,7 +96,7 @@ Pour les identités sans permission d'écriture Docker (comptes en lecture seule
 | Méthode | Chemin | Description |
 | --- | --- | --- |
 | GET | `/images` | `[{id,tags:string[],digests:string[],size,created,containers:number,dangling:bool}]` |
-| GET | `/images/{id}` | Détails `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` |
+| GET | `/images/{id}` | Détails `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` ; sans accès en écriture, `env` ne conserve que les noms des variables, et `cmd`, `entrypoint` et le `createdBy` de chaque couche apparaissent sous la forme `********` |
 | POST | `/images/pull` | `{ref}` → `{task}` ; s'authentifie avec les registres définis dans les réglages. Si la récupération échoue et que des miroirs sont configurés, chaque miroir est essayé à tour de rôle et l'image est ré-étiquetée avec son nom d'origine |
 | POST | `/images/push` | `{ref}` → `{task}` |
 | POST | `/images/search` | `{term,limit?}` → résultats de recherche Docker Hub `[{name,description,stars,official}]` |

@@ -18,6 +18,10 @@
 
 「主網域」即記錄所在的 DNS 區域（zone）。留空時，Gately 以 SOA 查詢找出驗證記錄的權威區域，因此子網域單獨委派給另一家 DNS 服務商（例如 `web.example.com` 與 `example.com` 分開託管）以及 `example.com.cn` 這類多層後綴都能正確識別；查詢失敗時依網域名稱推斷主網域，並在日誌中記錄原因。也可以手動填寫主網域，例如 `web.example.com`。
 
+## 簽發網路
+
+憑證的「網路」選項限定簽發時的對外網路：「自動」由系統選擇，「僅 IPv4」或「僅 IPv6」讓存取 CA、呼叫 DNS 服務商 API 以及檢查 TXT 記錄生效都只使用對應的位址族。主機有 IPv6 位址但 IPv6 實際不通時，自動模式下的生效檢查可能在查詢權威 DNS 伺服器時逾時，此時選擇「僅 IPv4」。
+
 ## HTTP-01 驗證
 
 在憑證的「驗證方式」中選擇 HTTP-01。簽發時 CA 會存取 `http://<網域>/.well-known/acme-challenge/<token>`：

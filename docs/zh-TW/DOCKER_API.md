@@ -39,6 +39,8 @@
 | POST | `/containers/{id}/check` `/upgrade` | 既有，保持不變 |
 | POST | `/containers/upgrade-batch` | `{ids:string[]}` 依序升級（任務），回傳 `{task}` |
 
+`{id}` 可以是完整 ID、ID 前綴或容器名稱，伺服器端會先解析為完整 ID。容器正在升級或編輯重建時，對它的啟停、刪除、`edit` 與 `upgrade` 會回傳 409。Gately 自身所在的容器拒絕 stop、kill、pause、刪除、`edit` 與 `upgrade`，`upgrade-batch` 會略過它；自身所在的 Compose 專案拒絕 stop、pause、`down`、`up` 與刪除。
+
 ### 容器檔案
 
 路徑均為容器內的絕對路徑，透過 Engine 的封存 API 實作。
@@ -94,7 +96,7 @@
 | 方法 | 路徑 | 說明 |
 | --- | --- | --- |
 | GET | `/images` | `[{id,tags:string[],digests:string[],size,created,containers:number,dangling:bool}]` |
-| GET | `/images/{id}` | 詳情 `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` |
+| GET | `/images/{id}` | 詳情 `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}`；沒有寫入權限時 `env` 只保留變數名稱，`cmd`、`entrypoint` 與各層 `createdBy` 顯示為 `********` |
 | POST | `/images/pull` | `{ref}` → `{task}`，依設定裡的 registries 認證；失敗且設定了 mirrors 時，依序嘗試映像加速位址並 retag 回原名 |
 | POST | `/images/push` | `{ref}` → `{task}` |
 | POST | `/images/search` | `{term,limit?}` → Docker Hub 搜尋 `[{name,description,stars,official}]` |

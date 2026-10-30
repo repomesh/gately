@@ -39,6 +39,8 @@ Las operaciones largas (descargar, subir o compilar imágenes, compose up, etc.)
 | POST | `/containers/{id}/check` `/upgrade` | Ya existentes; sin cambios |
 | POST | `/containers/upgrade-batch` | `{ids:string[]}` los actualiza en secuencia (una tarea); devuelve `{task}` |
 
+`{id}` puede ser un ID completo, un prefijo de ID o el nombre del contenedor; el servidor lo resuelve primero al ID completo. Mientras un contenedor se está actualizando o recreando tras una edición, iniciarlo, detenerlo, eliminarlo, `edit` y `upgrade` devuelven 409. En el contenedor donde se ejecuta Gately se rechazan stop, kill, pause, la eliminación, `edit` y `upgrade`, y `upgrade-batch` lo omite; en el proyecto Compose al que pertenece Gately se rechazan stop, pause, `down`, `up` y la eliminación.
+
 ### Archivos del contenedor
 
 Todas las rutas son rutas absolutas dentro del contenedor, implementadas mediante la API de archivos (archive) del Engine.
@@ -94,7 +96,7 @@ Para identidades sin permiso de escritura de Docker (cuentas de solo lectura, to
 | Método | Ruta | Descripción |
 | --- | --- | --- |
 | GET | `/images` | `[{id,tags:string[],digests:string[],size,created,containers:number,dangling:bool}]` |
-| GET | `/images/{id}` | Detalles `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}` |
+| GET | `/images/{id}` | Detalles `{id,tags,size,created,os,arch,author,cmd,entrypoint,env,exposedPorts,workdir,user,labels,layers:[{createdBy,size,created}]}`; sin permiso de escritura, `env` conserva solo los nombres de las variables, y `cmd`, `entrypoint` y el `createdBy` de cada capa se muestran como `********` |
 | POST | `/images/pull` | `{ref}` → `{task}`; se autentica con los registros de los ajustes. Si la descarga falla y hay mirrors configurados, se prueba cada mirror por turno y la imagen se vuelve a etiquetar con su nombre original |
 | POST | `/images/push` | `{ref}` → `{task}` |
 | POST | `/images/search` | `{term,limit?}` → resultados de búsqueda de Docker Hub `[{name,description,stars,official}]` |
