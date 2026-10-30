@@ -80,8 +80,8 @@
   "home": {
     "pill": "Open Source · Prüfbar · Einzelne Binärdatei",
     "announce": {
-      "text": "v0.6.0: mehrere frp-Instanzen, Routing nach Benutzer und Site-Gruppen →",
-      "link": "/de/news/v0.6.0"
+      "text": "v0.6.1: Sicherheitskorrektur, Zertifikate über IPv4/IPv6 und Sprache der Benachrichtigungen →",
+      "link": "/de/news/v0.6.1"
     },
     "titleLine1": "Ein Toolkit für Netzwerk-Gateways,",
     "titleLine2": "das Sie durchschauen können",

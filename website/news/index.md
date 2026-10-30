@@ -7,6 +7,10 @@ description: Gately 各版本的发布公告与更新说明。
 
 重要版本的发布公告如下，每个版本的完整变更与下载文件见 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.6.1](/news/v0.6.1)
+
+2026 年 10 月 30 日 · 安全修复：只读账号与只读 API 令牌不再能读到容器环境变量与启动命令明文；证书可限定 IPv4 或 IPv6 签发；Docker 页面不再升级或重建 Gately 自身容器；通知与日志跟随管理界面语言。
+
 ## [v0.6.0.4](/news/v0.6.0.4)
 
 2026 年 10 月 29 日 · 新增 OpenWrt 的 LuCI 插件，可在 LuCI 中查看状态、启停服务与设置管理端口；重定向站点支持 `{path}`、`{1}`、`{STUN_规则名_PORT}` 等变量；共享用户与 OIDC 客户端在全局设置中摘要显示、弹窗编辑。

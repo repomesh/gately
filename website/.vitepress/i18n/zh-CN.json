@@ -80,8 +80,8 @@
   "home": {
     "pill": "开源 · 可审计 · 单文件部署",
     "announce": {
-      "text": "v0.6.0 发布：frp 多实例、按用户分流与站点分组 →",
-      "link": "/news/v0.6.0"
+      "text": "v0.6.1 发布：安全修复、证书 IPv4/IPv6 签发与通知语言 →",
+      "link": "/news/v0.6.1"
     },
     "titleLine1": "看得见的",
     "titleLine2": "网络网关工具集",

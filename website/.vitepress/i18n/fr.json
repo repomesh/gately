@@ -80,8 +80,8 @@
   "home": {
     "pill": "Open source · Auditable · Binaire unique",
     "announce": {
-      "text": "v0.6.0 : plusieurs instances frp, routage par utilisateur et groupes de sites →",
-      "link": "/fr/news/v0.6.0"
+      "text": "v0.6.1 : correctif de sécurité, émission de certificats en IPv4/IPv6 et langue des notifications →",
+      "link": "/fr/news/v0.6.1"
     },
     "titleLine1": "Une boîte à outils de passerelle réseau",
     "titleLine2": "où tout est visible",

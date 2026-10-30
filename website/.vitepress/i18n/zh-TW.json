@@ -80,8 +80,8 @@
   "home": {
     "pill": "開源 · 可稽核 · 單檔部署",
     "announce": {
-      "text": "v0.6.0 發布：frp 多實例、依使用者分流與站點分組 →",
-      "link": "/zh-TW/news/v0.6.0"
+      "text": "v0.6.1 發布：安全修復、憑證 IPv4/IPv6 簽發與通知語言 →",
+      "link": "/zh-TW/news/v0.6.1"
     },
     "titleLine1": "看得見的",
     "titleLine2": "網路閘道工具集",

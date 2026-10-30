@@ -7,6 +7,10 @@ description: Anúncios e notas de cada versão do Gately.
 
 Abaixo estão os anúncios das versões principais. Veja as [GitHub Releases](https://github.com/wangwanjie/gately/releases) para as mudanças completas e os downloads de cada versão.
 
+## [v0.6.1](/pt-BR/news/v0.6.1)
+
+30 de outubro de 2026 · Correção de segurança: contas e tokens de API somente leitura não conseguem mais ler em texto puro as variáveis de ambiente e os comandos de inicialização dos contêineres; certificados podem ser emitidos somente por IPv4 ou somente por IPv6; a página do Docker não atualiza nem recria mais o próprio contêiner do Gately; notificações e logs seguem o idioma da interface de administração.
+
 ## [v0.6.0.4](/pt-BR/news/v0.6.0.4)
 
 29 de outubro de 2026 · Adiciona um aplicativo LuCI para OpenWrt que permite ver o estado, iniciar e parar o serviço e definir a porta de administração pelo LuCI; os sites de redirecionamento aceitam variáveis como `{path}`, `{1}` e `{STUN_NomeRegra_PORT}`; os usuários compartilhados e os clientes OIDC das configurações globais aparecem como resumos e são editados em uma janela.

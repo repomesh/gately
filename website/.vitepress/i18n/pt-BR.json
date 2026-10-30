@@ -80,8 +80,8 @@
   "home": {
     "pill": "Código aberto · Auditável · Binário único",
     "announce": {
-      "text": "v0.6.0: várias instâncias de frp, roteamento por usuário e grupos de sites →",
-      "link": "/pt-BR/news/v0.6.0"
+      "text": "v0.6.1: correção de segurança, emissão de certificados por IPv4/IPv6 e idioma das notificações →",
+      "link": "/pt-BR/news/v0.6.1"
     },
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",
