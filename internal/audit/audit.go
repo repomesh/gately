@@ -274,6 +274,10 @@ func sensitiveRead(path string) bool {
 
 // skipped 是只读性质的 POST 或高频接口，不写入审计。
 func skipped(method, path string) bool {
+	// 记录管理界面语言只是界面偏好：进入管理界面时也会上报，记入审计会刷屏并触发配置变更通知
+	if method == http.MethodPut && path == "/api/account/ui-language" {
+		return true
+	}
 	if method != http.MethodPost {
 		return false
 	}

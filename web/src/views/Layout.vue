@@ -78,7 +78,7 @@ import { useIsMobile } from '../composables/useIsMobile'
 import { useScrollLock } from '../composables/useScrollLock'
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const isMobile = useIsMobile()
 const username = ref('')
@@ -132,6 +132,10 @@ onMounted(async () => {
   role.value = s.role ?? 'admin'
   defaultPassword.value = s.defaultPassword ?? false
   disabledModules.value = s.disabledModules ?? []
+  if (role.value === 'admin') {
+    // 第三方登录、飞牛桌面入口等整页跳转进入时后端拿不到界面语言，这里上报一次；语言没变时后端不写文件
+    api.put('/api/account/ui-language', { language: locale.value }).catch(() => undefined)
+  }
   // 直接通过链接打开了已关闭模块的页面时，加载模块状态后再跳回总览
   if (!pathEnabled(route.path)) {
     router.replace('/overview')

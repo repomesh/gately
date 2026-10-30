@@ -391,6 +391,23 @@ func TestGatewayAutoLogin(t *testing.T) {
 		resp.Body.Close()
 	}
 
+	// 整页跳转带的是浏览器语言，自动登录不改写已记录的界面语言
+	a.settingsMu.Lock()
+	a.settings.UILanguage = "zh-CN"
+	a.settingsMu.Unlock()
+	req, _ = http.NewRequest("GET", gw.URL+"/app/gately/", nil)
+	req.Header.Set("X-Trim-Username", "alice")
+	req.Header.Set("X-Trim-Isadmin", "true")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+	if resp, err := http.DefaultClient.Do(req); err != nil || !strings.Contains(resp.Header.Get("Set-Cookie"), "gately_token=") {
+		t.Fatalf("飞牛管理员应自动登录: %v", err)
+	} else {
+		resp.Body.Close()
+	}
+	if got := a.settingsSnapshot().UILanguage; got != "zh-CN" {
+		t.Fatalf("自动登录不应按浏览器语言改写界面语言: %q", got)
+	}
+
 	// 退出登录后，登录页显示飞牛登录，点击即可登录
 	resp = fnosRequest(t, newClient(), "GET", gw.URL+"/app/gately/api/login/providers", true)
 	if body, _ := io.ReadAll(resp.Body); !strings.Contains(string(body), `"fnosUser":"alice"`) {
