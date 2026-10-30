@@ -82,8 +82,8 @@ func TestCRSBlocksAttacks(t *testing.T) {
 	}
 }
 
-func TestLuckyStyleSubset(t *testing.T) {
-	// 与 Lucky 中 waf-main 相同：只启用 LFI 规则
+func TestCRSSubset(t *testing.T) {
+	// 只启用 LFI 规则子集
 	m := newModule(t, Instance{Key: "lfi", Name: "lfi", Enable: true, InboundThreshold: 6, OutboundThreshold: 4,
 		RuleSets: []RuleSet{{Enable: true, Type: RuleCRS, Param: "REQUEST-901-INITIALIZATION.conf\nREQUEST-930-APPLICATION-ATTACK-LFI.conf\nREQUEST-949-BLOCKING-EVALUATION.conf"}}})
 	h := m.Middleware("lfi", ok)

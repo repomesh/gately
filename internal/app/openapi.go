@@ -171,6 +171,10 @@ func crudSummary(r routeInfo, verb string) string {
 	// 用整句格式串而不是拼接，便于各语言按自己的语序翻译
 	switch verb {
 	case "列表":
+		// 名词本身以“列表”结尾（如订阅 IP 列表）时不再重复
+		if strings.HasSuffix(noun, "列表") {
+			return fmt.Sprintf("获取%s", noun)
+		}
 		return fmt.Sprintf("获取%s列表", noun)
 	case "调整排序":
 		return fmt.Sprintf("调整%s排序", noun)
@@ -334,19 +338,23 @@ func (a *App) APIDocs(lang string) (openapi []byte, markdown []byte, err error) 
 	return append(openapi, '\n'), []byte(m.markdown(func(x string) string { return i18n.Tr(lang, x) })), nil
 }
 
-// trDocDeep 翻译文档中的字符串；接口说明由多个段落（以空行分隔）拼成，整体匹配不上时按段落翻译。
+// trDocDeep 翻译文档中的字符串；接口说明由多个段落（以空行分隔）拼成，整体没有译文时按段落翻译。
+// 多段说明先只做整句匹配：Tr 整体匹配不上时会做片段替换，结果与原文不同，就不会再按段落精确翻译，
+// 留下中外文混排的句子。
 func trDocDeep(lang string, v any) any {
 	switch x := v.(type) {
 	case string:
-		out := i18n.Tr(lang, x)
-		if out == x && strings.Contains(x, "\n\n") {
-			parts := strings.Split(x, "\n\n")
-			for i := range parts {
-				parts[i] = i18n.Tr(lang, parts[i])
-			}
-			out = strings.Join(parts, "\n\n")
+		if !strings.Contains(x, "\n\n") {
+			return i18n.Tr(lang, x)
 		}
-		return out
+		if out := i18n.TrExact(lang, x); out != x {
+			return out
+		}
+		parts := strings.Split(x, "\n\n")
+		for i := range parts {
+			parts[i] = i18n.Tr(lang, parts[i])
+		}
+		return strings.Join(parts, "\n\n")
 	case []any:
 		for i := range x {
 			x[i] = trDocDeep(lang, x[i])

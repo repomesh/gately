@@ -446,7 +446,7 @@ func mappingFiles(c *Cert) map[string][]byte {
 	return files
 }
 
-// pemBytes 保证 PEM 内容以换行结尾（与 Lucky 写出的文件一致，部分程序拼接证书时依赖结尾换行）。
+// pemBytes 保证 PEM 内容以换行结尾（部分程序拼接证书时依赖结尾换行）。
 func pemBytes(s string) []byte {
 	if s != "" && !strings.HasSuffix(s, "\n") {
 		s += "\n"

@@ -247,7 +247,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Eliminar Escucha del servicio web |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Activar o desactivar Escucha del servicio web |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Reordenar Escucha del servicio web |
-| GET | `/api/webservice/iplists` | `webservice:read` | Listar Lista de IP suscrita |
+| GET | `/api/webservice/iplists` | `webservice:read` | Listar las listas de IP suscritas |
 | POST | `/api/webservice/iplists` | `webservice:write` | Añadir Lista de IP suscrita |
 | PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Modificar Lista de IP suscrita |
 | DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Eliminar Lista de IP suscrita |

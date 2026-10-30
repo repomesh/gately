@@ -2900,7 +2900,7 @@
     "url": "https://gately.cn"
   },
   "info": {
-    "description": "Die Gately Verwaltungs-API dient der Stapelverwaltung per Skript und Automatisierung.\n\nAuthentifizierung: Erstellen Sie auf der Seite „API-Tokens“ der Verwaltungsoberfläche ein Token und senden Sie im Request-Header `Authorization: Bearer gtl_xxxx`.\n\nBerechtigungen: Jedes Token besitzt nur die bei der Erstellung ausgewählten Berechtigungen im Format `\u003cModul\u003e:read` oder `\u003cModul\u003e:write`, wobei Schreibrechte Leserechte einschließen. Schnittstellen für Konto, Zwei-Faktor-Authentifizierung, Token-Verwaltung sowie Backup, Wiederherstellung, Neustart und Systemeinstellungen sind nur mit einer Anmeldesitzung nutzbar.\n\nDer Anfragekörper verwendet `Content-Type: application/json`, Fehler werden einheitlich als `{\"error\": \"Beschreibung\"}` zurückgegeben.\n\nUnter „Einstellungen → Module“ deaktivierte Module stellen keine API bereit: Ihre Endpunkte liefern 403 und erscheinen nicht mehr in der API-Dokumentation der laufenden Instanz.",
+    "description": "Gately Verwaltungs-API 用于脚本与自动化批量管理。\n\n认证：在Verwaltungsoberfläche的“API-Token”页创建令牌，请求头携带 `Authorization: Bearer gtl_xxxx`。\n\n权限：每个令牌只拥有创建时勾选的权限，格式为 `\u003c模块\u003e:read` 或 `\u003c模块\u003e:write`，写权限包含读权限。账号、Zwei-Faktor-Authentifizierung、令牌管理以及备份、恢复、重启、系统设置接口只能使用登录会话。\n\n请求体使用 `Content-Type: application/json`，错误统一返回 `{\"error\": \"说明\"}`。\n\nUnter „Einstellungen → Module“ deaktivierte Module stellen keine API bereit: Ihre Endpunkte liefern 403 und erscheinen nicht mehr in der API-Dokumentation der laufenden Instanz.",
     "title": "Gately Verwaltungs-API",
     "version": "dev"
   },
@@ -3474,7 +3474,7 @@
         "x-token-allowed": false
       },
       "post": {
-        "description": "只读账号可查看状态与配置，不能、下载备份或读取密钥。\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.** ändern",
+        "description": "Schreibgeschützte Konten können Status und Konfiguration einsehen, aber nichts ändern, keine Backups herunterladen und keine Geheimnisse lesen.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3855,7 +3855,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `backup:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `backup:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -4757,7 +4757,7 @@
     },
     "/api/cloudflared/install": {
       "delete": {
-        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nErforderliche Berechtigung: `cloudflared:write`. löschen",
+        "description": "Löscht das in bin im Konfigurationsverzeichnis installierte Programm und alle gespeicherten früheren Versionen und startet die Prozesse neu, die es verwenden: Liegt ein gleichnamiges Programm in PATH, wird es verwendet, sonst können die Prozesse nicht starten. Die Moduleinstellungen bleiben unverändert; zum Zurücksetzen `POST /api/{module}/reset` verwenden.\n\nErforderliche Berechtigung: `cloudflared:write`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -5085,7 +5085,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `cloudflared:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `cloudflared:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -5234,7 +5234,7 @@
     },
     "/api/cloudflared/reset": {
       "post": {
-        "description": "frp、Cloudflare-Tunnel、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先abgemeldet；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nErforderliche Berechtigung: `cloudflared:write`. löschen",
+        "description": "Verfügbar für frp, Cloudflare-Tunnel, Tailscale und File Browser; ohne Request-Body. Stoppt alle Prozesse des Moduls, setzt seine Einstellungen (einschließlich Programmpfad und Download-Proxy) auf die Standardwerte zurück und löscht die von Gately dafür erzeugten Dateien: die frp-Konfigurationsdateien, das Datenverzeichnis jeder File-Browser-Instanz (Benutzer, Freigabelinks und Caches) und den Anmeldestatus im Standard-Statusverzeichnis von Tailscale (ein laufendes, von Gately verwaltetes tailscaled meldet sich zuerst ab; eigene Statusverzeichnisse und ein vorhandenes System-tailscaled bleiben unberührt). Die alten Einstellungen bleiben im Konfigurationsverlauf und lassen sich wiederherstellen; installierte Programme sind nicht betroffen, zum Deinstallieren `DELETE /api/{module}/install` verwenden.\n\nErforderliche Berechtigung: `cloudflared:write`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -6096,7 +6096,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `cron:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `cron:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -6918,7 +6918,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `ddns:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `ddns:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -10778,7 +10778,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `docker:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `docker:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -11920,7 +11920,7 @@
     },
     "/api/filebrowser/install": {
       "delete": {
-        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nErforderliche Berechtigung: `filebrowser:write`. löschen",
+        "description": "Löscht das in bin im Konfigurationsverzeichnis installierte Programm und alle gespeicherten früheren Versionen und startet die Prozesse neu, die es verwenden: Liegt ein gleichnamiges Programm in PATH, wird es verwendet, sonst können die Prozesse nicht starten. Die Moduleinstellungen bleiben unverändert; zum Zurücksetzen `POST /api/{module}/reset` verwenden.\n\nErforderliche Berechtigung: `filebrowser:write`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -12772,7 +12772,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `filebrowser:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `filebrowser:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -12921,7 +12921,7 @@
     },
     "/api/filebrowser/reset": {
       "post": {
-        "description": "frp、Cloudflare-Tunnel、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先abgemeldet；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nErforderliche Berechtigung: `filebrowser:write`. löschen",
+        "description": "Verfügbar für frp, Cloudflare-Tunnel, Tailscale und File Browser; ohne Request-Body. Stoppt alle Prozesse des Moduls, setzt seine Einstellungen (einschließlich Programmpfad und Download-Proxy) auf die Standardwerte zurück und löscht die von Gately dafür erzeugten Dateien: die frp-Konfigurationsdateien, das Datenverzeichnis jeder File-Browser-Instanz (Benutzer, Freigabelinks und Caches) und den Anmeldestatus im Standard-Statusverzeichnis von Tailscale (ein laufendes, von Gately verwaltetes tailscaled meldet sich zuerst ab; eigene Statusverzeichnisse und ein vorhandenes System-tailscaled bleiben unberührt). Die alten Einstellungen bleiben im Konfigurationsverlauf und lassen sich wiederherstellen; installierte Programme sind nicht betroffen, zum Deinstallieren `DELETE /api/{module}/install` verwenden.\n\nErforderliche Berechtigung: `filebrowser:write`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -13081,7 +13081,7 @@
     },
     "/api/fileusers": {
       "get": {
-        "description": "返回 WebDAV、FTP、SMB 共用的Gemeinsame Benutzer der Dateidienste，密码脱敏。`services` 列出各文件服务的使用情况：`enable` 服务是否启用，`sharedUsers` 是否允许共享用户登录，`localUsers` 本地用户名（同名的共享用户在该服务中只按本地用户校验），`caseInsensitive` 为 true 时按不区分大小写比较用户名（SMB），`issues` 为无法用于该服务的共享用户及原因：`name`（用户名含 SMB 不允许的字符）、`bcrypt`（密码是 bcrypt 哈希）、`share`（目录名称不能作为共享名或重复）。已关闭的模块不列出。`selfService` 为是否允许共享用户在 Web-Dienst站点的 `/__gately_auth/password` 页面自助密码。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。\n\nErforderliche Berechtigung: `fileusers:read`. ändern",
+        "description": "Gibt die von WebDAV, FTP und SMB gemeinsam genutzten Benutzer der Dateidienste zurück, Passwörter maskiert. Besteht `services` zeigt, wie jeder Dateidienst sie nutzt: `enable` ob der Dienst aktiviert ist, `sharedUsers` ob gemeinsame Benutzer sich anmelden dürfen, `localUsers` die Namen der lokalen Benutzer (ein gemeinsamer Benutzer mit demselben Namen wird in diesem Dienst nur als lokaler Benutzer geprüft), `caseInsensitive` true, wenn Benutzernamen ohne Beachtung der Groß-/Kleinschreibung verglichen werden (SMB), `issues` die gemeinsamen Benutzer, die dieser Dienst nicht nutzen kann, und der Grund: `name` (der Benutzername enthält Zeichen, die SMB nicht erlaubt), `bcrypt` (das Passwort ist ein bcrypt-Hash), `share` (ein Verzeichnisname ist als Freigabename ungültig oder doppelt). Ausgeschaltete Module werden nicht aufgeführt. `selfService` gibt an, ob gemeinsame Benutzer ihr Passwort auf der Seite `/__gately_auth/password` der Webdienst-Sites selbst ändern dürfen. Besteht fileusers.json die Prüfung nicht, wird `error` zurückgegeben und kein gemeinsamer Benutzer kann sich anmelden, bis eine gültige Liste gespeichert wird.\n\nErforderliche Berechtigung: `fileusers:read`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -13130,7 +13130,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中（字段 `sharedUsers`）。可选字段 `selfService` 为自助密码开关，省略时保持原值。\n\nErforderliche Berechtigung: `fileusers:write`. ändern ändern ändern ändern",
+        "description": "Gilt sofort für WebDAV, FTP und SMB; wird der maskierte Platzhalter als Passwort gesendet, bleibt es unverändert. Ein Dienst, der nur mit gemeinsamen Benutzern aktiviert ist, muss nach der Änderung noch einen gemeinsamen Benutzer haben, der sich anmelden kann, sonst wird das Speichern abgelehnt. Ob ein Dienst gemeinsame Benutzer zulässt, wird in dessen Einstellungen geändert (Feld `sharedUsers`). Das optionale Feld `selfService` ist der Schalter für Passwort selbst ändern; fehlt es, bleibt der Wert erhalten.\n\nErforderliche Berechtigung: `fileusers:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -13842,7 +13842,7 @@
     },
     "/api/frp/install": {
       "delete": {
-        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nErforderliche Berechtigung: `frp:write`. löschen",
+        "description": "Löscht das in bin im Konfigurationsverzeichnis installierte Programm und alle gespeicherten früheren Versionen und startet die Prozesse neu, die es verwenden: Liegt ein gleichnamiges Programm in PATH, wird es verwendet, sonst können die Prozesse nicht starten. Die Moduleinstellungen bleiben unverändert; zum Zurücksetzen `POST /api/{module}/reset` verwenden.\n\nErforderliche Berechtigung: `frp:write`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -14170,7 +14170,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `frp:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `frp:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -14782,7 +14782,7 @@
     },
     "/api/frp/reset": {
       "post": {
-        "description": "frp、Cloudflare-Tunnel、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先abgemeldet；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nErforderliche Berechtigung: `frp:write`. löschen",
+        "description": "Verfügbar für frp, Cloudflare-Tunnel, Tailscale und File Browser; ohne Request-Body. Stoppt alle Prozesse des Moduls, setzt seine Einstellungen (einschließlich Programmpfad und Download-Proxy) auf die Standardwerte zurück und löscht die von Gately dafür erzeugten Dateien: die frp-Konfigurationsdateien, das Datenverzeichnis jeder File-Browser-Instanz (Benutzer, Freigabelinks und Caches) und den Anmeldestatus im Standard-Statusverzeichnis von Tailscale (ein laufendes, von Gately verwaltetes tailscaled meldet sich zuerst ab; eigene Statusverzeichnisse und ein vorhandenes System-tailscaled bleiben unberührt). Die alten Einstellungen bleiben im Konfigurationsverlauf und lassen sich wiederherstellen; installierte Programme sind nicht betroffen, zum Deinstallieren `DELETE /api/{module}/install` verwenden.\n\nErforderliche Berechtigung: `frp:write`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -15522,7 +15522,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `ftp:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `ftp:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -15890,7 +15890,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API-Token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\nErforderliche Berechtigung: `webdav:write,ftp:write,smb:write`. ändern ändern",
+        "description": "Veraltet, stattdessen `PUT /api/fileusers` verwenden; dieser Endpunkt bleibt aus Kompatibilitätsgründen erhalten. Gilt sofort für WebDAV, FTP und SMB; wird der maskierte Platzhalter als Passwort gesendet, bleibt es unverändert. API-Token brauchen `webdav:write`, `ftp:write` und `smb:write` zusammen. Ein Dienst, der nur mit gemeinsamen Benutzern aktiviert ist, muss nach der Änderung noch einen gemeinsamen Benutzer haben, der sich anmelden kann, sonst wird das Speichern abgelehnt.\n\nErforderliche Berechtigung: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16696,7 +16696,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `guard:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `guard:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -17312,7 +17312,7 @@
     },
     "/api/logs": {
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `logs:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `logs:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -17561,7 +17561,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `nettools:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `nettools:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -18844,7 +18844,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `notify:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `notify:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -19475,7 +19475,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `portforward:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `portforward:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -20185,7 +20185,7 @@
     },
     "/api/session": {
       "get": {
-        "description": "返回 `username`、`role`（`admin` 或 `readonly`）、`disabledModules`（已关闭的功能模块 ID）与 `defaultPassword`（管理员仍在使用默认密码 `gately.cn` 时为 true，管理界面据此提醒）。\n\nJedes gültige API-Token hat Zugriff; eine bestimmte Berechtigung ist nicht erforderlich. ändern",
+        "description": "Liefert `username`, `role` (`admin` oder `readonly`), `disabledModules` (IDs abgeschalteter Module) und `defaultPassword` (true, solange der Administrator noch das Standardpasswort `gately.cn` verwendet; die Admin-Oberfläche fordert dann zur Änderung auf).\n\nJedes gültige API-Token hat Zugriff; eine bestimmte Berechtigung ist nicht erforderlich.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -20275,7 +20275,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `smb:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `smb:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -20643,7 +20643,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API-Token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\nErforderliche Berechtigung: `webdav:write,ftp:write,smb:write`. ändern ändern",
+        "description": "Veraltet, stattdessen `PUT /api/fileusers` verwenden; dieser Endpunkt bleibt aus Kompatibilitätsgründen erhalten. Gilt sofort für WebDAV, FTP und SMB; wird der maskierte Platzhalter als Passwort gesendet, bleibt es unverändert. API-Token brauchen `webdav:write`, `ftp:write` und `smb:write` zusammen. Ein Dienst, der nur mit gemeinsamen Benutzern aktiviert ist, muss nach der Änderung noch einen gemeinsamen Benutzer haben, der sich anmelden kann, sonst wird das Speichern abgelehnt.\n\nErforderliche Berechtigung: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21449,7 +21449,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `ssl:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `ssl:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -22242,7 +22242,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `storage:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `storage:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -22903,7 +22903,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `stun:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `stun:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -24082,7 +24082,7 @@
         "x-token-allowed": false
       },
       "put": {
-        "description": "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，后重启生效；`gatewaySSO` 开启Automatische Anmeldung mit der fnOS-Sitzung，仅飞牛安装包有效。\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.** ändern",
+        "description": "`disabledModules` ist die Liste der IDs deaktivierter Module; ein Modul, von dem andere abhängen, kann nicht deaktiviert werden, und Änderungen gelten nach einem Neustart. `gatewaySSO` aktiviert „Mit fnOS anmelden“ und wirkt nur im fnOS-Paket.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
         "requestBody": {
           "content": {
             "application/json": {
@@ -24428,7 +24428,7 @@
     },
     "/api/tailscale/install": {
       "delete": {
-        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nErforderliche Berechtigung: `tailscale:write`. löschen",
+        "description": "Löscht das in bin im Konfigurationsverzeichnis installierte Programm und alle gespeicherten früheren Versionen und startet die Prozesse neu, die es verwenden: Liegt ein gleichnamiges Programm in PATH, wird es verwendet, sonst können die Prozesse nicht starten. Die Moduleinstellungen bleiben unverändert; zum Zurücksetzen `POST /api/{module}/reset` verwenden.\n\nErforderliche Berechtigung: `tailscale:write`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -24807,7 +24807,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `tailscale:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `tailscale:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -24956,7 +24956,7 @@
     },
     "/api/tailscale/reset": {
       "post": {
-        "description": "frp、Cloudflare-Tunnel、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先abgemeldet；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nErforderliche Berechtigung: `tailscale:write`. löschen",
+        "description": "Verfügbar für frp, Cloudflare-Tunnel, Tailscale und File Browser; ohne Request-Body. Stoppt alle Prozesse des Moduls, setzt seine Einstellungen (einschließlich Programmpfad und Download-Proxy) auf die Standardwerte zurück und löscht die von Gately dafür erzeugten Dateien: die frp-Konfigurationsdateien, das Datenverzeichnis jeder File-Browser-Instanz (Benutzer, Freigabelinks und Caches) und den Anmeldestatus im Standard-Statusverzeichnis von Tailscale (ein laufendes, von Gately verwaltetes tailscaled meldet sich zuerst ab; eigene Statusverzeichnisse und ein vorhandenes System-tailscaled bleiben unberührt). Die alten Einstellungen bleiben im Konfigurationsverlauf und lassen sich wiederherstellen; installierte Programme sind nicht betroffen, zum Deinstallieren `DELETE /api/{module}/install` verwenden.\n\nErforderliche Berechtigung: `tailscale:write`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -26152,7 +26152,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `waf:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `waf:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -26350,7 +26350,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `webdav:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `webdav:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -26718,7 +26718,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API-Token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\nErforderliche Berechtigung: `webdav:write,ftp:write,smb:write`. ändern ändern",
+        "description": "Veraltet, stattdessen `PUT /api/fileusers` verwenden; dieser Endpunkt bleibt aus Kompatibilitätsgründen erhalten. Gilt sofort für WebDAV, FTP und SMB; wird der maskierte Platzhalter als Passwort gesendet, bleibt es unverändert. API-Token brauchen `webdav:write`, `ftp:write` und `smb:write` zusammen. Ein Dienst, der nur mit gemeinsamen Benutzern aktiviert ist, muss nach der Änderung noch einen gemeinsamen Benutzer haben, der sich anmelden kann, sonst wird das Speichern abgelehnt.\n\nErforderliche Berechtigung: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -27291,7 +27291,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "订阅 IP  auflisten列表",
+        "summary": "Abonnierte IP-Listen auflisten",
         "tags": [
           "Web-Dienst"
         ],
@@ -28134,7 +28134,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `webservice:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `webservice:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -28760,7 +28760,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "请求体 `{\"authUsers\": [], \"ssoDomain\": \"\", \"selfServicePassword\": false, \"oidc\": {}, \"sites\": [{\"listener\": \"l1\", \"site\": \"s1\", \"sharedUsers\": true}]}`，字段含义同Globale Einstellungen，只这几项，Globale Einstellungen的其他项保持不变；脱敏占位符表示保留原密码或密钥。`sites` 只需列出要的站点：启用时站点若未开启认证会同时开启网页认证；站点只通过共享用户认证时不能在这里取消（取消后将无需登录），使用转发认证的站点不能启用。任一项校验失败时不保存任何。\n\nErforderliche Berechtigung: `webservice:write`. ändern ändern ändern",
+        "description": "Request-Body `{\"authUsers\": [], \"ssoDomain\": \"\", \"selfServicePassword\": false, \"oidc\": {}, \"sites\": [{\"listener\": \"l1\", \"site\": \"s1\", \"sharedUsers\": true}]}`. Die Felder bedeuten dasselbe wie in den globalen Einstellungen; nur diese werden geändert, die übrigen globalen Einstellungen bleiben unverändert; der maskierte Platzhalter behält das bisherige Passwort bzw. Geheimnis. `sites` enthält nur die zu ändernden Sites: Beim Einschalten für eine Site ohne Authentifizierung wird auch Web-Auth eingeschaltet; eine Site, die nur über gemeinsame Benutzer authentifiziert, kann hier nicht abgeschaltet werden (sie würde keine Anmeldung mehr verlangen), und Sites mit Forward-Auth können nicht eingeschaltet werden. Schlägt eine Prüfung fehl, wird nichts gespeichert.\n\nErforderliche Berechtigung: `webservice:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -30224,7 +30224,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `webterminal:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `webterminal:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -32779,7 +32779,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `wol:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden). `exclude` enthält auszuschließende Begriffe: Einträge mit einem davon werden nicht zurückgegeben; Schreibweise wie bei `q`, das führende `-` ist optional.\n\nErforderliche Berechtigung: `wol:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",

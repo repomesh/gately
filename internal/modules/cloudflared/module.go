@@ -153,12 +153,14 @@ func (rt *runtime) reset() {
 
 // Module 是 cloudflared 模块。
 type Module struct {
-	mu      sync.Mutex
-	store   *config.Store
-	logs    *logbuf.Buffer
-	cfg     fileConfig
-	runs    map[string]*runtime
-	started bool
+	mu sync.Mutex
+	// ingressMu 串行化路由规则的保存（读取远程配置、核对版本、写入），不与 mu 嵌套
+	ingressMu sync.Mutex
+	store     *config.Store
+	logs      *logbuf.Buffer
+	cfg       fileConfig
+	runs      map[string]*runtime
+	started   bool
 	// version 缓存已探测的二进制版本
 	version     string
 	versionPath string

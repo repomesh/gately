@@ -109,3 +109,43 @@ func TestUsersAPI(t *testing.T) {
 		t.Fatalf("取消共享用户失败: %d %s", code, body)
 	}
 }
+
+// TestPutSettingsKeepsUsers 验证全局设置省略共享用户、单点登录域、自助改密与 OIDC 时保留原值，提供时照常修改。
+func TestPutSettingsKeepsUsers(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	m := New(nil, nil)
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(50, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	users, err := normalizeAuthUsers([]AuthUser{{Name: "alice", Password: "alice-pw"}}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.cfg.Settings.AuthUsers, m.cfg.Settings.SSODomain, m.cfg.Settings.SelfServicePassword = users, "example.com", true
+	put := func(body string) int {
+		rec := httptest.NewRecorder()
+		r := httptest.NewRequest("PUT", "/settings", strings.NewReader(body))
+		r.Header.Set("Content-Type", "application/json")
+		m.handlePutSettings(rec, r)
+		return rec.Code
+	}
+	if code := put(`{"enable":true,"autoBanSeconds":60,"trustedProxies":["10.0.0.1"]}`); code != 200 {
+		t.Fatalf("保存失败: %d", code)
+	}
+	s := m.cfg.Settings
+	if len(s.AuthUsers) != 1 || s.AuthUsers[0].Password != users[0].Password || s.SSODomain != "example.com" || !s.SelfServicePassword {
+		t.Fatalf("省略的认证用户设置应保留: %+v", s)
+	}
+	if s.AutoBanSeconds != 60 || len(s.TrustedProxies) != 1 {
+		t.Fatalf("其他设置应照常保存: %+v", s)
+	}
+	if _, ok := m.auth.shared.get().checkPassword("alice", "alice-pw"); !ok {
+		t.Fatal("保留的共享用户应继续生效")
+	}
+	if code := put(`{"enable":true,"authUsers":[],"ssoDomain":"","selfServicePassword":false}`); code != 200 {
+		t.Fatalf("保存失败: %d", code)
+	}
+	if s := m.cfg.Settings; len(s.AuthUsers) != 0 || s.SSODomain != "" || s.SelfServicePassword {
+		t.Fatalf("显式提供的字段应照常修改: %+v", s)
+	}
+}

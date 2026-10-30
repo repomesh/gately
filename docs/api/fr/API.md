@@ -247,7 +247,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Supprimer Écoute du service Web |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Activer ou désactiver Écoute du service Web |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Réordonner Écoute du service Web |
-| GET | `/api/webservice/iplists` | `webservice:read` | Lister Liste d'IP abonnée |
+| GET | `/api/webservice/iplists` | `webservice:read` | Lister les listes d’IP abonnées |
 | POST | `/api/webservice/iplists` | `webservice:write` | Ajouter Liste d'IP abonnée |
 | PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Modifier Liste d'IP abonnée |
 | DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Supprimer Liste d'IP abonnée |

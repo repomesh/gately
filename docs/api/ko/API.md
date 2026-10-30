@@ -247,7 +247,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Web 서비스 수신 대기 삭제 |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Web 서비스 수신 대기 사용 설정/해제 |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Web 서비스 수신 대기 순서 변경 |
-| GET | `/api/webservice/iplists` | `webservice:read` | 订阅 IP  목록 조회列表 |
+| GET | `/api/webservice/iplists` | `webservice:read` | 구독 IP 목록 조회 |
 | POST | `/api/webservice/iplists` | `webservice:write` | 구독 IP 목록 추가 |
 | PUT | `/api/webservice/iplists/{key}` | `webservice:write` | 구독 IP 목록 수정 |
 | DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | 구독 IP 목록 삭제 |

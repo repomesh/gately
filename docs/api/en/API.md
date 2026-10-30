@@ -247,7 +247,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Delete Web service listening |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Enable or disable Web service listening |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Reorder Web service listening |
-| GET | `/api/webservice/iplists` | `webservice:read` | List Subscribed IP list |
+| GET | `/api/webservice/iplists` | `webservice:read` | List subscribed IP lists |
 | POST | `/api/webservice/iplists` | `webservice:write` | Create Subscribed IP list |
 | PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Update Subscribed IP list |
 | DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Delete Subscribed IP list |

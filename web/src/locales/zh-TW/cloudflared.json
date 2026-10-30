@@ -55,6 +55,8 @@
     "dns_unchanged": "CNAME 記錄已存在",
     "saved": "路由規則已儲存",
     "savedDnsIssues": "路由規則已儲存，部分 DNS 記錄需要處理",
-    "reload": "重新載入"
+    "reload": "重新載入",
+    "confirmLocalTitle": "寫入遠端設定",
+    "confirmLocal": "這條通道目前由本機設定檔管理。儲存後路由規則寫入 Cloudflare 遠端設定，通道會改為遠端管理，本機設定檔中的路由規則不再生效。確定儲存？"
   }
 }

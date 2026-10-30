@@ -158,6 +158,10 @@ func (j *Jail) Validate() error {
 		return err
 	}
 	j.Ignore = strings.Join(splitLines(j.Ignore), "\n")
+	// 任意状态码又不限路径、不限未知域名时每个请求都会计数，正常访客访问几次就会被封
+	if j.AnyStatus && j.Filter == "" && !j.UnknownHost {
+		return errors.New("统计任意状态码时需要填写路径规则或只统计未知域名，否则正常访问也会被封禁")
+	}
 	return j.validateCount()
 }
 
@@ -197,6 +201,10 @@ func (j *Jail) validateWeb() error {
 		return err
 	}
 	j.Ignore = strings.Join(splitLines(j.Ignore), "\n")
+	// 任意状态码又不限路径、不限未知域名时每个请求都会计数，正常访客访问几次就会被封
+	if j.AnyStatus && j.Filter == "" && !j.UnknownHost {
+		return errors.New("统计任意状态码时需要填写路径规则或只统计未知域名，否则正常访问也会被封禁")
+	}
 	return j.validateCount()
 }
 

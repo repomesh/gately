@@ -13,28 +13,65 @@ import (
 // statusClosed 是 Web 服务断开连接（return 444）时记录的状态码。
 const statusClosed = 444
 
+// maxMatchPath 是参与路径规则匹配的最大长度。更长的路径只取开头与结尾各一半拼接后匹配，
+// 前缀与后缀类规则（/.git*、*.php）照常生效，避免超长请求行让每个请求的匹配耗时随长度增长。
+const maxMatchPath = 4096
+
+// pathRule 是一条编译后的路径规则：re 不为空时为正则，否则为按 * 切开的通配片段（已转小写）。
+type pathRule struct {
+	re    *regexp.Regexp
+	parts []string
+}
+
+// match 判断路径是否命中规则。通配规则做分段的前缀、包含、后缀比较，耗时与路径长度线性相关，不经过正则。
+func (r pathRule) match(p, lower string) bool {
+	if r.re != nil {
+		return r.re.MatchString(p)
+	}
+	return globMatch(r.parts, lower)
+}
+
+// globMatch 判断 s 是否与按 * 切开的片段整体匹配：首段为前缀、末段为后缀，中间各段依次出现。
+func globMatch(parts []string, s string) bool {
+	if len(parts) == 1 {
+		return s == parts[0]
+	}
+	first, last := parts[0], parts[len(parts)-1]
+	if len(s) < len(first)+len(last) || !strings.HasPrefix(s, first) || !strings.HasSuffix(s, last) {
+		return false
+	}
+	mid := s[len(first) : len(s)-len(last)]
+	for _, part := range parts[1 : len(parts)-1] {
+		i := strings.Index(mid, part)
+		if i < 0 {
+			return false
+		}
+		mid = mid[i+len(part):]
+	}
+	return true
+}
+
 // compilePaths 编译路径规则：每行一条，以 ~ 开头为正则（按 Go 正则语法，不自动锚定），
 // 其余为通配，* 匹配任意字符（含 /），整条路径匹配且不区分大小写。
-func compilePaths(text string) ([]*regexp.Regexp, error) {
-	var out []*regexp.Regexp
+func compilePaths(text string) ([]pathRule, error) {
+	var out []pathRule
 	for _, l := range splitLines(text) {
-		var expr string
 		if rest, ok := strings.CutPrefix(l, "~"); ok {
-			expr = strings.TrimSpace(rest)
+			expr := strings.TrimSpace(rest)
 			if expr == "" {
 				return nil, fmt.Errorf("路径规则 %q 缺少正则", l)
 			}
-		} else {
-			if !strings.HasPrefix(l, "/") && !strings.HasPrefix(l, "*") {
-				return nil, fmt.Errorf("路径规则 %q 应以 / 或 * 开头", l)
+			re, err := regexp.Compile(expr)
+			if err != nil {
+				return nil, fmt.Errorf("路径规则 %q 无效: %v", l, err)
 			}
-			expr = "(?i)^" + strings.ReplaceAll(regexp.QuoteMeta(l), `\*`, ".*") + "$"
+			out = append(out, pathRule{re: re})
+			continue
 		}
-		re, err := regexp.Compile(expr)
-		if err != nil {
-			return nil, fmt.Errorf("路径规则 %q 无效: %v", l, err)
+		if !strings.HasPrefix(l, "/") && !strings.HasPrefix(l, "*") {
+			return nil, fmt.Errorf("路径规则 %q 应以 / 或 * 开头", l)
 		}
-		out = append(out, re)
+		out = append(out, pathRule{parts: strings.Split(strings.ToLower(l), "*")})
 	}
 	return out, nil
 }
@@ -43,8 +80,8 @@ func compilePaths(text string) ([]*regexp.Regexp, error) {
 type webMatcher struct {
 	// listeners 为限定的监听 key，为空表示全部监听
 	listeners   map[string]bool
-	paths       []*regexp.Regexp
-	ignores     []*regexp.Regexp
+	paths       []pathRule
+	ignores     []pathRule
 	anyStatus   bool
 	unknownHost bool
 }
@@ -70,16 +107,23 @@ func newWebMatcher(j Jail) (*webMatcher, error) {
 
 // matchPath 判断路径是否命中任一规则。同时比较原始路径与规范化后的路径，
 // 防止用 //.env、/a/../.env 这类写法绕过。
-func matchPath(res []*regexp.Regexp, p string) bool {
+func matchPath(rules []pathRule, p string) bool {
+	if len(rules) == 0 {
+		return false
+	}
 	if p == "" {
 		p = "/"
+	}
+	if len(p) > maxMatchPath {
+		p = p[:maxMatchPath/2] + p[len(p)-maxMatchPath/2:]
 	}
 	clean := p
 	if strings.HasPrefix(p, "/") {
 		clean = path.Clean(p)
 	}
-	for _, re := range res {
-		if re.MatchString(p) || (clean != p && re.MatchString(clean)) {
+	lower, cleanLower := strings.ToLower(p), strings.ToLower(clean)
+	for _, r := range rules {
+		if r.match(p, lower) || (clean != p && r.match(clean, cleanLower)) {
 			return true
 		}
 	}
@@ -130,7 +174,8 @@ func (m *Module) onWebHit(h webprobe.Hit) {
 	a := h.Addr.Unmap()
 	for _, r := range *p {
 		if r.match.web.match(h) {
-			r.record(a, fmt.Sprintf("%s %s%s %d", h.Method, h.Host, h.Path, h.Status))
+			// 主机名与路径由访客控制，%q 转义换行等控制字符，避免伪造日志行与通知内容
+			r.record(a, fmt.Sprintf("%s %q %d", h.Method, h.Host+h.Path, h.Status))
 		}
 	}
 }

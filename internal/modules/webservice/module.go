@@ -101,6 +101,9 @@ func (m *Module) Init(env module.Env) error {
 			m.logs.Logger("").Infof("共享用户 %s 从 %s 自助修改了密码", name, ip)
 		}
 	}
+	m.auth.onPasswordFailed = func(kind, name, ip string, err error) {
+		m.logs.Logger("").Warnf("用户 %s 从 %s 自助修改密码时保存失败: %v", name, ip, err)
+	}
 	if err := m.auth.oidc.set(m.cfg.Settings.OIDC); err != nil {
 		m.logs.Add(logbuf.LevelWarn, "", "OIDC 身份提供方未启动: "+err.Error())
 	}
@@ -331,12 +334,24 @@ func oauthSecrets(providers []OAuthProvider) map[string]string {
 	return out
 }
 
+// settingsPut 是全局设置的请求体。共享用户、单点登录域、自助改密与 OIDC 改由认证用户页（PUT /users）维护，
+// 这几项在请求中省略时保留原值，避免打开较早的全局设置对话框保存时用旧数据覆盖认证用户页的修改。
+// 外层同名字段优先于内嵌 Settings 的字段解码。
+type settingsPut struct {
+	Settings
+	AuthUsers           *[]AuthUser   `json:"authUsers"`
+	SSODomain           *string       `json:"ssoDomain"`
+	SelfServicePassword *bool         `json:"selfServicePassword"`
+	OIDC                *OIDCSettings `json:"oidc"`
+}
+
 func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
-	var s Settings
-	if err := httpx.ReadJSON(r, &s); err != nil {
+	var put settingsPut
+	if err := httpx.ReadJSON(r, &put); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
 	}
+	s := put.Settings
 	if _, err := parsePrefixes(s.TrustedProxies); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
@@ -373,12 +388,35 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	s.TrustedProxies = cleanList(s.TrustedProxies)
-	us := UsersSettings{AuthUsers: s.AuthUsers, SSODomain: s.SSODomain, SelfServicePassword: s.SelfServicePassword, OIDC: s.OIDC}
-	if err := normalizeUsersSettings(&us, old); err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
+	// 省略的认证用户相关字段沿用原值（原值已规范化），提供的字段照常校验
+	s.AuthUsers, s.SSODomain, s.SelfServicePassword, s.OIDC = old.AuthUsers, old.SSODomain, old.SelfServicePassword, old.OIDC
+	if put.SelfServicePassword != nil {
+		s.SelfServicePassword = *put.SelfServicePassword
 	}
-	s.AuthUsers, s.SSODomain, s.OIDC = us.AuthUsers, us.SSODomain, us.OIDC
+	if put.AuthUsers != nil {
+		users, err := normalizeAuthUsers(*put.AuthUsers, old.AuthUsers)
+		if err != nil {
+			httpx.Error(w, http.StatusBadRequest, "%v", err)
+			return
+		}
+		s.AuthUsers = users
+	}
+	if put.SSODomain != nil {
+		d, err := validateSSODomain(*put.SSODomain)
+		if err != nil {
+			httpx.Error(w, http.StatusBadRequest, "%v", err)
+			return
+		}
+		s.SSODomain = d
+	}
+	if put.OIDC != nil {
+		o := *put.OIDC
+		if err := normalizeOIDC(&o, old.OIDC); err != nil {
+			httpx.Error(w, http.StatusBadRequest, "%v", err)
+			return
+		}
+		s.OIDC = o
+	}
 	if s.AutoBanSeconds < 0 || time.Duration(s.AutoBanSeconds)*time.Second > maxBanDuration {
 		httpx.Error(w, http.StatusBadRequest, "自动封禁时长需在 0 到 30 天之间")
 		return

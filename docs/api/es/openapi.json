@@ -2900,7 +2900,7 @@
     "url": "https://gately.cn"
   },
   "info": {
-    "description": "La API de administración de Gately permite la gestión por lotes mediante scripts y automatización.\n\nAutenticación: cree un token en la página «Tokens de API» del panel de administración e incluya en la cabecera de la solicitud `Authorization: Bearer gtl_xxxx`.\n\nPermisos: cada token solo tiene los permisos marcados al crearlo, con el formato `\u003cmódulo\u003e:read` o `\u003cmódulo\u003e:write`; el permiso de escritura incluye el de lectura. Los endpoints de cuenta, verificación en dos pasos, administración de tokens, y los de copia de seguridad, restauración, reinicio y ajustes del sistema solo pueden usarse con una sesión iniciada.\n\nEl cuerpo de la solicitud usa `Content-Type: application/json`; los errores se devuelven siempre como `{\"error\": \"descripción\"}`.\n\nLos módulos desactivados en «Ajustes → Módulos» no ofrecen API: sus endpoints devuelven 403 y dejan de aparecer en la documentación de la API de la instancia en ejecución.",
+    "description": "API de administración de Gately 用于脚本与自动化批量管理。\n\n认证：在Panel de administración的“Token de API”页创建令牌，请求头携带 `Authorization: Bearer gtl_xxxx`。\n\n权限：每个令牌只拥有创建时勾选的权限，格式为 `\u003c模块\u003e:read` 或 `\u003c模块\u003e:write`，写权限包含读权限。账号、Verificación en dos pasos、令牌管理以及备份、恢复、重启、系统设置接口只能使用登录会话。\n\n请求体使用 `Content-Type: application/json`，错误统一返回 `{\"error\": \"说明\"}`。\n\nLos módulos desactivados en «Ajustes → Módulos» no ofrecen API: sus endpoints devuelven 403 y dejan de aparecer en la documentación de la API de la instancia en ejecución.",
     "title": "API de administración de Gately",
     "version": "dev"
   },
@@ -3474,7 +3474,7 @@
         "x-token-allowed": false
       },
       "post": {
-        "description": "只读账号可查看状态与配置，不能Modificar 、下载备份或读取密钥。\n\n**Solo disponible para sesiones de inicio de sesión; los tokens de API no pueden acceder a este endpoint.**",
+        "description": "Las cuentas de solo lectura pueden ver el estado y la configuración, pero no pueden modificar nada, descargar copias de seguridad ni leer secretos.\n\n**Solo disponible para sesiones de inicio de sesión; los tokens de API no pueden acceder a este endpoint.**",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3855,7 +3855,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `backup:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `backup:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -4757,7 +4757,7 @@
     },
     "/api/cloudflared/install": {
       "delete": {
-        "description": "Eliminar 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermiso necesario: `cloudflared:write`.",
+        "description": "Elimina el programa instalado en bin dentro del directorio de configuración y todas las versiones anteriores guardadas, y reinicia los procesos que lo usan: si hay un programa con el mismo nombre en el PATH se usa ese, si no los procesos no pueden iniciarse. Los ajustes del módulo no cambian; para borrarlos use `POST /api/{module}/reset`.\n\nPermiso necesario: `cloudflared:write`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -5085,7 +5085,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `cloudflared:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `cloudflared:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -5234,7 +5234,7 @@
     },
     "/api/cloudflared/reset": {
       "post": {
-        "description": "frp、Túnel de Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Eliminar Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先Cierre de sesión；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermiso necesario: `cloudflared:write`.",
+        "description": "Disponible en frp, Túnel de Cloudflare, Tailscale y File Browser; sin cuerpo. Detiene todos los procesos del módulo, restaura sus ajustes (incluidos la ruta del programa y el proxy de descarga) a los valores predeterminados y elimina los archivos que Gately generó para él: los archivos de configuración de frp, el directorio de datos de cada instancia de File Browser (usuarios, enlaces compartidos y cachés) y el estado de sesión del directorio de estado predeterminado de Tailscale (si el tailscaled gestionado por Gately está en marcha, primero cierra sesión; los directorios de estado personalizados y un tailscaled del sistema no se tocan). Los ajustes anteriores quedan en el historial de configuración y pueden restaurarse; los programas instalados no se ven afectados, para desinstalar use `DELETE /api/{module}/install`.\n\nPermiso necesario: `cloudflared:write`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -6096,7 +6096,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `cron:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `cron:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -6918,7 +6918,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `ddns:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `ddns:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -10778,7 +10778,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `docker:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `docker:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -11920,7 +11920,7 @@
     },
     "/api/filebrowser/install": {
       "delete": {
-        "description": "Eliminar 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermiso necesario: `filebrowser:write`.",
+        "description": "Elimina el programa instalado en bin dentro del directorio de configuración y todas las versiones anteriores guardadas, y reinicia los procesos que lo usan: si hay un programa con el mismo nombre en el PATH se usa ese, si no los procesos no pueden iniciarse. Los ajustes del módulo no cambian; para borrarlos use `POST /api/{module}/reset`.\n\nPermiso necesario: `filebrowser:write`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -12772,7 +12772,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `filebrowser:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `filebrowser:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -12921,7 +12921,7 @@
     },
     "/api/filebrowser/reset": {
       "post": {
-        "description": "frp、Túnel de Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Eliminar Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先Cierre de sesión；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermiso necesario: `filebrowser:write`.",
+        "description": "Disponible en frp, Túnel de Cloudflare, Tailscale y File Browser; sin cuerpo. Detiene todos los procesos del módulo, restaura sus ajustes (incluidos la ruta del programa y el proxy de descarga) a los valores predeterminados y elimina los archivos que Gately generó para él: los archivos de configuración de frp, el directorio de datos de cada instancia de File Browser (usuarios, enlaces compartidos y cachés) y el estado de sesión del directorio de estado predeterminado de Tailscale (si el tailscaled gestionado por Gately está en marcha, primero cierra sesión; los directorios de estado personalizados y un tailscaled del sistema no se tocan). Los ajustes anteriores quedan en el historial de configuración y pueden restaurarse; los programas instalados no se ven afectados, para desinstalar use `DELETE /api/{module}/install`.\n\nPermiso necesario: `filebrowser:write`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -13081,7 +13081,7 @@
     },
     "/api/fileusers": {
       "get": {
-        "description": "返回 WebDAV、FTP、SMB 共用的Usuarios compartidos de los servicios de archivos，密码脱敏。`services` 列出各文件服务的使用情况：`enable` 服务是否启用，`sharedUsers` 是否允许共享用户登录，`localUsers` 本地用户名（同名的共享用户在该服务中只按本地用户校验），`caseInsensitive` 为 true 时按不区分大小写比较用户名（SMB），`issues` 为无法用于该服务的共享用户及原因：`name`（用户名含 SMB 不允许的字符）、`bcrypt`（密码是 bcrypt 哈希）、`share`（目录名称不能作为共享名或重复）。已关闭的模块不列出。`selfService` 为是否允许共享用户在 Servicio web站点的 `/__gately_auth/password` 页面自助Modificar 密码。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。\n\nPermiso necesario: `fileusers:read`.",
+        "description": "Devuelve los usuarios compartidos de los servicios de archivos que usan WebDAV, FTP y SMB, con las contraseñas enmascaradas. Si `services` indica cómo los usa cada servicio de archivos: `enable` si el servicio está activado, `sharedUsers` si los usuarios compartidos pueden iniciar sesión, `localUsers` los nombres de los usuarios locales (un usuario compartido con el mismo nombre solo se comprueba como usuario local en ese servicio), `caseInsensitive` true cuando los nombres se comparan sin distinguir mayúsculas (SMB), `issues` los usuarios compartidos que ese servicio no puede usar y el motivo: `name` (el nombre tiene caracteres que SMB no permite), `bcrypt` (la contraseña es un hash bcrypt), `share` (un nombre de directorio no sirve como nombre de recurso o está duplicado). Los módulos desactivados no aparecen. `selfService` indica si los usuarios compartidos pueden cambiar su contraseña en la página `/__gately_auth/password` de los sitios del servicio web. Si fileusers.json no supera la validación, se devuelve `error` y ningún usuario compartido puede iniciar sesión hasta guardar una lista válida.\n\nPermiso necesario: `fileusers:read`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -13130,7 +13130,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中Modificar （字段 `sharedUsers`）。可选字段 `selfService` 为自助Modificar 密码开关，省略时保持原值。\n\nPermiso necesario: `fileusers:write`.",
+        "description": "Se aplica a WebDAV, FTP y SMB a la vez; enviar el marcador enmascarado como contraseña la deja sin cambios. Un servicio activado solo con usuarios compartidos debe seguir teniendo un usuario compartido que pueda iniciar sesión tras el cambio; si no, se rechaza el guardado. Si cada servicio permite el inicio de sesión de usuarios compartidos se cambia en la configuración de ese servicio (campo `sharedUsers`). El campo opcional `selfService` es el interruptor de cambio de contraseña por el usuario; si se omite, conserva su valor.\n\nPermiso necesario: `fileusers:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -13842,7 +13842,7 @@
     },
     "/api/frp/install": {
       "delete": {
-        "description": "Eliminar 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermiso necesario: `frp:write`.",
+        "description": "Elimina el programa instalado en bin dentro del directorio de configuración y todas las versiones anteriores guardadas, y reinicia los procesos que lo usan: si hay un programa con el mismo nombre en el PATH se usa ese, si no los procesos no pueden iniciarse. Los ajustes del módulo no cambian; para borrarlos use `POST /api/{module}/reset`.\n\nPermiso necesario: `frp:write`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -14170,7 +14170,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `frp:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `frp:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -14782,7 +14782,7 @@
     },
     "/api/frp/reset": {
       "post": {
-        "description": "frp、Túnel de Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Eliminar Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先Cierre de sesión；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermiso necesario: `frp:write`.",
+        "description": "Disponible en frp, Túnel de Cloudflare, Tailscale y File Browser; sin cuerpo. Detiene todos los procesos del módulo, restaura sus ajustes (incluidos la ruta del programa y el proxy de descarga) a los valores predeterminados y elimina los archivos que Gately generó para él: los archivos de configuración de frp, el directorio de datos de cada instancia de File Browser (usuarios, enlaces compartidos y cachés) y el estado de sesión del directorio de estado predeterminado de Tailscale (si el tailscaled gestionado por Gately está en marcha, primero cierra sesión; los directorios de estado personalizados y un tailscaled del sistema no se tocan). Los ajustes anteriores quedan en el historial de configuración y pueden restaurarse; los programas instalados no se ven afectados, para desinstalar use `DELETE /api/{module}/install`.\n\nPermiso necesario: `frp:write`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -15522,7 +15522,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `ftp:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `ftp:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -15890,7 +15890,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
+        "description": "Obsoleto, use `PUT /api/fileusers`; este endpoint se mantiene por compatibilidad. Se aplica a WebDAV, FTP y SMB a la vez; enviar el marcador enmascarado como contraseña la deja sin cambios. Los tokens de API necesitan `webdav:write`, `ftp:write` y `smb:write` a la vez. Un servicio activado solo con usuarios compartidos debe seguir teniendo un usuario compartido que pueda iniciar sesión tras el cambio; si no, se rechaza el guardado.\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16696,7 +16696,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `guard:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `guard:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -17312,7 +17312,7 @@
     },
     "/api/logs": {
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `logs:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `logs:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -17561,7 +17561,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `nettools:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `nettools:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -18844,7 +18844,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `notify:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `notify:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -19475,7 +19475,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `portforward:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `portforward:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -20185,7 +20185,7 @@
     },
     "/api/session": {
       "get": {
-        "description": "返回 `username`、`role`（`admin` 或 `readonly`）、`disabledModules`（已关闭的功能模块 ID）与 `defaultPassword`（管理员仍在使用默认密码 `gately.cn` 时为 true，管理界面据此提醒Modificar ）。\n\nCualquier token de API válido puede acceder; no se requiere un permiso específico.",
+        "description": "Devuelve `username`, `role` (`admin` o `readonly`), `disabledModules` (ID de los módulos desactivados) y `defaultPassword` (true mientras el administrador siga usando la contraseña predeterminada `gately.cn`; la interfaz lo usa para pedir que se cambie).\n\nCualquier token de API válido puede acceder; no se requiere un permiso específico.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -20275,7 +20275,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `smb:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `smb:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -20643,7 +20643,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
+        "description": "Obsoleto, use `PUT /api/fileusers`; este endpoint se mantiene por compatibilidad. Se aplica a WebDAV, FTP y SMB a la vez; enviar el marcador enmascarado como contraseña la deja sin cambios. Los tokens de API necesitan `webdav:write`, `ftp:write` y `smb:write` a la vez. Un servicio activado solo con usuarios compartidos debe seguir teniendo un usuario compartido que pueda iniciar sesión tras el cambio; si no, se rechaza el guardado.\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21449,7 +21449,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `ssl:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `ssl:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -22242,7 +22242,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `storage:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `storage:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -22903,7 +22903,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `stun:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `stun:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -24082,7 +24082,7 @@
         "x-token-allowed": false
       },
       "put": {
-        "description": "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，Modificar 后重启生效；`gatewaySSO` 开启Inicio de sesión automático con la sesión de fnOS，仅飞牛安装包有效。\n\n**Solo disponible para sesiones de inicio de sesión; los tokens de API no pueden acceder a este endpoint.**",
+        "description": "`disabledModules` es la lista de ID de módulos desactivados; un módulo del que dependen otros no se puede desactivar, y los cambios se aplican tras reiniciar. `gatewaySSO` activa el inicio de sesión con fnOS y solo funciona en el paquete de fnOS.\n\n**Solo disponible para sesiones de inicio de sesión; los tokens de API no pueden acceder a este endpoint.**",
         "requestBody": {
           "content": {
             "application/json": {
@@ -24428,7 +24428,7 @@
     },
     "/api/tailscale/install": {
       "delete": {
-        "description": "Eliminar 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermiso necesario: `tailscale:write`.",
+        "description": "Elimina el programa instalado en bin dentro del directorio de configuración y todas las versiones anteriores guardadas, y reinicia los procesos que lo usan: si hay un programa con el mismo nombre en el PATH se usa ese, si no los procesos no pueden iniciarse. Los ajustes del módulo no cambian; para borrarlos use `POST /api/{module}/reset`.\n\nPermiso necesario: `tailscale:write`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -24807,7 +24807,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `tailscale:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `tailscale:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -24956,7 +24956,7 @@
     },
     "/api/tailscale/reset": {
       "post": {
-        "description": "frp、Túnel de Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Eliminar Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先Cierre de sesión；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermiso necesario: `tailscale:write`.",
+        "description": "Disponible en frp, Túnel de Cloudflare, Tailscale y File Browser; sin cuerpo. Detiene todos los procesos del módulo, restaura sus ajustes (incluidos la ruta del programa y el proxy de descarga) a los valores predeterminados y elimina los archivos que Gately generó para él: los archivos de configuración de frp, el directorio de datos de cada instancia de File Browser (usuarios, enlaces compartidos y cachés) y el estado de sesión del directorio de estado predeterminado de Tailscale (si el tailscaled gestionado por Gately está en marcha, primero cierra sesión; los directorios de estado personalizados y un tailscaled del sistema no se tocan). Los ajustes anteriores quedan en el historial de configuración y pueden restaurarse; los programas instalados no se ven afectados, para desinstalar use `DELETE /api/{module}/install`.\n\nPermiso necesario: `tailscale:write`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -26152,7 +26152,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `waf:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `waf:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -26350,7 +26350,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `webdav:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `webdav:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -26718,7 +26718,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
+        "description": "Obsoleto, use `PUT /api/fileusers`; este endpoint se mantiene por compatibilidad. Se aplica a WebDAV, FTP y SMB a la vez; enviar el marcador enmascarado como contraseña la deja sin cambios. Los tokens de API necesitan `webdav:write`, `ftp:write` y `smb:write` a la vez. Un servicio activado solo con usuarios compartidos debe seguir teniendo un usuario compartido que pueda iniciar sesión tras el cambio; si no, se rechaza el guardado.\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -27291,7 +27291,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Listar Lista de IP suscrita",
+        "summary": "Listar las listas de IP suscritas",
         "tags": [
           "Servicio web"
         ],
@@ -28134,7 +28134,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `webservice:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `webservice:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -28760,7 +28760,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "请求体 `{\"authUsers\": [], \"ssoDomain\": \"\", \"selfServicePassword\": false, \"oidc\": {}, \"sites\": [{\"listener\": \"l1\", \"site\": \"s1\", \"sharedUsers\": true}]}`，字段含义同Ajustes globales，只Modificar 这几项，Ajustes globales的其他项保持不变；脱敏占位符表示保留原密码或密钥。`sites` 只需列出要Modificar 的站点：启用时站点若未开启认证会同时开启网页认证；站点只通过共享用户认证时不能在这里取消（取消后将无需登录），使用转发认证的站点不能启用。任一项校验失败时不保存任何Modificar 。\n\nPermiso necesario: `webservice:write`.",
+        "description": "Cuerpo de la solicitud `{\"authUsers\": [], \"ssoDomain\": \"\", \"selfServicePassword\": false, \"oidc\": {}, \"sites\": [{\"listener\": \"l1\", \"site\": \"s1\", \"sharedUsers\": true}]}`. Los campos significan lo mismo que en los ajustes globales; solo se modifican estos y el resto de los ajustes globales no cambia; el marcador enmascarado conserva la contraseña o el secreto existentes. `sites` solo incluye los sitios que cambian: al activarlo en un sitio sin autenticación también se activa la autenticación web; un sitio que solo se autentica con usuarios compartidos no se puede desactivar aquí (dejaría de requerir inicio de sesión) y los sitios con autenticación delegada no se pueden activar. Si algo no pasa la validación, no se guarda nada.\n\nPermiso necesario: `webservice:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -30224,7 +30224,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `webterminal:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `webterminal:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -32779,7 +32779,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `wol:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos). `exclude` indica términos a excluir: no se devuelven las entradas que contengan alguno; se escribe como `q` y el `-` inicial es opcional.\n\nPermiso necesario: `wol:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",

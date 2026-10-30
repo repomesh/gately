@@ -62,8 +62,8 @@
     </div>
     <template #footer>
       <el-button @click="visible = false">{{ t('common.close') }}</el-button>
-      <el-button v-if="loadError" @click="load">{{ t('cloudflared.ingress.reload') }}</el-button>
-      <el-button v-else type="primary" :loading="saving" :disabled="!loaded" @click="save">{{ t('common.save') }}</el-button>
+      <el-button v-if="loadError || conflict" @click="load">{{ t('cloudflared.ingress.reload') }}</el-button>
+      <el-button v-if="!loadError" type="primary" :loading="saving" :disabled="!loaded" @click="save">{{ t('common.save') }}</el-button>
     </template>
   </el-dialog>
 </template>
@@ -71,7 +71,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { ApiError } from '../api'
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import { useFormLayout } from '../composables/useIsMobile'
@@ -112,6 +113,10 @@ const loading = ref(false)
 const saving = ref(false)
 const loaded = ref(false)
 const loadError = ref('')
+// conflict 为 true 表示保存时远程配置已在别处修改，显示「重新加载」按钮
+const conflict = ref(false)
+// loadSeq 区分先后发出的读取请求，丢弃已切换到别的隧道后才返回的旧响应
+let loadSeq = 0
 const key = ref('')
 const name = ref('')
 const tunnelId = ref('')
@@ -139,22 +144,34 @@ function apply(v: IngressView) {
 }
 
 function reset() {
+  loadSeq++
   loaded.value = false
+  conflict.value = false
   loadError.value = ''
   dnsResults.value = []
   rules.value = []
 }
 
 async function load() {
+  const seq = ++loadSeq
   loading.value = true
   loadError.value = ''
   try {
-    apply(await api.get<IngressView>(`/api/cloudflared/tunnels/${key.value}/ingress`))
+    const v = await api.get<IngressView>(`/api/cloudflared/tunnels/${key.value}/ingress`)
+    if (seq !== loadSeq) {
+      return
+    }
+    apply(v)
+    conflict.value = false
     loaded.value = true
   } catch (e) {
-    loadError.value = (e as Error).message
+    if (seq === loadSeq) {
+      loadError.value = (e as Error).message
+    }
   } finally {
-    loading.value = false
+    if (seq === loadSeq) {
+      loading.value = false
+    }
   }
 }
 
@@ -211,9 +228,19 @@ function dnsText(d: DNSResult) {
 }
 
 async function save() {
+  // 本地配置文件管理的隧道写入远程配置会改变管理方式，先让用户确认
+  if (source.value === 'local') {
+    try {
+      await ElMessageBox.confirm(t('cloudflared.ingress.confirmLocal'), t('cloudflared.ingress.confirmLocalTitle'), { type: 'warning' })
+    } catch {
+      return
+    }
+  }
+  const tunnelKey = key.value
   saving.value = true
   try {
     const body = {
+      force: source.value === 'local',
       version: version.value,
       rules: rules.value.map((r) => {
         const out: Rule = { hostname: r.hostname.trim(), path: r.path.trim(), service: r.service.trim() }
@@ -225,7 +252,10 @@ async function save() {
       catchAll: catchAll.value.trim(),
       syncDns: syncDns.value,
     }
-    const v = await api.put<IngressView>(`/api/cloudflared/tunnels/${key.value}/ingress`, body)
+    const v = await api.put<IngressView>(`/api/cloudflared/tunnels/${tunnelKey}/ingress`, body)
+    if (tunnelKey !== key.value) {
+      return
+    }
     apply(v)
     dnsResults.value = v.dns || []
     const problem = dnsResults.value.some((d) => d.status === 'conflict' || d.status === 'failed')
@@ -235,6 +265,9 @@ async function save() {
       ElMessage.success(t('cloudflared.ingress.saved'))
     }
   } catch (e) {
+    if (e instanceof ApiError && e.status === 409 && source.value !== 'local') {
+      conflict.value = true
+    }
     ElMessage.error((e as Error).message)
   } finally {
     saving.value = false

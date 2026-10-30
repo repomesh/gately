@@ -4,6 +4,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"sync"
 	"testing"
 	"time"
@@ -80,5 +81,21 @@ func TestWebProbeReport(t *testing.T) {
 	}
 	if h := wait(4); h.Listener != "l3" || h.Status != http.StatusForbidden {
 		t.Fatalf("拒绝访问的上报不符: %+v", h)
+	}
+
+	// 重写规则改写路径后，上报的仍是访客请求的原始路径
+	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/index.html" {
+			t.Errorf("后端应收到重写后的路径，实际 %s", r.URL.Path)
+		}
+		_, _ = w.Write([]byte("spa"))
+	}))
+	t.Cleanup(backend.Close)
+	spa := Listener{Key: "l4", Sites: []Site{{Key: "s4", Enable: true, Domains: []string{"spa.test"}, Targets: []string{backend.URL},
+		Rewrites: []Rewrite{{Pattern: "^/.*", To: "/index.html"}}}}}
+	addr4, _ := startRunner(t, spa, nil, nil)
+	get(t, noRedirect(), addr4, "spa.test", "/.env", nil)
+	if h := wait(5); h.Listener != "l4" || h.Path != "/.env" || h.Status != 200 {
+		t.Fatalf("重写后的上报不符: %+v", h)
 	}
 }

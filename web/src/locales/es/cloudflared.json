@@ -55,6 +55,8 @@
     "dns_unchanged": "El registro CNAME ya existe",
     "saved": "Rutas guardadas",
     "savedDnsIssues": "Rutas guardadas; algunos registros DNS requieren atención",
-    "reload": "Recargar"
+    "reload": "Recargar",
+    "confirmLocalTitle": "Escribir configuración remota",
+    "confirmLocal": "Este túnel se gestiona actualmente con un archivo de configuración local. Al guardar, las rutas se escriben en la configuración remota de Cloudflare y el túnel pasa a gestión remota; las rutas del archivo local dejarán de aplicarse. ¿Guardar de todos modos?"
   }
 }

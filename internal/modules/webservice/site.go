@@ -522,14 +522,16 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	client := clientAddr(r)
 	rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
+	// 重写规则会原地改写 r.URL，访问日志与路径探测要用访客实际请求的路径
+	origPath, origURI := r.URL.Path, r.URL.RequestURI()
 
 	defer func() {
 		h.metrics.record(client.Addr(), rec.status, rec.bytes, time.Now())
 		if h.site.AccessLog {
-			uri := r.URL.RequestURI()
+			uri := origURI
 			// 认证路径的查询串含票据、授权码等敏感信息，不写入日志
-			if strings.HasPrefix(r.URL.Path, authPath) {
-				uri = r.URL.Path
+			if strings.HasPrefix(origPath, authPath) {
+				uri = origPath
 			}
 			// 末尾按 nginx combined 格式附上 Referer 与 User-Agent，便于区分同一出口 IP 后面的不同设备；
 			// %q 会转义换行等控制字符，防止伪造日志行；三者都由访客控制，先截断再写入
@@ -544,7 +546,7 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			status = http.StatusForbidden
 		}
 		webprobe.Report(webprobe.Hit{Addr: client.Addr(), Listener: h.listener, Site: h.site.Key, Unknown: h.deflt,
-			Method: r.Method, Host: r.Host, Path: r.URL.Path, Status: status})
+			Method: r.Method, Host: r.Host, Path: origPath, Status: status})
 	}()
 
 	// 断开连接的站点不经过访问控制、WAF、跨域、认证与重写，直接断开，与 nginx server 级 return 444 在 rewrite 阶段生效一致。

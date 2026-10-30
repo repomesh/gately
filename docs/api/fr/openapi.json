@@ -2900,7 +2900,7 @@
     "url": "https://gately.cn"
   },
   "info": {
-    "description": "L'API d'administration de Gately permet la gestion en masse par scripts et automatisation.\n\nAuthentification : créez un jeton dans la page « Jetons API » de l'interface d'administration et ajoutez l'en-tête de requête `Authorization: Bearer gtl_xxxx`.\n\nPermissions : chaque jeton ne possède que les permissions cochées à sa création, au format `\u003cmodule\u003e:read` ou `\u003cmodule\u003e:write` ; l'écriture inclut la lecture. Les interfaces de compte, d'authentification à deux facteurs, de gestion des jetons, de sauvegarde, de restauration, de redémarrage et de paramètres système exigent une session connectée.\n\nLe corps de la requête utilise `Content-Type: application/json` ; les erreurs sont renvoyées au format `{\"error\": \"description\"}`.\n\nLes modules désactivés dans « Paramètres → Modules » n’exposent aucune API : leurs points de terminaison renvoient 403 et n’apparaissent plus dans la documentation de l’API de l’instance en cours d’exécution.",
+    "description": "API d'administration de Gately 用于脚本与自动化批量管理。\n\n认证：在Interface d'administration的“Jeton API”页创建令牌，请求头携带 `Authorization: Bearer gtl_xxxx`。\n\n权限：每个令牌只拥有创建时勾选的权限，格式为 `\u003c模块\u003e:read` 或 `\u003c模块\u003e:write`，写权限包含读权限。账号、Authentification à deux facteurs、令牌管理以及备份、恢复、重启、系统设置接口只能使用登录会话。\n\n请求体使用 `Content-Type: application/json`，错误统一返回 `{\"error\": \"说明\"}`。\n\nLes modules désactivés dans « Paramètres → Modules » n’exposent aucune API : leurs points de terminaison renvoient 403 et n’apparaissent plus dans la documentation de l’API de l’instance en cours d’exécution.",
     "title": "API d'administration de Gately",
     "version": "dev"
   },
@@ -3474,7 +3474,7 @@
         "x-token-allowed": false
       },
       "post": {
-        "description": "只读账号可查看状态与配置，不能Modifier 、下载备份或读取密钥。\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
+        "description": "Les comptes en lecture seule peuvent consulter l'état et la configuration ; ils ne peuvent rien modifier, ni télécharger de sauvegardes, ni lire les secrets.\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3855,7 +3855,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `backup:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `backup:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -4757,7 +4757,7 @@
     },
     "/api/cloudflared/install": {
       "delete": {
-        "description": "Supprimer 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermission requise : `cloudflared:write`.",
+        "description": "Supprime le programme installé dans bin sous le répertoire de configuration et toutes les versions précédentes conservées, puis redémarre les processus qui l'utilisent : un programme du même nom dans le PATH est utilisé s'il existe, sinon les processus ne peuvent pas démarrer. Les paramètres du module ne changent pas ; utilisez `POST /api/{module}/reset` pour les effacer.\n\nPermission requise : `cloudflared:write`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -5085,7 +5085,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `cloudflared:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `cloudflared:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -5234,7 +5234,7 @@
     },
     "/api/cloudflared/reset": {
       "post": {
-        "description": "frp、Tunnel Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Supprimer Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先déconnexion；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermission requise : `cloudflared:write`.",
+        "description": "Fourni par frp, Tunnel Cloudflare, Tailscale et File Browser ; sans corps. Arrête tous les processus du module, rétablit ses paramètres par défaut (y compris le chemin du programme et le proxy de téléchargement) et supprime les fichiers que Gately a générés pour lui : les fichiers de configuration frp, le répertoire de données de chaque instance File Browser (utilisateurs, liens de partage et caches) et l'état de connexion du répertoire d'état Tailscale par défaut (un tailscaled géré par Gately en cours d'exécution se déconnecte d'abord ; les répertoires d'état personnalisés et un tailscaled système existant ne sont pas touchés). Les anciens paramètres restent dans l'historique de configuration et peuvent être restaurés ; les programmes installés ne sont pas concernés, utilisez `DELETE /api/{module}/install` pour désinstaller.\n\nPermission requise : `cloudflared:write`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -6096,7 +6096,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `cron:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `cron:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -6918,7 +6918,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `ddns:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `ddns:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -10778,7 +10778,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `docker:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `docker:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -11920,7 +11920,7 @@
     },
     "/api/filebrowser/install": {
       "delete": {
-        "description": "Supprimer 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermission requise : `filebrowser:write`.",
+        "description": "Supprime le programme installé dans bin sous le répertoire de configuration et toutes les versions précédentes conservées, puis redémarre les processus qui l'utilisent : un programme du même nom dans le PATH est utilisé s'il existe, sinon les processus ne peuvent pas démarrer. Les paramètres du module ne changent pas ; utilisez `POST /api/{module}/reset` pour les effacer.\n\nPermission requise : `filebrowser:write`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -12772,7 +12772,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `filebrowser:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `filebrowser:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -12921,7 +12921,7 @@
     },
     "/api/filebrowser/reset": {
       "post": {
-        "description": "frp、Tunnel Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Supprimer Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先déconnexion；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermission requise : `filebrowser:write`.",
+        "description": "Fourni par frp, Tunnel Cloudflare, Tailscale et File Browser ; sans corps. Arrête tous les processus du module, rétablit ses paramètres par défaut (y compris le chemin du programme et le proxy de téléchargement) et supprime les fichiers que Gately a générés pour lui : les fichiers de configuration frp, le répertoire de données de chaque instance File Browser (utilisateurs, liens de partage et caches) et l'état de connexion du répertoire d'état Tailscale par défaut (un tailscaled géré par Gately en cours d'exécution se déconnecte d'abord ; les répertoires d'état personnalisés et un tailscaled système existant ne sont pas touchés). Les anciens paramètres restent dans l'historique de configuration et peuvent être restaurés ; les programmes installés ne sont pas concernés, utilisez `DELETE /api/{module}/install` pour désinstaller.\n\nPermission requise : `filebrowser:write`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -13081,7 +13081,7 @@
     },
     "/api/fileusers": {
       "get": {
-        "description": "返回 WebDAV、FTP、SMB 共用的Utilisateurs partagés des services de fichiers，密码脱敏。`services` 列出各文件服务的使用情况：`enable` 服务是否启用，`sharedUsers` 是否允许共享用户登录，`localUsers` 本地用户名（同名的共享用户在该服务中只按本地用户校验），`caseInsensitive` 为 true 时按不区分大小写比较用户名（SMB），`issues` 为无法用于该服务的共享用户及原因：`name`（用户名含 SMB 不允许的字符）、`bcrypt`（密码是 bcrypt 哈希）、`share`（目录名称不能作为共享名或重复）。已关闭的模块不列出。`selfService` 为是否允许共享用户在 Service Web站点的 `/__gately_auth/password` 页面自助Modifier 密码。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。\n\nPermission requise : `fileusers:read`.",
+        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si `services` indique comment chaque service de fichiers les utilise : `enable` si le service est activé, `sharedUsers` si les utilisateurs partagés peuvent se connecter, `localUsers` les noms des utilisateurs locaux (un utilisateur partagé du même nom n’est vérifié que comme utilisateur local dans ce service), `caseInsensitive` vrai quand les noms sont comparés sans tenir compte de la casse (SMB), `issues` les utilisateurs partagés inutilisables par ce service et la raison : `name` (le nom contient des caractères refusés par SMB), `bcrypt` (le mot de passe est un hachage bcrypt), `share` (un nom de répertoire ne peut pas servir de nom de partage ou est en double). Les modules désactivés ne sont pas listés. `selfService` indique si les utilisateurs partagés peuvent changer leur mot de passe sur la page `/__gately_auth/password` des sites du service web. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée.\n\nPermission requise : `fileusers:read`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -13130,7 +13130,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中Modifier （字段 `sharedUsers`）。可选字段 `selfService` 为自助Modifier 密码开关，省略时保持原值。\n\nPermission requise : `fileusers:write`.",
+        "description": "S'applique à WebDAV, FTP et SMB en même temps ; envoyer l'espace réservé masqué comme mot de passe le laisse inchangé. Un service activé uniquement avec des utilisateurs partagés doit encore avoir un utilisateur partagé capable de se connecter après la modification, sinon l'enregistrement est refusé. L’autorisation des utilisateurs partagés se modifie dans les réglages de chaque service (champ `sharedUsers`). Le champ facultatif `selfService` est l'interrupteur du changement de mot de passe en libre-service ; s'il est omis, sa valeur est conservée.\n\nPermission requise : `fileusers:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -13842,7 +13842,7 @@
     },
     "/api/frp/install": {
       "delete": {
-        "description": "Supprimer 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermission requise : `frp:write`.",
+        "description": "Supprime le programme installé dans bin sous le répertoire de configuration et toutes les versions précédentes conservées, puis redémarre les processus qui l'utilisent : un programme du même nom dans le PATH est utilisé s'il existe, sinon les processus ne peuvent pas démarrer. Les paramètres du module ne changent pas ; utilisez `POST /api/{module}/reset` pour les effacer.\n\nPermission requise : `frp:write`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -14170,7 +14170,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `frp:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `frp:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -14782,7 +14782,7 @@
     },
     "/api/frp/reset": {
       "post": {
-        "description": "frp、Tunnel Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Supprimer Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先déconnexion；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermission requise : `frp:write`.",
+        "description": "Fourni par frp, Tunnel Cloudflare, Tailscale et File Browser ; sans corps. Arrête tous les processus du module, rétablit ses paramètres par défaut (y compris le chemin du programme et le proxy de téléchargement) et supprime les fichiers que Gately a générés pour lui : les fichiers de configuration frp, le répertoire de données de chaque instance File Browser (utilisateurs, liens de partage et caches) et l'état de connexion du répertoire d'état Tailscale par défaut (un tailscaled géré par Gately en cours d'exécution se déconnecte d'abord ; les répertoires d'état personnalisés et un tailscaled système existant ne sont pas touchés). Les anciens paramètres restent dans l'historique de configuration et peuvent être restaurés ; les programmes installés ne sont pas concernés, utilisez `DELETE /api/{module}/install` pour désinstaller.\n\nPermission requise : `frp:write`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -15522,7 +15522,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `ftp:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `ftp:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -15890,7 +15890,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
+        "description": "Obsolète, utilisez `PUT /api/fileusers` ; ce point d’accès est conservé pour compatibilité. S'applique à WebDAV, FTP et SMB en même temps ; envoyer l'espace réservé masqué comme mot de passe le laisse inchangé. Les jetons d'API doivent avoir à la fois `webdav:write`, `ftp:write` et `smb:write`. Un service activé uniquement avec des utilisateurs partagés doit encore avoir un utilisateur partagé capable de se connecter après la modification, sinon l'enregistrement est refusé.\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16696,7 +16696,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `guard:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `guard:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -17312,7 +17312,7 @@
     },
     "/api/logs": {
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `logs:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `logs:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -17561,7 +17561,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `nettools:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `nettools:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -18844,7 +18844,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `notify:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `notify:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -19475,7 +19475,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `portforward:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `portforward:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -20185,7 +20185,7 @@
     },
     "/api/session": {
       "get": {
-        "description": "返回 `username`、`role`（`admin` 或 `readonly`）、`disabledModules`（已关闭的功能模块 ID）与 `defaultPassword`（管理员仍在使用默认密码 `gately.cn` 时为 true，管理界面据此提醒Modifier ）。\n\nTout jeton d'API valide peut y accéder, sans permission spécifique.",
+        "description": "Renvoie `username`, `role` (`admin` ou `readonly`), `disabledModules` (ID des modules désactivés) et `defaultPassword` (true tant que l'administrateur utilise le mot de passe par défaut `gately.cn` ; l'interface s'en sert pour inviter à le changer).\n\nTout jeton d'API valide peut y accéder, sans permission spécifique.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -20275,7 +20275,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `smb:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `smb:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -20643,7 +20643,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
+        "description": "Obsolète, utilisez `PUT /api/fileusers` ; ce point d’accès est conservé pour compatibilité. S'applique à WebDAV, FTP et SMB en même temps ; envoyer l'espace réservé masqué comme mot de passe le laisse inchangé. Les jetons d'API doivent avoir à la fois `webdav:write`, `ftp:write` et `smb:write`. Un service activé uniquement avec des utilisateurs partagés doit encore avoir un utilisateur partagé capable de se connecter après la modification, sinon l'enregistrement est refusé.\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21449,7 +21449,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `ssl:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `ssl:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -22242,7 +22242,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `storage:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `storage:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -22903,7 +22903,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `stun:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `stun:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -24082,7 +24082,7 @@
         "x-token-allowed": false
       },
       "put": {
-        "description": "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，Modifier 后重启生效；`gatewaySSO` 开启Connexion automatique avec la session fnOS，仅飞牛安装包有效。\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
+        "description": "`disabledModules` liste les identifiants des modules désactivés ; un module dont d’autres dépendent ne peut pas être désactivé, et les changements prennent effet après un redémarrage. `gatewaySSO` active la connexion via fnOS et ne fonctionne que dans le paquet fnOS.\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
         "requestBody": {
           "content": {
             "application/json": {
@@ -24428,7 +24428,7 @@
     },
     "/api/tailscale/install": {
       "delete": {
-        "description": "Supprimer 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermission requise : `tailscale:write`.",
+        "description": "Supprime le programme installé dans bin sous le répertoire de configuration et toutes les versions précédentes conservées, puis redémarre les processus qui l'utilisent : un programme du même nom dans le PATH est utilisé s'il existe, sinon les processus ne peuvent pas démarrer. Les paramètres du module ne changent pas ; utilisez `POST /api/{module}/reset` pour les effacer.\n\nPermission requise : `tailscale:write`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -24807,7 +24807,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `tailscale:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `tailscale:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -24956,7 +24956,7 @@
     },
     "/api/tailscale/reset": {
       "post": {
-        "description": "frp、Tunnel Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Supprimer Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先déconnexion；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermission requise : `tailscale:write`.",
+        "description": "Fourni par frp, Tunnel Cloudflare, Tailscale et File Browser ; sans corps. Arrête tous les processus du module, rétablit ses paramètres par défaut (y compris le chemin du programme et le proxy de téléchargement) et supprime les fichiers que Gately a générés pour lui : les fichiers de configuration frp, le répertoire de données de chaque instance File Browser (utilisateurs, liens de partage et caches) et l'état de connexion du répertoire d'état Tailscale par défaut (un tailscaled géré par Gately en cours d'exécution se déconnecte d'abord ; les répertoires d'état personnalisés et un tailscaled système existant ne sont pas touchés). Les anciens paramètres restent dans l'historique de configuration et peuvent être restaurés ; les programmes installés ne sont pas concernés, utilisez `DELETE /api/{module}/install` pour désinstaller.\n\nPermission requise : `tailscale:write`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -26152,7 +26152,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `waf:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `waf:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -26350,7 +26350,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `webdav:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `webdav:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -26718,7 +26718,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
+        "description": "Obsolète, utilisez `PUT /api/fileusers` ; ce point d’accès est conservé pour compatibilité. S'applique à WebDAV, FTP et SMB en même temps ; envoyer l'espace réservé masqué comme mot de passe le laisse inchangé. Les jetons d'API doivent avoir à la fois `webdav:write`, `ftp:write` et `smb:write`. Un service activé uniquement avec des utilisateurs partagés doit encore avoir un utilisateur partagé capable de se connecter après la modification, sinon l'enregistrement est refusé.\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -27291,7 +27291,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Lister Liste d'IP abonnée",
+        "summary": "Lister les listes d’IP abonnées",
         "tags": [
           "Service Web"
         ],
@@ -28134,7 +28134,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `webservice:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `webservice:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -28760,7 +28760,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "请求体 `{\"authUsers\": [], \"ssoDomain\": \"\", \"selfServicePassword\": false, \"oidc\": {}, \"sites\": [{\"listener\": \"l1\", \"site\": \"s1\", \"sharedUsers\": true}]}`，字段含义同Paramètres globaux，只Modifier 这几项，Paramètres globaux的其他项保持不变；脱敏占位符表示保留原密码或密钥。`sites` 只需列出要Modifier 的站点：启用时站点若未开启认证会同时开启网页认证；站点只通过共享用户认证时不能在这里取消（取消后将无需登录），使用转发认证的站点不能启用。任一项校验失败时不保存任何Modifier 。\n\nPermission requise : `webservice:write`.",
+        "description": "Corps de la requête `{\"authUsers\": [], \"ssoDomain\": \"\", \"selfServicePassword\": false, \"oidc\": {}, \"sites\": [{\"listener\": \"l1\", \"site\": \"s1\", \"sharedUsers\": true}]}`. Les champs ont le même sens que dans les paramètres globaux ; seuls ceux-ci sont modifiés et les autres paramètres globaux restent inchangés ; l'espace réservé masqué conserve le mot de passe ou le secret existant. `sites` ne liste que les sites à modifier : l'activer sur un site sans authentification active aussi l'auth Web ; un site qui ne s'authentifie qu'avec les utilisateurs partagés ne peut pas être désactivé ici (il ne demanderait plus de connexion), et les sites en authentification déléguée ne peuvent pas être activés. Si un élément échoue à la validation, rien n'est enregistré.\n\nPermission requise : `webservice:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -30224,7 +30224,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `webterminal:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `webterminal:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
@@ -32779,7 +32779,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes).\n\nPermission requise : `wol:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les entrées les plus récentes et, si la mémoire n’en contient pas assez, recherche aussi dans l’historique conservé dans les fichiers journaux. Paramètres de filtre : `level` niveau minimal, `source` source, `q` mots-clés (séparés par des espaces, tous doivent correspondre ; les guillemets doubles regroupent une expression ; un `-` initial exclut), `ip` adresse du client (adresse complète, CIDR ou partie d’adresse, séparées par des virgules), `host` nom du site ou domaine, `status` code d’état (par exemple `404`, `4xx`, `500-599`), `from` et `to` plage horaire (RFC 3339 ou horodatage en millisecondes). `exclude` liste les termes à exclure : les entrées contenant l’un d’eux ne sont pas renvoyées ; même syntaxe que `q`, le `-` initial est facultatif.\n\nPermission requise : `wol:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",

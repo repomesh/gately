@@ -55,6 +55,8 @@
     "dns_unchanged": "L'enregistrement CNAME existe déjà",
     "saved": "Routes enregistrées",
     "savedDnsIssues": "Routes enregistrées ; certains enregistrements DNS demandent votre attention",
-    "reload": "Recharger"
+    "reload": "Recharger",
+    "confirmLocalTitle": "Écrire la configuration distante",
+    "confirmLocal": "Ce tunnel est actuellement géré par un fichier de configuration local. L'enregistrement écrit les routes dans la configuration distante Cloudflare et passe le tunnel en gestion distante ; les routes du fichier local ne s'appliqueront plus. Enregistrer quand même ?"
   }
 }

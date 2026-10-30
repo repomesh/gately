@@ -55,6 +55,8 @@
     "dns_unchanged": "CNAME record already exists",
     "saved": "Routes saved",
     "savedDnsIssues": "Routes saved; some DNS records need attention",
-    "reload": "Reload"
+    "reload": "Reload",
+    "confirmLocalTitle": "Write remote config",
+    "confirmLocal": "This tunnel is currently managed by a local config file. Saving writes the routes to the Cloudflare remote config and switches the tunnel to remote management; routes in the local config file will no longer apply. Save anyway?"
   }
 }

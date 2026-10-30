@@ -55,6 +55,8 @@
     "dns_unchanged": "CNAME-Eintrag ist bereits vorhanden",
     "saved": "Routen gespeichert",
     "savedDnsIssues": "Routen gespeichert; einige DNS-Einträge erfordern Aufmerksamkeit",
-    "reload": "Neu laden"
+    "reload": "Neu laden",
+    "confirmLocalTitle": "Remote-Konfiguration schreiben",
+    "confirmLocal": "Dieser Tunnel wird derzeit über eine lokale Konfigurationsdatei verwaltet. Beim Speichern werden die Routen in die Cloudflare-Remote-Konfiguration geschrieben und der Tunnel auf Remote-Verwaltung umgestellt; Routen in der lokalen Konfigurationsdatei gelten dann nicht mehr. Trotzdem speichern?"
   }
 }

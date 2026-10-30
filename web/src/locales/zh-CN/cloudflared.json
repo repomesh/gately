@@ -55,6 +55,8 @@
     "dns_unchanged": "CNAME 记录已存在",
     "saved": "路由规则已保存",
     "savedDnsIssues": "路由规则已保存，部分 DNS 记录需要处理",
-    "reload": "重新加载"
+    "reload": "重新加载",
+    "confirmLocalTitle": "写入远程配置",
+    "confirmLocal": "这条隧道当前由本地配置文件管理。保存后路由规则写入 Cloudflare 远程配置，隧道会改为远程管理，本地配置文件中的路由规则不再生效。确定保存？"
   }
 }

@@ -32,6 +32,23 @@ func TestCompilePaths(t *testing.T) {
 			t.Errorf("%s 匹配结果 %v，期望 %v", p, got, want)
 		}
 	}
+	// 多段通配与超长路径：超长路径只取开头与结尾匹配，前缀与后缀规则照常生效
+	multi, err := compilePaths("/a*b*c\n/.git*\n*.php")
+	if err != nil {
+		t.Fatal(err)
+	}
+	long := "/" + strings.Repeat("x", 100000)
+	for p, want := range map[string]bool{
+		"/abc": true, "/aXbYc": true, "/acb": false, "/a/b/c": true, "/ab": false,
+		"/.git/config": true,
+		long + ".php":  true,
+		"/.git" + long: true,
+		long:           false,
+	} {
+		if got := matchPath(multi, p); got != want {
+			t.Errorf("%.20s…%s（长 %d）匹配结果 %v，期望 %v", p, p[max(0, len(p)-8):], len(p), got, want)
+		}
+	}
 	for _, bad := range []string{"env", "~", "~(", "/a\n.git"} {
 		if _, err := compilePaths(bad); err == nil {
 			t.Errorf("%q 应校验失败", bad)
@@ -53,6 +70,12 @@ func TestWebJailValidate(t *testing.T) {
 	}
 	if err := (&Jail{Name: "bad", Source: SourceWeb, Filter: "env"}).Validate(); err == nil {
 		t.Fatal("路径规则不以 / 或 * 开头应校验失败")
+	}
+	if err := (&Jail{Name: "all", Source: SourceWeb, AnyStatus: true}).Validate(); err == nil {
+		t.Fatal("任意状态码且不限路径时应校验失败")
+	}
+	if err := (&Jail{Name: "host", Source: SourceWeb, AnyStatus: true, UnknownHost: true}).Validate(); err != nil {
+		t.Fatalf("只统计未知域名时可以不填路径: %v", err)
 	}
 	if err := (&Jail{Name: "bad", Source: SourceWeb, Target: "a b"}).Validate(); err == nil {
 		t.Fatal("监听 key 含空格应校验失败")

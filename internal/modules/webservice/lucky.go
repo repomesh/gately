@@ -264,7 +264,7 @@ func convertLuckyListeners(raw json.RawMessage, opts luckyimport.Options) ([]Lis
 		out = append(out, l)
 	}
 	if len(out) > 0 {
-		warns = append(warns, "站点引用的 WAF 实例需同时导入 lucky_coraza.lkcf；子规则的 WAF 为 main 时已改为监听规则使用的实例（与 Lucky 行为一致）")
+		warns = append(warns, "站点引用的 WAF 实例需同时导入 lucky_coraza.lkcf；子规则的 WAF 为 main 时已改为监听规则使用的实例")
 	}
 	return out, warns, len(src), nil
 }

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/config"
@@ -293,5 +294,56 @@ func TestChangeSharedPassword(t *testing.T) {
 	var saved fileConfig
 	if _, err := st.Load(ID, &saved); err != nil || saved.Settings.AuthUsers[0].Password != "$2a$new" {
 		t.Fatalf("应写入配置文件: %v", err)
+	}
+}
+
+// failingFiles 模拟保存时被服务检查拒绝的文件服务账号（当前密码正确）。
+type failingFiles struct{ fakeFiles }
+
+func (f *failingFiles) ChangePassword(name, current, next string) error {
+	if err := f.fakeFiles.ChangePassword(name, current, next); err != nil {
+		return err
+	}
+	return errors.New("共享用户 bob 的目录需为绝对路径")
+}
+
+// TestSelfServicePasswordCooldown 验证同一账号改密后 1 分钟内不能再改，其他账号不受影响；
+// 保存失败的详细原因只写日志，访客看到统一提示。
+func TestSelfServicePasswordCooldown(t *testing.T) {
+	_, r, post := passwordEnv(t)
+	a := r.auth
+	files := &fakeFiles{on: true, users: map[string]string{"alice": "file-password", "carol": "carol-password"}}
+	a.files = files
+	form := func(name, cur, next string) url.Values {
+		return url.Values{"kind": {"file"}, "username": {name}, "current": {cur}, "next": {next}, "confirm": {next}}
+	}
+	if resp, _ := post("a.test", form("alice", "file-password", "new-password-1"), nil); resp.StatusCode != 200 {
+		t.Fatalf("首次改密应成功: %d", resp.StatusCode)
+	}
+	// 用户名大小写不同也视为同一账号
+	if resp, body := post("a.test", form("Alice", "new-password-1", "new-password-2"), nil); resp.StatusCode != 429 || !strings.Contains(body, "密码刚修改过") {
+		t.Fatalf("冷却期内应拒绝: %d", resp.StatusCode)
+	}
+	if files.users["alice"] != "new-password-1" {
+		t.Fatal("冷却期内不应保存新密码")
+	}
+	if resp, _ := post("a.test", form("carol", "carol-password", "new-password-3"), nil); resp.StatusCode != 200 {
+		t.Fatalf("其他账号不受冷却影响: %d", resp.StatusCode)
+	}
+	// 冷却结束后可以再改
+	a.pwChangedAt.Store(cooldownKey(kindFile, "alice"), time.Now().Add(-passwordCooldown-time.Second))
+	if resp, _ := post("a.test", form("alice", "new-password-1", "new-password-2"), nil); resp.StatusCode != 200 {
+		t.Fatalf("冷却结束后应允许改密: %d", resp.StatusCode)
+	}
+
+	var logged error
+	a.onPasswordFailed = func(_, _, _ string, err error) { logged = err }
+	a.files = &failingFiles{fakeFiles{on: true, users: map[string]string{"dave": "dave-password"}}}
+	resp, body := post("a.test", form("dave", "dave-password", "new-password-4"), nil)
+	if resp.StatusCode != 500 || !strings.Contains(body, "保存失败，请联系管理员") || strings.Contains(body, "bob") {
+		t.Fatalf("保存失败时应只显示统一提示: %d", resp.StatusCode)
+	}
+	if logged == nil || !strings.Contains(logged.Error(), "bob") {
+		t.Fatalf("详细原因应写入日志: %v", logged)
 	}
 }

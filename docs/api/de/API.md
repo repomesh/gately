@@ -247,7 +247,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Web-Dienst lauscht löschen |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Web-Dienst lauscht aktivieren oder deaktivieren |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Web-Dienst lauscht neu anordnen |
-| GET | `/api/webservice/iplists` | `webservice:read` | 订阅 IP  auflisten列表 |
+| GET | `/api/webservice/iplists` | `webservice:read` | Abonnierte IP-Listen auflisten |
 | POST | `/api/webservice/iplists` | `webservice:write` | Abonnierte IP-Liste hinzufügen |
 | PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Abonnierte IP-Liste ändern |
 | DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Abonnierte IP-Liste löschen |

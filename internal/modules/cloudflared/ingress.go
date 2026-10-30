@@ -61,9 +61,25 @@ func parseToken(token string) (tokenInfo, error) {
 }
 
 var (
-	hostnameRe   = regexp.MustCompile(`^(\*\.)?([a-z0-9_]([a-z0-9_-]{0,61}[a-z0-9_])?\.)+[a-z0-9-]{2,63}$`)
+	hostnameRe   = regexp.MustCompile(`^(\*\.)?([a-z0-9_]([a-z0-9_-]{0,61}[a-z0-9_])?\.)+[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])$`)
 	httpStatusRe = regexp.MustCompile(`^http_status:[1-5][0-9]{2}$`)
 )
+
+// normalizeService 去掉 HTTP 类服务地址末尾单独的 /：cloudflared 要求 HTTP 类服务不带任何路径，
+// 带 / 的地址能写入 Cloudflare，但运行中的 cloudflared 会拒绝整份远程配置。
+func normalizeService(s string) string {
+	s = strings.TrimSpace(s)
+	u, err := url.Parse(s)
+	if err != nil || u.Host == "" || u.Path != "/" || u.RawQuery != "" || u.Fragment != "" {
+		return s
+	}
+	switch u.Scheme {
+	case "http", "https", "ws", "wss":
+		u.Path = ""
+		return u.String()
+	}
+	return s
+}
 
 // validateService 校验回源服务地址，规则与 cloudflared 一致：HTTP 类服务不能带路径，TCP 类服务必须带端口。
 func validateService(s string) error {
@@ -82,7 +98,7 @@ func validateService(s string) error {
 	}
 	switch u.Scheme {
 	case "http", "https", "ws", "wss":
-		if u.Path != "" && u.Path != "/" {
+		if u.Path != "" {
 			return fmt.Errorf("服务 %s 不能带路径，路由规则只按路径匹配，不改写回源路径", s)
 		}
 	case "tcp", "ssh", "rdp", "smb":
@@ -100,9 +116,10 @@ func validateService(s string) error {
 func normalizeRules(rules []IngressRule) error {
 	for i := range rules {
 		r := &rules[i]
-		r.Hostname = strings.ToLower(strings.TrimSpace(r.Hostname))
+		// 主机名去掉末尾的根域点，与 Cloudflare 的记录名写法一致
+		r.Hostname = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(r.Hostname)), ".")
 		r.Path = strings.TrimSpace(r.Path)
-		r.Service = strings.TrimSpace(r.Service)
+		r.Service = normalizeService(r.Service)
 		if r.Hostname == "" && r.Path == "" {
 			return fmt.Errorf("第 %d 条规则需要填写主机名或路径", i+1)
 		}
@@ -266,7 +283,7 @@ type cfDNSRecord struct {
 }
 
 // zoneFor 从最长的后缀开始查找主机名所属的域名（zone），返回 zone ID。
-func (c *cfClient) zoneFor(ctx context.Context, host string, cache map[string]string) (string, error) {
+func (c *cfClient) zoneFor(ctx context.Context, account, host string, cache map[string]string) (string, error) {
 	labels := strings.Split(strings.TrimPrefix(host, "*."), ".")
 	for i := 0; i+2 <= len(labels); i++ {
 		name := strings.Join(labels[i:], ".")
@@ -280,7 +297,7 @@ func (c *cfClient) zoneFor(ctx context.Context, host string, cache map[string]st
 			ID   string `json:"id"`
 			Name string `json:"name"`
 		}
-		if err := c.call(ctx, http.MethodGet, "/zones?name="+url.QueryEscape(name), nil, &zones); err != nil {
+		if err := c.call(ctx, http.MethodGet, "/zones?name="+url.QueryEscape(name)+"&account.id="+url.QueryEscape(account), nil, &zones); err != nil {
 			return "", err
 		}
 		cache[name] = ""
@@ -296,9 +313,10 @@ func (c *cfClient) zoneFor(ctx context.Context, host string, cache map[string]st
 
 // ensureCNAME 确保主机名有指向隧道的 CNAME 记录：没有记录时创建（开启代理），
 // 已是指向本隧道的 CNAME 时不变，已有其他记录时不覆盖，返回冲突。
-func (c *cfClient) ensureCNAME(ctx context.Context, host, target string, cache map[string]string) DNSResult {
+func (c *cfClient) ensureCNAME(ctx context.Context, account, host, target string, cache map[string]string) DNSResult {
 	res := DNSResult{Hostname: host}
-	zid, err := c.zoneFor(ctx, host, cache)
+	// 只在隧道所属账号下查找域名，令牌能访问多个账号时不会找到别的账号的同名域名
+	zid, err := c.zoneFor(ctx, account, host, cache)
 	if err != nil {
 		res.Status, res.Error = dnsFailed, err.Error()
 		return res
@@ -313,7 +331,12 @@ func (c *cfClient) ensureCNAME(ctx context.Context, host, target string, cache m
 			continue
 		}
 		if r.Type == "CNAME" && strings.EqualFold(strings.TrimSuffix(r.Content, "."), target) {
-			res.Status = dnsUnchanged
+			if r.Proxied {
+				res.Status = dnsUnchanged
+				return res
+			}
+			// 未开启代理的 CNAME 只解析到隧道域名，流量不会进入隧道，按冲突报告、不擅自修改
+			res.Status, res.Existing = dnsConflict, r.Type+" "+r.Content+" (DNS only)"
 			return res
 		}
 		res.Status, res.Existing = dnsConflict, r.Type+" "+r.Content
@@ -339,7 +362,7 @@ func (c *cfClient) syncDNS(ctx context.Context, info tokenInfo, rules []IngressR
 			continue
 		}
 		seen[r.Hostname] = true
-		out = append(out, c.ensureCNAME(ctx, r.Hostname, target, cache))
+		out = append(out, c.ensureCNAME(ctx, info.AccountTag, r.Hostname, target, cache))
 	}
 	return out
 }
@@ -356,12 +379,15 @@ type ingressView struct {
 }
 
 // ingressUpdate 是保存路由规则的请求体。Version 为读取时的配置版本，用于发现其他地方的修改；
-// SyncDNS 为 true 时为主机名创建指向隧道的 CNAME 记录。
+// SyncDNS 为 true 时为主机名创建指向隧道的 CNAME 记录。Rules 必须提供（可以是空数组），
+// 缺省时拒绝，避免只想改兜底规则的调用把全部规则清空。Force 为 true 时才允许写入
+// 本地配置文件管理（source 为 local）的隧道。
 type ingressUpdate struct {
-	Version  int           `json:"version"`
-	Rules    []IngressRule `json:"rules"`
-	CatchAll string        `json:"catchAll"`
-	SyncDNS  bool          `json:"syncDns"`
+	Version  int            `json:"version"`
+	Rules    *[]IngressRule `json:"rules"`
+	Force    bool           `json:"force"`
+	CatchAll string         `json:"catchAll"`
+	SyncDNS  bool           `json:"syncDns"`
 }
 
 // ingressTarget 取出隧道的 API 客户端与令牌信息；调用方之后访问外网时不持有锁。
@@ -421,11 +447,16 @@ func (m *Module) ingressRoutes(r module.Router) {
 			httpx.Error(w, http.StatusBadRequest, "%v", err)
 			return
 		}
-		if err := normalizeRules(body.Rules); err != nil {
+		if body.Rules == nil {
+			httpx.Error(w, http.StatusBadRequest, "缺少 rules 字段，清空全部规则请传空数组")
+			return
+		}
+		rules := *body.Rules
+		if err := normalizeRules(rules); err != nil {
 			httpx.Error(w, http.StatusBadRequest, "%v", err)
 			return
 		}
-		body.CatchAll = strings.TrimSpace(body.CatchAll)
+		body.CatchAll = normalizeService(body.CatchAll)
 		if body.CatchAll == "" {
 			body.CatchAll = defaultCatchAll
 		}
@@ -439,6 +470,9 @@ func (m *Module) ingressRoutes(r module.Router) {
 			return
 		}
 		ctx := req.Context()
+		// 读取、核对版本、写入串行执行，避免 Gately 内两次并发保存互相覆盖
+		m.ingressMu.Lock()
+		defer m.ingressMu.Unlock()
 		// 先读取当前配置：核对版本，并保留 ingress 以外的字段与兜底规则的回源设置
 		cur, err := c.getConfig(ctx, info)
 		if err != nil {
@@ -449,26 +483,30 @@ func (m *Module) ingressRoutes(r module.Router) {
 			httpx.Error(w, http.StatusConflict, "路由规则已在其他地方修改（版本 %d，当前 %d），请刷新后重试", body.Version, cur.Version)
 			return
 		}
+		if cur.Source == "local" && !body.Force {
+			httpx.Error(w, http.StatusConflict, "这条隧道由本地配置文件管理，写入远程配置会改变它的管理方式，确认后请带 force 重试")
+			return
+		}
 		_, oldCatchAll, err := splitIngress(cur.Config)
 		if err != nil {
 			httpx.Error(w, http.StatusBadGateway, "%v", err)
 			return
 		}
-		ingress := append(append([]IngressRule{}, body.Rules...), IngressRule{Service: body.CatchAll, OriginRequest: oldCatchAll.OriginRequest})
+		ingress := append(append([]IngressRule{}, rules...), IngressRule{Service: body.CatchAll, OriginRequest: oldCatchAll.OriginRequest})
 		cur.Config["ingress"] = ingress
 		saved, err := c.putConfig(ctx, info, cur.Config)
 		if err != nil {
 			httpx.Error(w, http.StatusBadGateway, "保存路由规则失败: %v", err)
 			return
 		}
-		m.logs.Logger(name).Infof("已更新路由规则：%d 条，配置版本 %d", len(body.Rules), saved.Version)
+		m.logs.Logger(name).Infof("已更新路由规则：%d 条，配置版本 %d", len(rules), saved.Version)
 		v, err := newIngressView(info, saved)
 		if err != nil {
 			httpx.Error(w, http.StatusBadGateway, "%v", err)
 			return
 		}
 		if body.SyncDNS {
-			v.DNS = c.syncDNS(ctx, info, body.Rules)
+			v.DNS = c.syncDNS(ctx, info, rules)
 			for _, d := range v.DNS {
 				switch d.Status {
 				case dnsCreated:

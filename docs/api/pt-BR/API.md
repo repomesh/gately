@@ -247,7 +247,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Excluir Escuta do serviço web |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Ativar ou desativar Escuta do serviço web |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Reordenar Escuta do serviço web |
-| GET | `/api/webservice/iplists` | `webservice:read` | Listar Lista de IP assinada |
+| GET | `/api/webservice/iplists` | `webservice:read` | Listar as listas de IP assinadas |
 | POST | `/api/webservice/iplists` | `webservice:write` | Adicionar Lista de IP assinada |
 | PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Modificar Lista de IP assinada |
 | DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Excluir Lista de IP assinada |

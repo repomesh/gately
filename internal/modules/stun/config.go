@@ -229,7 +229,7 @@ func (r *Rule) Validate() error {
 	return r.Webhook.Validate()
 }
 
-// selectIP 按 Lucky 兼容的规则从地址列表中选择一个。
+// selectIP 按配置的选择规则从地址列表中选择一个。
 func selectIP(addrs []string, rule string) (string, error) {
 	if len(addrs) == 0 {
 		return "", errors.New("网卡上没有可用的 IPv4 地址")

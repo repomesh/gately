@@ -509,8 +509,8 @@ import EntityCard from '../components/EntityCard.vue'
 import { useCompactView } from '../composables/useCompactView'
 import { useCollapsed } from '../composables/useCollapsed'
 import OAuthProviders from '../components/OAuthProviders.vue'
-import { oidcFromAPI, oidcToAPI, type OIDCSettings } from '../oidc'
-import { type AuthUser, fromAPI, toAPI } from '../sharedUsers'
+import { oidcFromAPI, type OIDCSettings } from '../oidc'
+import { type AuthUser, fromAPI } from '../sharedUsers'
 import AccessSettings from '../components/AccessSettings.vue'
 import IPListsManager from '../components/IPListsManager.vue'
 import NginxImport from '../components/NginxImport.vue'
@@ -1205,6 +1205,13 @@ async function fetchSettings() {
   return { ...s, oauthProviders: s.oauthProviders ?? [], authUsers: fromAPI(s.authUsers), ssoDomain: s.ssoDomain ?? '', oidc: oidcFromAPI(s.oidc), selfServicePassword: !!s.selfServicePassword }
 }
 
+// settingsBody 生成全局设置的请求体：共享用户、单点登录域、自助改密与 OIDC 由认证用户页维护，
+// 这里不提交，后端对省略的字段保留原值，避免对话框里的旧数据覆盖认证用户页刚保存的修改
+function settingsBody(s: WebSettings) {
+  const { authUsers: _u, ssoDomain: _d, selfServicePassword: _p, oidc: _o, ...rest } = s
+  return rest
+}
+
 async function openSettings() {
   settings.value = await fetchSettings()
   settingsVisible.value = true
@@ -1215,7 +1222,7 @@ async function enableModule() {
   enabling.value = true
   try {
     const s = await fetchSettings()
-    await api.put('/api/webservice/settings', { ...s, enable: true, authUsers: toAPI(s.authUsers), oidc: oidcToAPI(s.oidc) })
+    await api.put('/api/webservice/settings', { ...settingsBody(s), enable: true })
     ElMessage.success(t('web.moduleEnabled'))
     await Promise.all([fetchSettings(), load()])
   } catch (e) {
@@ -1231,7 +1238,7 @@ async function saveSettings() {
     if (!s) {
       return
     }
-    await api.put('/api/webservice/settings', { ...s, authUsers: toAPI(s.authUsers), oidc: oidcToAPI(s.oidc) })
+    await api.put('/api/webservice/settings', settingsBody(s))
     settingsVisible.value = false
     ElMessage.success(t('common.saved'))
     await Promise.all([fetchSettings(), load()])

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -183,6 +184,9 @@ func (a *authenticator) changePassword(w http.ResponseWriter, r *http.Request, s
 	if err := fileusers.ValidateNewPassword(current, next); err != nil {
 		return err.Error(), http.StatusBadRequest
 	}
+	if a.inCooldown(kind, name) {
+		return "密码刚修改过，请 1 分钟后再试", http.StatusTooManyRequests
+	}
 	key := limitKey(ip)
 	if !a.reserve(key) {
 		return "失败次数过多，请稍后再试", http.StatusTooManyRequests
@@ -191,10 +195,13 @@ func (a *authenticator) changePassword(w http.ResponseWriter, r *http.Request, s
 		err := a.files.ChangePassword(name, current, next)
 		a.release(key, !errors.Is(err, fileusers.ErrBadCredentials))
 		if err != nil {
-			if errors.Is(err, fileusers.ErrBadCredentials) {
+			switch {
+			case errors.Is(err, fileusers.ErrBadCredentials):
 				return err.Error(), http.StatusUnauthorized
+			case errors.Is(err, fileusers.ErrBadNewPassword), errors.Is(err, fileusers.ErrSelfServiceOff):
+				return err.Error(), http.StatusBadRequest
 			}
-			return err.Error(), http.StatusBadRequest
+			return a.saveFailed(kindFile, name, ip, err)
 		}
 		a.passwordChanged(kindFile, name, ip)
 		return "", http.StatusOK
@@ -213,13 +220,16 @@ func (a *authenticator) changePassword(w http.ResponseWriter, r *http.Request, s
 	a.release(key, true)
 	h, err := bcrypt.GenerateFromPassword([]byte(next), bcrypt.DefaultCost)
 	if err != nil {
-		return err.Error(), http.StatusInternalServerError
+		return a.saveFailed(kindAuth, name, ip, err)
 	}
 	if a.changeShared == nil {
-		return "保存失败", http.StatusInternalServerError
+		return a.saveFailed(kindAuth, name, ip, errors.New("未设置保存方法"))
 	}
 	if err := a.changeShared(u, string(h)); err != nil {
-		return err.Error(), http.StatusBadRequest
+		if errors.Is(err, errPasswordChanged) {
+			return err.Error(), http.StatusUnauthorized
+		}
+		return a.saveFailed(kindAuth, name, ip, err)
 	}
 	// 旧会话已随凭据指纹失效，顺手清掉本站与单点登录的 Cookie
 	http.SetCookie(w, &http.Cookie{Name: cookieName(s), Value: "", Path: "/", MaxAge: -1})
@@ -230,8 +240,32 @@ func (a *authenticator) changePassword(w http.ResponseWriter, r *http.Request, s
 	return "", http.StatusOK
 }
 
-// passwordChanged 记录自助修改密码的日志。
+// passwordCooldown 是同一账号两次自助修改密码的最短间隔。文件服务账号每次修改都会让 FTP 重启、SMB 重新载入，
+// 不加限制时知道自己密码的用户可以来回修改，反复断开其他人的连接。
+const passwordCooldown = time.Minute
+
+// cooldownKey 返回自助改密冷却记录的键。
+func cooldownKey(kind, name string) string {
+	return kind + "\x00" + strings.ToLower(name)
+}
+
+// inCooldown 判断账号是否刚自助修改过密码。
+func (a *authenticator) inCooldown(kind, name string) bool {
+	v, ok := a.pwChangedAt.Load(cooldownKey(kind, name))
+	return ok && time.Since(v.(time.Time)) < passwordCooldown
+}
+
+// saveFailed 记录保存失败的详细原因，访客只看到统一提示，避免泄露其他用户或服务的配置。
+func (a *authenticator) saveFailed(kind, name, ip string, err error) (string, int) {
+	if a.onPasswordFailed != nil {
+		a.onPasswordFailed(kind, name, ip, err)
+	}
+	return "保存失败，请联系管理员", http.StatusInternalServerError
+}
+
+// passwordChanged 记录自助修改密码的日志，并开始该账号的冷却时间。
 func (a *authenticator) passwordChanged(kind, name, ip string) {
+	a.pwChangedAt.Store(cooldownKey(kind, name), time.Now())
 	if a.onPasswordChanged != nil {
 		a.onPasswordChanged(kind, name, ip)
 	}

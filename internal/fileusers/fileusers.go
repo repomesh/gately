@@ -265,6 +265,8 @@ var (
 	ErrSelfServiceOff = errors.New("未开启自助修改密码")
 	// ErrBadCredentials 表示用户不存在或当前密码错误
 	ErrBadCredentials = errors.New("用户名或当前密码错误")
+	// ErrBadNewPassword 表示新密码的写法不能保存，提示可以直接展示给访客
+	ErrBadNewPassword = errors.New("新密码不能以 $2 开头，也不能是 ********")
 )
 
 // ChangePassword 由共享用户自己修改密码：校验当前密码后保存新密码。原密码为 bcrypt 哈希时新密码也按哈希保存，
@@ -282,6 +284,10 @@ func (r *Registry) ChangePassword(name, current, next string) error {
 		_ = bcrypt.CompareHashAndPassword(dummyHash(), []byte(current))
 		return ErrBadCredentials
 	}
+	if !strings.HasPrefix(u.Password, "$2") {
+		// 明文密码的比较几乎不耗时，补一次哈希比较，使耗时与用户不存在、bcrypt 用户一致
+		_ = bcrypt.CompareHashAndPassword(dummyHash(), []byte(current))
+	}
 	if !CheckPassword(u.Password, current) {
 		return ErrBadCredentials
 	}
@@ -290,7 +296,7 @@ func (r *Registry) ChangePassword(name, current, next string) error {
 	}
 	// 新密码不能写成脱敏占位符或 bcrypt 哈希的样子，否则保存时会被当作“未修改”或哈希
 	if next == crud.SecretMask || strings.HasPrefix(next, "$2") {
-		return errors.New("新密码不能以 $2 开头，也不能是 ********")
+		return ErrBadNewPassword
 	}
 	stored := next
 	if strings.HasPrefix(u.Password, "$2") {

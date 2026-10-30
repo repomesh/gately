@@ -59,6 +59,10 @@ type authenticator struct {
 	changeShared func(u AuthUser, hash string) error
 	// onPasswordChanged 在自助修改密码成功后调用，用于记录日志
 	onPasswordChanged func(kind, name, ip string)
+	// onPasswordFailed 在当前密码校验通过、但保存失败时调用，记录详细原因
+	onPasswordFailed func(kind, name, ip string, err error)
+	// pwChangedAt 记录各账号最近一次自助修改密码的时间（键见 cooldownKey），用于冷却
+	pwChangedAt sync.Map
 }
 
 func (a *authenticator) setOAuth(env oauthEnv) {
@@ -284,7 +288,7 @@ func (a *authenticator) sessionIdentity(r *http.Request, s Site) []string {
 	return nil
 }
 
-// isBrowser 粗略判断是否为浏览器访问，非浏览器回退到基本认证（与 Lucky 行为一致）。
+// isBrowser 粗略判断是否为浏览器访问，非浏览器回退到基本认证。
 func isBrowser(r *http.Request) bool {
 	ua := r.UserAgent()
 	return strings.Contains(ua, "Mozilla/") && strings.Contains(r.Header.Get("Accept"), "text/html")

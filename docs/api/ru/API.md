@@ -247,7 +247,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Удалить: Прослушивание веб-службы |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Включить или отключить: Прослушивание веб-службы |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Изменить порядок: Прослушивание веб-службы |
-| GET | `/api/webservice/iplists` | `webservice:read` | Список: Подписной список IP |
+| GET | `/api/webservice/iplists` | `webservice:read` | Список подписных списков IP |
 | POST | `/api/webservice/iplists` | `webservice:write` | Добавить: Подписной список IP |
 | PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Изменить: Подписной список IP |
 | DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Удалить: Подписной список IP |

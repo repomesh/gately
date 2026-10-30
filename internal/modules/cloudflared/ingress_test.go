@@ -33,17 +33,43 @@ func TestParseToken(t *testing.T) {
 }
 
 func TestValidateService(t *testing.T) {
-	good := []string{"http://localhost:8080", "https://192.168.1.2", "http://nas:5000/", "ssh://localhost:22", "tcp://[::1]:3389",
+	good := []string{"http://localhost:8080", "https://192.168.1.2", "ssh://localhost:22", "tcp://[::1]:3389",
 		"rdp://pc:3389", "smb://nas:445", "unix:/run/app.sock", "http_status:404", "hello_world", "bastion", "wss://a:1"}
 	for _, s := range good {
 		if err := validateService(s); err != nil {
 			t.Errorf("%s 应通过: %v", s, err)
 		}
 	}
-	bad := []string{"localhost:8080", "http://localhost:8080/app", "ssh://localhost", "ftp://a:21", "http_status:99", "unix:", "nothing"}
+	bad := []string{"localhost:8080", "http://localhost:8080/app", "http://nas:5000/", "ssh://localhost", "ftp://a:21", "http_status:99", "unix:", "nothing"}
 	for _, s := range bad {
 		if err := validateService(s); err == nil {
 			t.Errorf("%s 应被拒绝", s)
+		}
+	}
+}
+
+// TestNormalizeService 验证 HTTP 类服务末尾单独的 / 被去掉（cloudflared 拒绝带路径的服务），其他地址原样保留。
+func TestNormalizeService(t *testing.T) {
+	cases := map[string]string{
+		" http://nas:5000/ ":   "http://nas:5000",
+		"https://[::1]:8443/":  "https://[::1]:8443",
+		"http://nas:5000/app/": "http://nas:5000/app/",
+		"http://nas:5000/?a=1": "http://nas:5000/?a=1",
+		"ssh://host:22/":       "ssh://host:22/",
+		"http_status:404":      "http_status:404",
+	}
+	for in, want := range cases {
+		if got := normalizeService(in); got != want {
+			t.Errorf("normalizeService(%q) = %q，期望 %q", in, got, want)
+		}
+	}
+	rules := []IngressRule{{Hostname: "App.Example.com.", Service: "http://nas:5000/"}}
+	if err := normalizeRules(rules); err != nil || rules[0].Service != "http://nas:5000" || rules[0].Hostname != "app.example.com" {
+		t.Fatalf("规范化结果错误: %+v %v", rules[0], err)
+	}
+	for _, h := range []string{"a.-com", "a.com-", "-a.com"} {
+		if err := normalizeRules([]IngressRule{{Hostname: h, Service: "http://a:1"}}); err == nil {
+			t.Errorf("%s 应被拒绝", h)
 		}
 	}
 }
@@ -79,6 +105,8 @@ type fakeCF struct {
 	t       *testing.T
 	mu      sync.Mutex
 	version int
+	// source 为远程配置的管理方式，空表示 cloudflare
+	source  string
 	config  map[string]any
 	records []cfDNSRecord
 	puts    int
@@ -101,7 +129,11 @@ func (f *fakeCF) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if f.config != nil {
 			cfg = f.config
 		}
-		reply(map[string]any{"tunnel_id": "tid", "version": f.version, "source": "cloudflare", "config": cfg})
+		src := f.source
+		if src == "" {
+			src = "cloudflare"
+		}
+		reply(map[string]any{"tunnel_id": "tid", "version": f.version, "source": src, "config": cfg})
 	case r.URL.Path == "/accounts/acc/cfd_tunnel/tid/configurations" && r.Method == http.MethodPut:
 		var body struct {
 			Config map[string]any `json:"config"`
@@ -113,7 +145,8 @@ func (f *fakeCF) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		f.puts++
 		reply(map[string]any{"tunnel_id": "tid", "version": f.version, "source": "cloudflare", "config": f.config})
 	case r.URL.Path == "/zones" && r.Method == http.MethodGet:
-		if r.URL.Query().Get("name") == "example.com" {
+		// 只认隧道所属账号下的域名
+		if r.URL.Query().Get("name") == "example.com" && r.URL.Query().Get("account.id") == "acc" {
 			reply([]map[string]string{{"id": "z1", "name": "example.com"}})
 		} else {
 			reply([]any{})
@@ -191,7 +224,8 @@ func TestIngressReadWrite(t *testing.T) {
 		},
 		"warp-routing": map[string]any{"enabled": true},
 	}, records: []cfDNSRecord{
-		{Type: "CNAME", Name: "old.example.com", Content: "tid.cfargotunnel.com"},
+		{Type: "CNAME", Name: "old.example.com", Content: "tid.cfargotunnel.com", Proxied: true},
+		{Type: "CNAME", Name: "plain.example.com", Content: "tid.cfargotunnel.com"},
 		{Type: "A", Name: "busy.example.com", Content: "1.2.3.4"},
 	}}
 	_, mux := newIngressModule(t, cf)
@@ -211,14 +245,15 @@ func TestIngressReadWrite(t *testing.T) {
 		IngressRule{Hostname: "New.Example.com", Service: "ssh://localhost:22"},
 		IngressRule{Hostname: "busy.example.com", Service: "http://localhost:81"},
 		IngressRule{Hostname: "x.other.net", Service: "http://localhost:82"},
-		IngressRule{Hostname: "new.example.com", Path: "^/a", Service: "http://localhost:83"},
+		IngressRule{Hostname: "new.example.com", Path: "^/a", Service: "http://localhost:83/"},
+		IngressRule{Hostname: "plain.example.com", Service: "http://localhost:84"},
 	)
-	upd := ingressUpdate{Version: 3, Rules: rules, CatchAll: "http_status:503", SyncDNS: true}
+	upd := ingressUpdate{Version: 3, Rules: &rules, CatchAll: "http_status:503", SyncDNS: true}
 	var saved ingressView
 	if code := doJSON(t, mux, "PUT", "/api/cloudflared/tunnels/k/ingress", upd, &saved); code != 200 {
 		t.Fatalf("保存失败: %d %+v", code, saved)
 	}
-	if saved.Version != 4 || len(saved.Rules) != 5 || saved.CatchAll != "http_status:503" || saved.Rules[1].Hostname != "new.example.com" {
+	if saved.Version != 4 || len(saved.Rules) != 6 || saved.Rules[4].Service != "http://localhost:83" || saved.CatchAll != "http_status:503" || saved.Rules[1].Hostname != "new.example.com" {
 		t.Fatalf("保存结果错误: %+v", saved)
 	}
 	if cf.config["warp-routing"] == nil {
@@ -229,7 +264,7 @@ func TestIngressReadWrite(t *testing.T) {
 	if last["service"] != "http_status:503" || last["originRequest"].(map[string]any)["connectTimeout"] != float64(10) || last["hostname"] != nil {
 		t.Fatalf("兜底规则错误: %+v", last)
 	}
-	want := map[string]string{"old.example.com": dnsUnchanged, "new.example.com": dnsCreated, "busy.example.com": dnsConflict, "x.other.net": dnsFailed}
+	want := map[string]string{"old.example.com": dnsUnchanged, "new.example.com": dnsCreated, "busy.example.com": dnsConflict, "x.other.net": dnsFailed, "plain.example.com": dnsConflict}
 	if len(saved.DNS) != len(want) {
 		t.Fatalf("同一主机名只应同步一次: %+v", saved.DNS)
 	}
@@ -245,23 +280,23 @@ func TestIngressReadWrite(t *testing.T) {
 	if created.Name != "new.example.com" || created.Type != "CNAME" || created.Content != "tid.cfargotunnel.com" || !created.Proxied {
 		t.Fatalf("创建的记录错误: %+v", created)
 	}
-	if len(cf.records) != 3 {
+	if len(cf.records) != 4 {
 		t.Fatalf("冲突的记录不应被修改: %+v", cf.records)
 	}
 
 	// 版本已被其他地方修改
 	var e map[string]string
-	if code := doJSON(t, mux, "PUT", "/api/cloudflared/tunnels/k/ingress", ingressUpdate{Version: 3, Rules: rules}, &e); code != http.StatusConflict {
+	if code := doJSON(t, mux, "PUT", "/api/cloudflared/tunnels/k/ingress", ingressUpdate{Version: 3, Rules: &rules}, &e); code != http.StatusConflict {
 		t.Fatalf("版本过期应返回 409: %d %v", code, e)
 	}
 	// 规则无效时不访问 Cloudflare
 	puts := cf.puts
-	if code := doJSON(t, mux, "PUT", "/api/cloudflared/tunnels/k/ingress", ingressUpdate{Version: 4, Rules: []IngressRule{{Service: "http://a:1"}}}, &e); code != 400 || cf.puts != puts {
+	if code := doJSON(t, mux, "PUT", "/api/cloudflared/tunnels/k/ingress", ingressUpdate{Version: 4, Rules: &[]IngressRule{{Service: "http://a:1"}}}, &e); code != 400 || cf.puts != puts {
 		t.Fatalf("无效规则应返回 400: %d %v", code, e)
 	}
 	// 不同步 DNS、兜底为空时使用默认值
 	var cleared ingressView
-	if code := doJSON(t, mux, "PUT", "/api/cloudflared/tunnels/k/ingress", ingressUpdate{Version: 4, Rules: []IngressRule{}}, &cleared); code != 200 || cleared.DNS != nil || cleared.CatchAll != defaultCatchAll || len(cleared.Rules) != 0 {
+	if code := doJSON(t, mux, "PUT", "/api/cloudflared/tunnels/k/ingress", ingressUpdate{Version: 4, Rules: &[]IngressRule{}}, &cleared); code != 200 || cleared.DNS != nil || cleared.CatchAll != defaultCatchAll || len(cleared.Rules) != 0 {
 		t.Fatalf("清空规则失败: %d %+v", code, cleared)
 	}
 }
@@ -273,6 +308,27 @@ func TestIngressFreshTunnel(t *testing.T) {
 	var v ingressView
 	if code := doJSON(t, mux, "GET", "/api/cloudflared/tunnels/k/ingress", nil, &v); code != 200 || v.Rules == nil || len(v.Rules) != 0 || v.CatchAll != defaultCatchAll {
 		t.Fatalf("空配置读取错误: %d %+v", code, v)
+	}
+}
+
+// TestIngressGuards 验证缺少 rules 字段时拒绝（不清空规则），本地配置管理的隧道需要 force 才写入。
+func TestIngressGuards(t *testing.T) {
+	cf := &fakeCF{t: t, version: 2, source: "local", config: map[string]any{"ingress": []any{
+		map[string]any{"hostname": "a.example.com", "service": "http://localhost:80"},
+		map[string]any{"service": "http_status:404"},
+	}}}
+	_, mux := newIngressModule(t, cf)
+	var e map[string]string
+	if code := doJSON(t, mux, "PUT", "/api/cloudflared/tunnels/k/ingress", map[string]any{"version": 2, "catchAll": "http_status:503"}, &e); code != 400 || cf.puts != 0 {
+		t.Fatalf("缺少 rules 应拒绝: %d %v", code, e)
+	}
+	rules := []IngressRule{{Hostname: "b.example.com", Service: "http://localhost:81"}}
+	if code := doJSON(t, mux, "PUT", "/api/cloudflared/tunnels/k/ingress", ingressUpdate{Version: 2, Rules: &rules}, &e); code != http.StatusConflict || cf.puts != 0 {
+		t.Fatalf("本地管理的隧道未带 force 应拒绝: %d %v", code, e)
+	}
+	var v ingressView
+	if code := doJSON(t, mux, "PUT", "/api/cloudflared/tunnels/k/ingress", ingressUpdate{Version: 2, Rules: &rules, Force: true}, &v); code != 200 || cf.puts != 1 || len(v.Rules) != 1 {
+		t.Fatalf("带 force 应写入: %d %+v", code, v)
 	}
 }
 

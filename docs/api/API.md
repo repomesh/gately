@@ -247,7 +247,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | 删除Web 服务监听 |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | 启用或停用Web 服务监听 |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | 调整Web 服务监听排序 |
-| GET | `/api/webservice/iplists` | `webservice:read` | 获取订阅 IP 列表列表 |
+| GET | `/api/webservice/iplists` | `webservice:read` | 获取订阅 IP 列表 |
 | POST | `/api/webservice/iplists` | `webservice:write` | 新增订阅 IP 列表 |
 | PUT | `/api/webservice/iplists/{key}` | `webservice:write` | 修改订阅 IP 列表 |
 | DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | 删除订阅 IP 列表 |
