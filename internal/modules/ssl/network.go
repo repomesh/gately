@@ -7,7 +7,9 @@ import (
 	"net"
 	"net/http"
 	"net/netip"
+	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-acme/lego/v4/challenge/dns01"
@@ -37,25 +39,75 @@ func forceNetwork(c *http.Client, network string) *http.Client {
 		tr = http.DefaultTransport.(*http.Transport)
 	}
 	tr = tr.Clone()
+	// 经代理（如 HTTPS_PROXY）访问时，到目标的连接由代理建立，本机只连代理；
+	// 代理地址按自身情况选择地址族，不受 network 限制，否则代理只有另一种地址时会连不上
+	var proxies sync.Map
+	if proxyFn := tr.Proxy; proxyFn != nil {
+		tr.Proxy = func(req *http.Request) (*url.URL, error) {
+			u, err := proxyFn(req)
+			if u != nil {
+				proxies.Store(proxyAddr(u), true)
+			}
+			return u, err
+		}
+	}
 	d := &net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}
 	tr.DialContext = func(ctx context.Context, _, addr string) (net.Conn, error) {
+		if _, ok := proxies.Load(addr); ok {
+			return d.DialContext(ctx, "tcp", addr)
+		}
 		return d.DialContext(ctx, network, addr)
 	}
 	out.Transport = tr
 	return out
 }
 
-// filterNameservers 保留与 network 同一地址族的 DNS 服务器（host:port）；主机名在查询时按 network 解析，一并保留。
+// proxyAddr 返回 Transport 连接代理 u 时使用的 host:port（未写端口时按协议取默认端口）。
+func proxyAddr(u *url.URL) string {
+	port := u.Port()
+	if port == "" {
+		switch u.Scheme {
+		case "https":
+			port = "443"
+		case "socks5", "socks5h":
+			port = "1080"
+		default:
+			port = "80"
+		}
+	}
+	return net.JoinHostPort(u.Hostname(), port)
+}
+
+// lookupNetIP 按地址族解析主机名，测试中替换。
+var lookupNetIP = net.DefaultResolver.LookupNetIP
+
+// filterNameservers 保留与 network 同一地址族的 DNS 服务器（host:port）。
+// 主机名形式的服务器先解析为该地址族的 IP：lego 的 CNAME 跟随与区域查询用 "udp" 发出，
+// 主机名可能被解析到不通的另一地址族，直到超时；解析不到该地址族地址的服务器丢弃。
 func filterNameservers(servers []string, network string) []string {
+	family := "ip4"
+	if network == NetworkIPv6 {
+		family = "ip6"
+	}
 	var out []string
 	for _, s := range servers {
-		host, _, err := net.SplitHostPort(s)
+		host, port, err := net.SplitHostPort(s)
 		if err != nil {
-			host = s
+			host, port = s, "53"
 		}
 		ip, err := netip.ParseAddr(host)
 		if err != nil {
-			out = append(out, s)
+			ctx, cancel := context.WithTimeout(context.Background(), dnsQueryTimeout)
+			ips, err := lookupNetIP(ctx, family, host)
+			cancel()
+			if err != nil {
+				continue
+			}
+			for _, a := range ips {
+				if a.Unmap().Is4() == (network == NetworkIPv4) {
+					out = append(out, net.JoinHostPort(a.Unmap().String(), port))
+				}
+			}
 			continue
 		}
 		if ip.Unmap().Is4() == (network == NetworkIPv4) {
@@ -118,14 +170,18 @@ func (p netPreCheck) query(name string, qtype uint16, servers []string, recursiv
 }
 
 // nsAddrs 通过递归 DNS 解析权威服务器在当前地址族下的地址。
-func (p netPreCheck) nsAddrs(host string) []string {
+// 查询失败时返回错误，由调用方稍后重试；确实没有该地址族的地址时返回空列表。
+func (p netPreCheck) nsAddrs(host string) ([]string, error) {
 	qtype := dns.TypeA
 	if p.network == NetworkIPv6 {
 		qtype = dns.TypeAAAA
 	}
 	r, err := p.query(host, qtype, p.nameservers, true)
-	if err != nil || r.Rcode != dns.RcodeSuccess {
-		return nil
+	if err != nil {
+		return nil, err
+	}
+	if r.Rcode != dns.RcodeSuccess {
+		return nil, fmt.Errorf("解析 %s 返回 %s", host, dns.RcodeToString[r.Rcode])
 	}
 	var out []string
 	for _, rr := range r.Answer {
@@ -136,7 +192,7 @@ func (p netPreCheck) nsAddrs(host string) []string {
 			out = append(out, net.JoinHostPort(v.AAAA.String(), authoritativePort))
 		}
 	}
-	return out
+	return out, nil
 }
 
 // hasTXT 判断响应中是否有值为 value 的 TXT 记录。
@@ -186,7 +242,10 @@ func (p netPreCheck) check(_, fqdn, value string, _ dns01.PreCheckFunc) (bool, e
 	}
 	checked := 0
 	for _, host := range hosts {
-		addrs := p.nsAddrs(host)
+		addrs, err := p.nsAddrs(host)
+		if err != nil {
+			return false, fmt.Errorf("权威服务器 %s: %w", host, err)
+		}
 		// 没有当前地址族地址的权威服务器无法访问，跳过
 		if len(addrs) == 0 {
 			continue

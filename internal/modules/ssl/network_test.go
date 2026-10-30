@@ -1,10 +1,14 @@
 package ssl
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/netip"
+	"net/url"
 	"strings"
 	"sync"
 	"testing"
@@ -165,12 +169,81 @@ func TestNetPreCheckAllNSOtherFamily(t *testing.T) {
 }
 
 func TestFilterNameservers(t *testing.T) {
-	in := []string{"1.1.1.1:53", "[2606:4700:4700::1111]:53", "dns.example:53", "[::ffff:8.8.8.8]:53"}
-	if got := fmt.Sprint(filterNameservers(in, NetworkIPv4)); got != "[1.1.1.1:53 dns.example:53 [::ffff:8.8.8.8]:53]" {
+	// 主机名按地址族解析为 IP，解析不到的丢弃
+	old := lookupNetIP
+	lookupNetIP = func(_ context.Context, network, host string) ([]netip.Addr, error) {
+		switch {
+		case host == "dns.example" && network == "ip4":
+			return []netip.Addr{netip.MustParseAddr("9.9.9.9")}, nil
+		case host == "dns.example" && network == "ip6":
+			return []netip.Addr{netip.MustParseAddr("2620:fe::fe")}, nil
+		}
+		return nil, errors.New("no such host")
+	}
+	t.Cleanup(func() {
+		lookupNetIP = old
+	})
+	in := []string{"1.1.1.1:53", "[2606:4700:4700::1111]:53", "dns.example:5353", "[::ffff:8.8.8.8]:53", "missing.example:53"}
+	if got := fmt.Sprint(filterNameservers(in, NetworkIPv4)); got != "[1.1.1.1:53 9.9.9.9:5353 [::ffff:8.8.8.8]:53]" {
 		t.Errorf("IPv4 过滤结果错误: %s", got)
 	}
-	if got := fmt.Sprint(filterNameservers(in, NetworkIPv6)); got != "[[2606:4700:4700::1111]:53 dns.example:53]" {
+	if got := fmt.Sprint(filterNameservers(in, NetworkIPv6)); got != "[[2606:4700:4700::1111]:53 [2620:fe::fe]:5353]" {
 		t.Errorf("IPv6 过滤结果错误: %s", got)
+	}
+}
+
+// 权威服务器地址查询失败时返回错误等待重试，不能跳过该服务器后判定通过
+func TestNetPreCheckNSLookupError(t *testing.T) {
+	z := &fakeZone{zone: "nserr.example.", txt: "token"}
+	h := dns.HandlerFunc(func(w dns.ResponseWriter, req *dns.Msg) {
+		// ns6 的 AAAA 查询返回 SERVFAIL，模拟临时故障
+		if req.Question[0].Qtype == dns.TypeAAAA && strings.EqualFold(req.Question[0].Name, "ns6.nserr.example.") {
+			m := new(dns.Msg)
+			m.SetRcode(req, dns.RcodeServerFailure)
+			_ = w.WriteMsg(m)
+			return
+		}
+		z.ServeDNS(w, req)
+	})
+	addr := startFakeDNS(t, "[::1]:0", h)
+	useAuthoritativePort(t, addr)
+	pc := netPreCheck{network: NetworkIPv6, nameservers: []string{addr}, authoritative: true}
+	ok, err := pc.check("", "_acme-challenge.nserr.example.", "token", nil)
+	if ok || err == nil || !strings.Contains(err.Error(), "ns6.nserr.example.") {
+		t.Fatalf("权威服务器地址查询失败时应返回错误: %v %v", ok, err)
+	}
+}
+
+// 经代理访问时，连代理不受地址族限制
+func TestForceNetworkProxy(t *testing.T) {
+	ln, err := net.Listen("tcp4", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var hits int
+	var mu sync.Mutex
+	// 只监听 IPv4 的 HTTP 代理：直接应答被代理的请求
+	srv := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		hits++
+		mu.Unlock()
+		_, _ = w.Write([]byte("proxied"))
+	}))
+	srv.Listener = ln
+	srv.Start()
+	defer srv.Close()
+	_, port, _ := net.SplitHostPort(ln.Addr().String())
+	proxyURL, _ := url.Parse("http://localhost:" + port)
+	base := &http.Client{Timeout: 5 * time.Second, Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)}}
+	resp, err := forceNetwork(base, NetworkIPv6).Get("http://ca.invalid/directory")
+	if err != nil {
+		t.Fatalf("限定 IPv6 时仍应能连接只有 IPv4 地址的代理: %v", err)
+	}
+	_ = resp.Body.Close()
+	mu.Lock()
+	defer mu.Unlock()
+	if hits != 1 {
+		t.Fatalf("请求应经过代理: %d", hits)
 	}
 }
 

@@ -619,6 +619,8 @@ function openEditor(row?: CertView) {
     // 旧配置没有验证方式字段，视为 DNS 验证
     editing.value.acme.challenge ||= 'dns'
     editing.value.acme.profile ??= ''
+    // 自动网络在后端省略该字段，补成空串让下拉框选中「自动」
+    editing.value.acme.network ??= ''
     editing.value.deploys = (editing.value.deploys ?? []).map((d) => ({ ...d, certName: d.certName ?? '', keyName: d.keyName ?? '', containers: d.containers ?? [] }))
   } else {
     editing.value = emptyCert()
