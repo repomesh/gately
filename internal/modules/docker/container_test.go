@@ -894,6 +894,7 @@ func TestContainerEditByName(t *testing.T) {
 	newID := strings.Repeat("f", 64)
 	f, host := newCtrFake(t, map[string]http.HandlerFunc{
 		"GET /containers/web/json":              ctrJSON(info),
+		"GET /containers/" + oldID + "/json":    ctrJSON(info),
 		"POST /containers/" + oldID + "/stop":   ctrStatus(204),
 		"POST /containers/" + oldID + "/rename": ctrStatus(204),
 		"POST /containers/create":               ctrJSON(map[string]string{"Id": newID}),
@@ -921,6 +922,7 @@ func TestContainerEditByNameRestoresOld(t *testing.T) {
 	_ = json.Unmarshal(info["Id"], &oldID)
 	f, host := newCtrFake(t, map[string]http.HandlerFunc{
 		"GET /containers/web/json":              ctrJSON(info),
+		"GET /containers/" + oldID + "/json":    ctrJSON(info),
 		"POST /containers/" + oldID + "/stop":   ctrStatus(204),
 		"POST /containers/" + oldID + "/rename": ctrStatus(204),
 		"POST /containers/create":               ctrStatus(500),
@@ -998,6 +1000,7 @@ func TestContainerDetailAndListAPI(t *testing.T) {
 
 func TestContainerActionsAPI(t *testing.T) {
 	f, host := newCtrFake(t, map[string]http.HandlerFunc{
+		"GET /containers/c1/json":    ctrJSON(map[string]string{"Id": "c1"}),
 		"POST /containers/c1/pause":  ctrStatus(204),
 		"POST /containers/c1/kill":   ctrStatus(204),
 		"POST /containers/c1/rename": ctrStatus(204),

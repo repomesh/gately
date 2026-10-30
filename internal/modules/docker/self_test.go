@@ -108,3 +108,47 @@ func TestComposeSelfProjectRejected(t *testing.T) {
 		t.Fatalf("pull 不应被拒绝: %+v", tk)
 	}
 }
+
+// 按容器名调用时先解析为完整 ID，自身保护不能被绕过；占用标记同样按完整 ID，按名称与按 ID 的操作互斥
+func TestSelfContainerGuardByName(t *testing.T) {
+	info := ctrSampleInfo(t)
+	var id string
+	_ = json.Unmarshal(info["Id"], &id)
+	f, host := newCtrFake(t, map[string]http.HandlerFunc{
+		"GET /containers/web/json":        ctrJSON(info),
+		"GET /containers/" + id + "/json": ctrJSON(info),
+	})
+	m, api := ctrAPI(t, host)
+	fakeSelf(t, id)
+
+	for _, c := range []struct{ method, path string }{
+		{"POST", "/containers/web/stop"},
+		{"POST", "/containers/web/kill"},
+		{"POST", "/containers/web/pause"},
+		{"DELETE", "/containers/web"},
+		{"POST", "/containers/web/upgrade"},
+	} {
+		if rec := api(c.method, c.path, "", nil); rec.Code != 400 {
+			t.Errorf("%s %s 按名称调用也应拒绝操作自身: %d %s", c.method, c.path, rec.Code, rec.Body)
+		}
+	}
+	if rec := api("POST", "/containers/web/edit", "application/json", jsonBody(specFromInspect(info, nil))); rec.Code != 400 {
+		t.Errorf("按名称重建自身应拒绝: %d %s", rec.Code, rec.Body)
+	}
+	for _, step := range []string{"POST /containers/web/", "DELETE /containers/web", "POST /containers/" + id + "/stop"} {
+		if f.called(step) != 0 {
+			t.Errorf("不应对自身执行 %s: %v", step, f.calls)
+		}
+	}
+
+	// 已按完整 ID 占用时，按名称编辑应报冲突
+	fakeSelf(t, "other")
+	release, ok := m.acquire(id)
+	if !ok {
+		t.Fatal("占用失败")
+	}
+	defer release()
+	if rec := api("POST", "/containers/web/edit", "application/json", jsonBody(specFromInspect(info, nil))); rec.Code != http.StatusConflict {
+		t.Errorf("同一容器按名称与按 ID 的操作应互斥: %d %s", rec.Code, rec.Body)
+	}
+}

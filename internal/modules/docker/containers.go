@@ -65,6 +65,26 @@ func (m *Module) clientOrFail(w http.ResponseWriter) (*Client, bool) {
 	return c, true
 }
 
+// resolveID 把路径中的容器名或 ID 前缀解析为完整 ID，失败时直接写出错误响应并返回 false。
+// 自身容器判断、操作占用标记与更新检查结果都以完整 ID 为准，按名称调用时若不先解析，
+// 自身保护会被绕过，同一容器按名称与按 ID 的并发操作也不会互斥。
+func resolveID(w http.ResponseWriter, r *http.Request, c *Client) (string, bool) {
+	raw := r.PathValue("id")
+	ctx, cancel := context.WithTimeout(r.Context(), stepTimeout)
+	defer cancel()
+	info, err := c.Inspect(ctx, raw)
+	if err != nil {
+		writeCtrErr(w, err)
+		return "", false
+	}
+	var id string
+	decodeField(info, "Id", &id)
+	if id == "" {
+		id = raw
+	}
+	return id, true
+}
+
 // acquire 标记容器正在被操作（升级、编辑），已被占用时返回 false。
 func (m *Module) acquire(id string) (release func(), ok bool) {
 	m.mu.Lock()
@@ -183,11 +203,15 @@ func (m *Module) handleAction(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	id, action := r.PathValue("id"), r.PathValue("action")
+	action := r.PathValue("action")
 	switch action {
 	case "start", "stop", "restart", "pause", "unpause", "kill":
 	default:
 		httpx.Error(w, http.StatusBadRequest, "不支持的操作 %q", action)
+		return
+	}
+	id, ok := resolveID(w, r, c)
+	if !ok {
 		return
 	}
 	// 停止、强杀、暂停自身会让 Gately 无法再被访问，直接拒绝
@@ -231,7 +255,10 @@ func (m *Module) handleDelete(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	id := r.PathValue("id")
+	id, ok := resolveID(w, r, c)
+	if !ok {
+		return
+	}
 	if isSelfContainer(id) {
 		httpx.Error(w, http.StatusBadRequest, "不能删除 Gately 自身所在的容器")
 		return
@@ -586,7 +613,10 @@ func (m *Module) handleEdit(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	id := r.PathValue("id")
+	id, ok := resolveID(w, r, c)
+	if !ok {
+		return
+	}
 	// 按新配置重建会先停止旧容器，对自身执行会让 Gately 中途退出、容器停在停止状态
 	if isSelfContainer(id) {
 		httpx.Error(w, http.StatusBadRequest, selfRebuildError)
@@ -651,7 +681,11 @@ func (m *Module) handleCheck(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	id := r.PathValue("id")
+	// 检查结果按完整 ID 记录，列表按完整 ID 读取
+	id, ok := resolveID(w, r, c)
+	if !ok {
+		return
+	}
 	ctx, cancel := context.WithTimeout(r.Context(), waitTimeout)
 	defer cancel()
 	has, err := m.checkUpdate(ctx, c, id)
@@ -670,7 +704,10 @@ func (m *Module) handleUpgrade(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	id := r.PathValue("id")
+	id, ok := resolveID(w, r, c)
+	if !ok {
+		return
+	}
 	// 升级会先停止旧容器，对自身执行会让 Gately 中途退出、无法创建新容器，也无法恢复旧容器
 	if isSelfContainer(id) {
 		httpx.Error(w, http.StatusBadRequest, selfRebuildError)
@@ -767,10 +804,15 @@ func (m *Module) handleUpgradeBatch(w http.ResponseWriter, r *http.Request) {
 			}
 			label := shortID(cid)
 			if info, err := c.Inspect(ctx, cid); err == nil {
-				var name string
+				var name, full string
 				decodeField(info, "Name", &name)
+				decodeField(info, "Id", &full)
 				if name != "" {
 					label = trimSlash(name)
+				}
+				// 与单个操作一致，后续判断与占用标记都以完整 ID 为准
+				if full != "" {
+					cid = full
 				}
 			}
 			// 自身所在的容器跳过并计为失败，其余容器照常升级
