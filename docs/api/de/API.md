@@ -188,6 +188,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Cloudflare-Tunnel neu anordnen |
 | GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | Geheimnisse im Klartext anzeigen |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Einen Cloudflare-Tunnel neu starten |
+| GET | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:read` | Routen eines Token-Tunnels lesen |
+| PUT | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:write` | Routen eines Token-Tunnels speichern |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Cloudflare-Tunnel-Einstellungen lesen |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Cloudflare-Tunnel-Einstellungen speichern |
 | GET | `/api/cloudflared/install` | `cloudflared:read` | Installationsinfo und Fortschritt eines verwalteten Programms anzeigen |
@@ -738,6 +740,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 
 | Feld | Typ |
 | --- | --- |
+| `apiToken` | string |
 | `edgeIpVersion` | string |
 | `enable` | boolean |
 | `key` | string |

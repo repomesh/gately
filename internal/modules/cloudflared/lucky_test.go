@@ -20,7 +20,7 @@ func TestImportLuckyCloudflared(t *testing.T) {
 		t.Fatal(err)
 	}
 	doc := luckyimport.Document{"List": json.RawMessage(`[
-	  {"Key":"a","Remark":"nas","Enable":true,"Type":"tunnel","Params":{"Token":"eyJ0","EdgeIpVersion":"4","HaConnections":4,"Protocol":"http2","EdgeBindAddress":"","NoTlsVerify":true}},
+	  {"Key":"a","Remark":"nas","Enable":true,"Type":"tunnel","Params":{"Token":"eyJ0","EdgeIpVersion":"4","HaConnections":4,"Protocol":"http2","EdgeBindAddress":"","NoTlsVerify":true,"CFApiToken":"cfapi"}},
 	  {"Key":"b","Remark":"","Enable":true,"Type":"tunnel","Params":{"Token":"eyJ1","Protocol":"auto","HaConnections":2}},
 	  {"Key":"c","Remark":"api","Enable":true,"Type":"tunnel","Params":{"Token":"","CFApiToken":"x"}},
 	  {"Key":"d","Remark":"ssh","Enable":true,"Type":"access","Params":{"Hostname":"ssh.example.com"}}
@@ -33,7 +33,7 @@ func TestImportLuckyCloudflared(t *testing.T) {
 		t.Fatalf("统计错误: %+v %+v", rep, m.cfg.Tunnels)
 	}
 	tn := m.cfg.Tunnels[0]
-	if tn.Name != "nas" || tn.Mode != ModeToken || tn.Token != "eyJ0" || tn.Protocol != "http2" || tn.EdgeIPVersion != "4" || !tn.Enable {
+	if tn.Name != "nas" || tn.Mode != ModeToken || tn.Token != "eyJ0" || tn.Protocol != "http2" || tn.EdgeIPVersion != "4" || tn.APIToken != "cfapi" || !tn.Enable {
 		t.Fatalf("隧道映射错误: %+v", tn)
 	}
 	if m.cfg.Tunnels[1].Name != "b" {

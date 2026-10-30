@@ -46,6 +46,9 @@ type Tunnel struct {
 	Mode   string `json:"mode"`
 	// Token 为 ModeToken 的隧道令牌
 	Token string `json:"token"`
+	// APIToken 为 ModeToken 可选的 Cloudflare API 令牌（需要 Cloudflare Tunnel 编辑权限，同步 DNS 还需要 DNS 编辑权限），
+	// 填写后可在 Gately 中编辑隧道的路由规则
+	APIToken string `json:"apiToken,omitempty"`
 	// Service 为 ModeQuick 要暴露的本地服务地址，例如 http://localhost:8080
 	Service string `json:"service"`
 	// Protocol 为边缘连接协议：auto、quic、http2
@@ -66,6 +69,7 @@ type fileConfig struct {
 func (t *Tunnel) Validate() error {
 	t.Name = strings.TrimSpace(t.Name)
 	t.Token = strings.TrimSpace(t.Token)
+	t.APIToken = strings.TrimSpace(t.APIToken)
 	t.Service = strings.TrimSpace(t.Service)
 	if t.Name == "" {
 		return errors.New("隧道名称不能为空")
@@ -81,7 +85,7 @@ func (t *Tunnel) Validate() error {
 		if err != nil || u.Host == "" || (u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "tcp" && u.Scheme != "ssh" && u.Scheme != "rdp") {
 			return errors.New("本地服务地址格式应为 http://localhost:8080")
 		}
-		t.Token = ""
+		t.Token, t.APIToken = "", ""
 	default:
 		return fmt.Errorf("不支持的模式 %q", t.Mode)
 	}
@@ -270,11 +274,17 @@ type TunnelView struct {
 	URL string `json:"url,omitempty"`
 	// Connections 为已注册的边缘连接数
 	Connections int `json:"connections"`
+	// TunnelID 为从令牌解析出的隧道 ID
+	TunnelID string `json:"tunnelId,omitempty"`
 }
 
 func (m *Module) viewLocked(t *Tunnel) TunnelView {
 	v := TunnelView{Tunnel: *t}
 	v.Token = crud.Mask(v.Token)
+	v.APIToken = crud.Mask(v.APIToken)
+	if info, err := parseToken(t.Token); err == nil {
+		v.TunnelID = info.TunnelID
+	}
 	if rt := m.runs[t.Key]; rt != nil {
 		v.State = rt.sup.State()
 		v.Error = rt.err
@@ -297,10 +307,13 @@ func (m *Module) Routes(r module.Router) {
 		Key:      func(t *Tunnel) *string { return &t.Key },
 		Enabled:  func(t *Tunnel) *bool { return &t.Enable },
 		Validate: func(t *Tunnel) error { return t.Validate() },
-		Merge:    func(old, updated *Tunnel) { crud.KeepSecret(old.Token, &updated.Token) },
-		View:     func(t *Tunnel) any { return m.viewLocked(t) },
+		Merge: func(old, updated *Tunnel) {
+			crud.KeepSecret(old.Token, &updated.Token)
+			crud.KeepSecret(old.APIToken, &updated.APIToken)
+		},
+		View: func(t *Tunnel) any { return m.viewLocked(t) },
 		// 查看被脱敏的隧道令牌明文
-		Secrets: func(t *Tunnel) map[string]string { return map[string]string{"token": t.Token} },
+		Secrets: func(t *Tunnel) map[string]string { return map[string]string{"token": t.Token, "apiToken": t.APIToken} },
 		Changed: m.applyLocked,
 		Removed: m.dropLocked,
 	}
@@ -316,6 +329,7 @@ func (m *Module) Routes(r module.Router) {
 		m.applyLocked(key)
 		httpx.OK(w, map[string]bool{"ok": true})
 	})
+	m.ingressRoutes(r)
 	r.HandleFunc("GET /settings", func(w http.ResponseWriter, req *http.Request) {
 		m.mu.Lock()
 		defer m.mu.Unlock()

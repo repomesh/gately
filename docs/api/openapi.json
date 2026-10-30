@@ -160,6 +160,9 @@
       },
       "cloudflared.Tunnel": {
         "properties": {
+          "apiToken": {
+            "type": "string"
+          },
           "edgeIpVersion": {
             "type": "string"
           },
@@ -5637,6 +5640,135 @@
           }
         ],
         "summary": "启用或停用Cloudflare 隧道",
+        "tags": [
+          "Cloudflare 隧道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/tunnels/{key}/ingress": {
+      "get": {
+        "description": "通过 Cloudflare API 读取隧道的远程配置，需要隧道填写了 `apiToken`（Cloudflare Tunnel 读取或编辑权限）。返回 `rules`（不含兜底规则）、`catchAll`（兜底服务，默认 `http_status:404`）、`version`（配置版本，保存时原样提交）与 `source`（`cloudflare` 为远程管理，`local` 表示隧道使用本地配置文件，远程规则不生效）。\n\n所需权限：`cloudflared:read`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "读取令牌隧道的路由规则",
+        "tags": [
+          "Cloudflare 隧道"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "请求体 `{\"version\": 3, \"rules\": [{\"hostname\": \"app.example.com\", \"path\": \"\", \"service\": \"http://localhost:8080\", \"originRequest\": {}}], \"catchAll\": \"http_status:404\", \"syncDns\": true}`。`version` 与 Cloudflare 上的当前版本不一致时返回 409。只替换 ingress，远程配置的其他字段与兜底规则的回源设置保持不变，运行中的 cloudflared 自动生效。`syncDns` 为 true 时为每个主机名创建开启代理、指向 `\u003c隧道ID\u003e.cfargotunnel.com` 的 CNAME 记录（需要 DNS 编辑权限），已有其他记录时不覆盖，结果在 `dns` 中：`created`、`unchanged`、`conflict`（`existing` 为已有记录）或 `failed`（`error` 为原因）。\n\n所需权限：`cloudflared:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "保存令牌隧道的路由规则",
         "tags": [
           "Cloudflare 隧道"
         ],

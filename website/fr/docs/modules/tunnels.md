@@ -69,6 +69,15 @@ Les jetons et les clés sont stockés avec les permissions 0600. Le jeton cloudf
 - Plusieurs tunnels avec redémarrage automatique ;
 - Affichage de l'adresse publique.
 
+### Routes {#cloudflared-ingress}
+
+Les noms d'hôte publics et les services d'origine (routes) d'un tunnel à jeton sont stockés chez Cloudflare, et cloudflared en cours d'exécution les récupère automatiquement. Renseignez le **jeton d'API** facultatif dans les paramètres du tunnel : le bouton Routes de la carte permet alors de les modifier directement.
+
+- Le jeton nécessite l'autorisation Cloudflare Tunnel : Edit, ainsi que DNS : Edit sur les zones pour créer automatiquement les enregistrements DNS. Le compte et l'ID du tunnel sont lus depuis le jeton du tunnel.
+- Chaque règle comporte un nom d'hôte, une expression régulière de chemin facultative et un service (par exemple `http://localhost:8080`, `ssh://localhost:22` ou `http_status:404`). Les règles sont comparées dans l'ordre et la première correspondance l'emporte. Vous pouvez activer Ignorer la vérification TLS de l'origine et définir l'en-tête Host vers l'origine ; les autres paramètres d'origine sont conservés. Le service par défaut traite les requêtes qui ne correspondent à aucune règle ; il vaut `http_status:404` par défaut.
+- Les modifications s'appliquent dès l'enregistrement, sans redémarrer le tunnel. Si les routes ont été modifiées entre-temps dans le tableau de bord Cloudflare ou ailleurs, l'enregistrement demande d'actualiser afin de conserver ces modifications.
+- Avec Synchroniser le DNS activé, chaque nom d'hôte reçoit un enregistrement CNAME proxifié pointant vers `<ID du tunnel>.cfargotunnel.com` ; les noms d'hôte qui ont déjà d'autres enregistrements les conservent et sont listés dans le résultat. Supprimer une règle conserve son enregistrement DNS ; supprimez-le dans Cloudflare si nécessaire.
+
 ## Comment choisir
 
 | Scénario | Recommandation |

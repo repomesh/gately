@@ -38,7 +38,7 @@ Gately 可以直接讀取 Lucky 的 `.lkcf` 設定檔，或 Lucky「備份設定
 | lucky_ftpserver.lkcf | FTP | 監聽連接埠、被動連接埠範圍、TLS 與逾時參數，以及使用者（處理方式同 WebDAV） |
 | lucky_storagemanagement.lkcf | 儲存掛載 | 本機目錄與 WebDAV 儲存；阿里雲盤、系統掛載與存取代理不遷移 |
 | lucky_frp.lkcf | frp | 第一個用戶端實例（伺服器位址、權杖、傳輸協定與代理）與第一個伺服器端實例；訪問者、外掛代理與控制台不遷移 |
-| lucky_cloudflared.lkcf | Cloudflare 通道 | 使用通道權杖的通道；Access 存取端與只填寫 API 權杖的通道不遷移 |
+| lucky_cloudflared.lkcf | Cloudflare 通道 | 使用通道權杖的通道（API 權杖一併遷移）；Access 存取端與只填寫 API 權杖的通道不遷移 |
 | lucky_base.lkcf | 全域設定、Web 服務 | 僅允許內網存取、登入失敗上限、工作階段時長、時區、自訂 DNS（含 doh@ 寫法）、GC 參數、PROXY 協定可信來源。管理連接埠、安全入口、管理員帳號與兩步驟驗證不遷移 |
 
 Lucky 的排程工作、IP 過濾、Docker 設定在常見設定中為空，暫不遷移；有內容時請手動設定。

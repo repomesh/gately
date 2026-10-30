@@ -188,6 +188,8 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Réordonner Tunnel Cloudflare |
 | GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | Afficher les secrets en clair |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Redémarrer un tunnel Cloudflare |
+| GET | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:read` | Lire les routes d'un tunnel à jeton |
+| PUT | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:write` | Enregistrer les routes d'un tunnel à jeton |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Lire les paramètres du tunnel Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Enregistrer les paramètres du tunnel Cloudflare |
 | GET | `/api/cloudflared/install` | `cloudflared:read` | Voir les informations d'installation et la progression d'un programme géré |
@@ -738,6 +740,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 
 | Champ | Type |
 | --- | --- |
+| `apiToken` | string |
 | `edgeIpVersion` | string |
 | `enable` | boolean |
 | `key` | string |

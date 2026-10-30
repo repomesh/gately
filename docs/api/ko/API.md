@@ -188,6 +188,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Cloudflare 터널 순서 변경 |
 | GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | 비밀 값 평문 보기 |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Cloudflare 터널 재시작 |
+| GET | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:read` | 토큰 터널의 라우팅 규칙 조회 |
+| PUT | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:write` | 토큰 터널의 라우팅 규칙 저장 |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Cloudflare 터널 설정 읽기 |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Cloudflare 터널 설정 저장 |
 | GET | `/api/cloudflared/install` | `cloudflared:read` | 관리 프로그램의 설치 정보와 진행 상태 보기 |
@@ -738,6 +740,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 필드 | 타입 |
 | --- | --- |
+| `apiToken` | string |
 | `edgeIpVersion` | string |
 | `enable` | boolean |
 | `key` | string |

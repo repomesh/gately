@@ -160,6 +160,9 @@
       },
       "cloudflared.Tunnel": {
         "properties": {
+          "apiToken": {
+            "type": "string"
+          },
           "edgeIpVersion": {
             "type": "string"
           },
@@ -5637,6 +5640,135 @@
           }
         ],
         "summary": "啟用或停用Cloudflare 通道",
+        "tags": [
+          "Cloudflare 通道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/tunnels/{key}/ingress": {
+      "get": {
+        "description": "透過 Cloudflare API 讀取通道的遠端設定，需要通道填寫了 `apiToken`（Cloudflare Tunnel 讀取或編輯權限）。回傳 `rules`（不含預設規則）、`catchAll`（預設服務，預設 `http_status:404`）、`version`（設定版本，儲存時原樣提交）與 `source`（`cloudflare` 為遠端管理，`local` 表示通道使用本機設定檔，遠端規則不生效）。\n\n所需權限：`cloudflared:read`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "讀取權杖通道的路由規則",
+        "tags": [
+          "Cloudflare 通道"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "請求內容 `{\"version\": 3, \"rules\": [{\"hostname\": \"app.example.com\", \"path\": \"\", \"service\": \"http://localhost:8080\", \"originRequest\": {}}], \"catchAll\": \"http_status:404\", \"syncDns\": true}`。`version` 與 Cloudflare 上的目前版本不一致時回傳 409。只替換 ingress，遠端設定的其他欄位與預設規則的回源設定保持不變，執行中的 cloudflared 自動生效。`syncDns` 為 true 時為每個主機名稱建立開啟代理、指向 `\u003c通道ID\u003e.cfargotunnel.com` 的 CNAME 記錄（需要 DNS 編輯權限），已有其他記錄時保持原樣，結果在 `dns` 中：`created`、`unchanged`、`conflict`（`existing` 為已有記錄）或 `failed`（`error` 為原因）。\n\n所需權限：`cloudflared:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "儲存權杖通道的路由規則",
         "tags": [
           "Cloudflare 通道"
         ],

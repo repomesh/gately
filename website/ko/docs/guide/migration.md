@@ -38,7 +38,7 @@ Gately의 「설정 → 백업 및 마이그레이션」을 열고 `lucky_*.lkcf
 | lucky_ftpserver.lkcf | FTP | 수신 포트, 패시브 포트 범위, TLS와 타임아웃 매개변수, 사용자(처리 방식은 WebDAV와 같음) |
 | lucky_storagemanagement.lkcf | 스토리지 마운트 | 로컬 디렉터리와 WebDAV 스토리지. Aliyun Drive, 시스템 마운트, 접근 프록시는 가져오지 않습니다 |
 | lucky_frp.lkcf | frp | 첫 번째 클라이언트 인스턴스(서버 주소, 토큰, 전송 프로토콜, 프록시)와 첫 번째 서버 인스턴스. visitor, 플러그인 프록시, 대시보드는 가져오지 않습니다 |
-| lucky_cloudflared.lkcf | Cloudflare 터널 | 터널 토큰을 사용하는 터널. Access 접근 클라이언트와 API 토큰만 입력한 터널은 가져오지 않습니다 |
+| lucky_cloudflared.lkcf | Cloudflare 터널 | 터널 토큰을 사용하는 터널(API 토큰도 함께 가져옴). Access 접근 클라이언트와 API 토큰만 입력한 터널은 가져오지 않습니다 |
 | lucky_base.lkcf | 전역 설정, 웹 서비스 | 내부망 접근만 허용, 로그인 실패 한도, 세션 유지 시간, 시간대, 사용자 지정 DNS(doh@ 표기 포함), GC 매개변수, PROXY 프로토콜 신뢰 출처. 관리 포트, 보안 진입 경로, 관리자 계정, 2단계 인증은 가져오지 않습니다 |
 
 Lucky의 예약 작업, IP 필터, Docker 설정은 일반적인 구성에서는 비어 있으므로 아직 가져오지 않습니다. 내용이 있으면 직접 설정하세요.

@@ -21,10 +21,12 @@
           <span v-else class="muted">{{ tn.state.running ? t('cloudflared.requesting') : '—' }}</span>
         </Field>
         <Field v-if="tn.mode === 'token'" :label="t('cloudflared.edgeConnections')" mono>{{ tn.connections }}</Field>
+        <Field v-if="tn.tunnelId" :label="t('cloudflared.tunnelId')" mono wide>{{ tn.tunnelId }}</Field>
         <Field :label="t('cloudflared.protocol')" mono>{{ tn.protocol || 'auto' }}</Field>
         <template #actions>
           <el-switch :model-value="tn.enable" size="small" @change="(v: boolean | string | number) => toggle(tn, Boolean(v))" />
           <el-button text size="small" :icon="RefreshCw" :disabled="!tn.enable" @click="restart(tn)">{{ t('common.restart') }}</el-button>
+          <el-button v-if="tn.mode === 'token'" text size="small" :icon="Route" :title="tn.apiToken ? '' : t('cloudflared.ingressNeedsApi')" @click="ingress?.open(tn.key!, tn.name)">{{ t('cloudflared.ingressButton') }}</el-button>
           <el-button text size="small" :icon="Pencil" @click="openEditor(tn)">{{ t('common.edit') }}</el-button>
           <el-popconfirm :title="t('cloudflared.confirmDelete')" @confirm="remove(tn)">
             <template #reference>
@@ -53,6 +55,8 @@
 
     <LogCard url="/api/cloudflared/logs" clearable />
 
+    <CloudflaredIngress ref="ingress" />
+
     <el-dialog v-model="editorVisible" :title="editing.key ? t('cloudflared.editTunnel') : t('cloudflared.addTunnel')" width="540px" :fullscreen="isMobile">
       <el-form :model="editing" label-width="100px" :label-position="labelPosition">
         <el-form-item :label="t('common.name')"><el-input v-model="editing.name" /></el-form-item>
@@ -65,6 +69,10 @@
         <el-form-item v-if="editing.mode === 'token'" :label="t('cloudflared.token')">
           <SecretInput v-model="editing.token" placeholder="eyJh…" :reveal="secretOf(editing.key && `/api/cloudflared/tunnels/${editing.key}/secrets`, 'token')" />
           <div class="form-help">{{ t('cloudflared.tokenHelp') }}</div>
+        </el-form-item>
+        <el-form-item v-if="editing.mode === 'token'" :label="t('cloudflared.apiToken')">
+          <SecretInput v-model="editing.apiToken" :placeholder="t('cloudflared.apiTokenPh')" :reveal="secretOf(editing.key && `/api/cloudflared/tunnels/${editing.key}/secrets`, 'apiToken')" />
+          <div class="form-help">{{ t('cloudflared.apiTokenHelp') }} <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener">dash.cloudflare.com</a></div>
         </el-form-item>
         <el-form-item v-else :label="t('cloudflared.localService')">
           <el-input v-model="editing.service" placeholder="http://localhost:8080" class="mono" />
@@ -99,7 +107,7 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { Cloud, Download, Pencil, Plus, RefreshCw, Save, Terminal, Trash2 } from 'lucide-vue-next'
+import { Cloud, Download, Pencil, Plus, RefreshCw, Route, Save, Terminal, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import SecretInput from '../components/SecretInput.vue'
 import { secretOf } from '../secrets'
@@ -110,6 +118,7 @@ import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import ProgramInstall from '../components/ProgramInstall.vue'
 import ResetConfigButton from '../components/ResetConfigButton.vue'
+import CloudflaredIngress from '../components/CloudflaredIngress.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { usePolling } from '../composables/usePolling'
 
@@ -119,6 +128,7 @@ interface Tunnel {
   enable: boolean
   mode: string
   token: string
+  apiToken: string
   service: string
   protocol: string
   edgeIpVersion: string
@@ -130,6 +140,7 @@ interface TunnelView extends Tunnel {
   error: string
   url?: string
   connections: number
+  tunnelId?: string
 }
 
 const { t } = useI18n()
@@ -140,13 +151,14 @@ const binary = ref('')
 const version = ref('')
 const binError = ref('')
 const installer = ref<InstanceType<typeof ProgramInstall>>()
+const ingress = ref<InstanceType<typeof CloudflaredIngress>>()
 const editorVisible = ref(false)
 const editing = ref<Tunnel>(empty())
 // 定时刷新，标签页在后台时暂停
 const polling = usePolling(loadTunnels, 4000)
 
 function empty(): Tunnel {
-  return { name: '', enable: true, mode: 'token', token: '', service: 'http://localhost:8080', protocol: 'auto', edgeIpVersion: 'auto', remark: '' }
+  return { name: '', enable: true, mode: 'token', token: '', apiToken: '', service: 'http://localhost:8080', protocol: 'auto', edgeIpVersion: 'auto', remark: '' }
 }
 
 function tunnelBadge(tn: TunnelView): { type: StatusType; text: string; title?: string } {
@@ -207,7 +219,7 @@ async function saveSettings() {
 function openEditor(tn?: TunnelView) {
   if (tn) {
     // 去掉运行状态、公网地址等只读字段，后端按未知字段拒绝请求
-    const { state: _s, error: _e, url: _u, connections: _c, ...tunnel } = tn
+    const { state: _s, error: _e, url: _u, connections: _c, tunnelId: _i, ...tunnel } = tn
     editing.value = JSON.parse(JSON.stringify(tunnel))
   } else {
     editing.value = empty()

@@ -69,6 +69,15 @@ Tokens and keys are stored with 0600 permissions. The cloudflared token is passe
 - Multiple tunnels with automatic restart;
 - Shows the public address.
 
+### Routes {#cloudflared-ingress}
+
+The public hostnames and origin services (routes) of a token tunnel are stored on Cloudflare, and running cloudflared fetches them automatically. Fill in the optional **API token** in the tunnel settings and the Routes button on the card lets you edit them directly:
+
+- The token needs the Cloudflare Tunnel: Edit permission, plus DNS: Edit on the zones to create DNS records automatically. The account and tunnel ID are read from the tunnel token.
+- Each rule has a hostname, an optional path regex and a service (such as `http://localhost:8080`, `ssh://localhost:22` or `http_status:404`). Rules are matched in order and the first match wins. You can turn on Skip origin TLS verification and set the origin Host header; other origin settings are kept. The catch-all service handles requests that match no rule and defaults to `http_status:404`.
+- Changes apply as soon as you save, with no tunnel restart. If the routes were changed in the Cloudflare dashboard or elsewhere in the meantime, saving asks you to refresh so their changes are kept.
+- With Sync DNS on, each hostname gets a proxied CNAME record pointing to `<tunnel ID>.cfargotunnel.com`; hostnames that already have other records keep them and are listed in the result. Deleting a rule keeps its DNS record; remove it in Cloudflare if needed.
+
 ## How to choose
 
 | Scenario | Recommendation |

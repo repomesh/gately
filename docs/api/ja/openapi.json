@@ -160,6 +160,9 @@
       },
       "cloudflared.Tunnel": {
         "properties": {
+          "apiToken": {
+            "type": "string"
+          },
           "edgeIpVersion": {
             "type": "string"
           },
@@ -5637,6 +5640,135 @@
           }
         ],
         "summary": "Cloudflare トンネル の有効/無効を切り替え",
+        "tags": [
+          "Cloudflare トンネル"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/tunnels/{key}/ingress": {
+      "get": {
+        "description": "Cloudflare API でトンネルのリモート設定を読み取ります。トンネルに `apiToken`（Cloudflare Tunnel の読み取りまたは編集権限）が必要です。`rules`（キャッチオールルールを除く）、`catchAll`（キャッチオールのサービス、既定は `http_status:404`）、`version`（設定バージョン、保存時にそのまま送信）、`source`（`cloudflare` はリモート管理、`local` はトンネルがローカル設定ファイルで動作しておりリモートルールが反映されないことを示す）を返します。\n\n必要な権限: `cloudflared:read`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "トークントンネルのルートを取得",
+        "tags": [
+          "Cloudflare トンネル"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "リクエスト本文 `{\"version\": 3, \"rules\": [{\"hostname\": \"app.example.com\", \"path\": \"\", \"service\": \"http://localhost:8080\", \"originRequest\": {}}], \"catchAll\": \"http_status:404\", \"syncDns\": true}`。`version` が Cloudflare 上の現在のバージョンと異なる場合は 409 を返します。ingress だけを置き換え、リモート設定のその他のフィールドとキャッチオールルールのオリジン設定はそのまま保持し、実行中の cloudflared に自動で反映されます。`syncDns` が true の場合、ホスト名ごとに `\u003cトンネルID\u003e.cfargotunnel.com` を指すプロキシ有効の CNAME レコードを作成します（DNS 編集権限が必要）。既存のレコードはそのまま残します。結果は `dns` に `created`、`unchanged`、`conflict`（`existing` は既存のレコード）、`failed`（`error` は原因）として返ります。\n\n必要な権限: `cloudflared:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "トークントンネルのルートを保存",
         "tags": [
           "Cloudflare トンネル"
         ],

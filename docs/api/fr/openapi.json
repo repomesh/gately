@@ -160,6 +160,9 @@
       },
       "cloudflared.Tunnel": {
         "properties": {
+          "apiToken": {
+            "type": "string"
+          },
           "edgeIpVersion": {
             "type": "string"
           },
@@ -5637,6 +5640,135 @@
           }
         ],
         "summary": "Activer ou désactiver Tunnel Cloudflare",
+        "tags": [
+          "Tunnel Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/tunnels/{key}/ingress": {
+      "get": {
+        "description": "Lit la configuration distante du tunnel via l'API Cloudflare ; le tunnel doit avoir un `apiToken` (autorisation de lecture ou de modification Cloudflare Tunnel). Renvoie `rules` (sans la règle par défaut), `catchAll` (le service par défaut, `http_status:404` sinon), `version` (la version de configuration, renvoyée telle quelle à l'enregistrement) et `source` (`cloudflare` signifie géré à distance ; `local` signifie que le tunnel utilise un fichier de configuration local et que les règles distantes ne s'appliquent pas).\n\nPermission requise : `cloudflared:read`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Lire les routes d'un tunnel à jeton",
+        "tags": [
+          "Tunnel Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Corps de la requête `{\"version\": 3, \"rules\": [{\"hostname\": \"app.example.com\", \"path\": \"\", \"service\": \"http://localhost:8080\", \"originRequest\": {}}], \"catchAll\": \"http_status:404\", \"syncDns\": true}`. Renvoie 409 si `version` diffère de la version actuelle chez Cloudflare. Seul ingress est remplacé ; les autres champs de la configuration distante et les paramètres d'origine de la règle par défaut sont conservés, et cloudflared en cours d'exécution applique la modification automatiquement. Avec `syncDns` à true, un enregistrement CNAME proxifié pointant vers `\u003cID du tunnel\u003e.cfargotunnel.com` est créé pour chaque nom d'hôte (autorisation de modification DNS requise) ; les enregistrements existants restent intacts. Les résultats sont dans `dns` : `created`, `unchanged`, `conflict` (`existing` contient l'enregistrement existant) ou `failed` (`error` contient la raison).\n\nPermission requise : `cloudflared:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Enregistrer les routes d'un tunnel à jeton",
         "tags": [
           "Tunnel Cloudflare"
         ],

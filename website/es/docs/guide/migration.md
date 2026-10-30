@@ -38,7 +38,7 @@ Archivos compatibles:
 | lucky_ftpserver.lkcf | FTP | Puerto de escucha, rango de puertos pasivos, TLS y parámetros de tiempo de espera, además de los usuarios (se tratan igual que en WebDAV) |
 | lucky_storagemanagement.lkcf | Montajes de almacenamiento | Almacenamientos de directorio local y WebDAV; Alibaba Cloud Drive, los montajes del sistema y el proxy de acceso no se migran |
 | lucky_frp.lkcf | frp | La primera instancia de cliente (dirección del servidor, token, protocolo de transporte y proxies) y la primera instancia de servidor; los visitantes, los proxies de plugin y el panel no se migran |
-| lucky_cloudflared.lkcf | Túnel de Cloudflare | Túneles que usan token de túnel; los clientes de Access y los túneles que solo tienen un token de API no se migran |
+| lucky_cloudflared.lkcf | Túnel de Cloudflare | Túneles que usan token de túnel (con su token de API); los clientes de Access y los túneles que solo tienen un token de API no se migran |
 | lucky_base.lkcf | Ajustes globales, Servicios web | Acceso solo desde la red local, límite de fallos de inicio de sesión, duración de la sesión, zona horaria, DNS personalizado (incluida la sintaxis doh@), parámetros de GC y orígenes de confianza para el protocolo PROXY. El puerto de administración, la ruta de acceso segura, la cuenta de administrador y la autenticación de dos factores no se migran |
 
 Las tareas programadas, el filtrado de IP y los ajustes de Docker de Lucky están vacíos en las configuraciones habituales y por ahora no se migran; si tienen contenido, configúralos manualmente.

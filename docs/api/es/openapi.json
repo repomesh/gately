@@ -160,6 +160,9 @@
       },
       "cloudflared.Tunnel": {
         "properties": {
+          "apiToken": {
+            "type": "string"
+          },
           "edgeIpVersion": {
             "type": "string"
           },
@@ -5637,6 +5640,135 @@
           }
         ],
         "summary": "Activar o desactivar Túnel de Cloudflare",
+        "tags": [
+          "Túnel de Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/tunnels/{key}/ingress": {
+      "get": {
+        "description": "Lee la configuración remota del túnel mediante la API de Cloudflare; el túnel necesita un `apiToken` (permiso de lectura o edición de Cloudflare Tunnel). Devuelve `rules` (sin la regla por defecto), `catchAll` (el servicio por defecto, `http_status:404` si no se indica), `version` (la versión de la configuración, que se envía sin cambios al guardar) y `source` (`cloudflare` indica gestión remota; `local` indica que el túnel usa un archivo de configuración local y las reglas remotas no se aplican).\n\nPermiso necesario: `cloudflared:read`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Leer las rutas de un túnel con token",
+        "tags": [
+          "Túnel de Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Cuerpo de la solicitud `{\"version\": 3, \"rules\": [{\"hostname\": \"app.example.com\", \"path\": \"\", \"service\": \"http://localhost:8080\", \"originRequest\": {}}], \"catchAll\": \"http_status:404\", \"syncDns\": true}`. Devuelve 409 cuando `version` difiere de la versión actual en Cloudflare. Solo se sustituye ingress; los demás campos de la configuración remota y los ajustes de origen de la regla por defecto se mantienen, y cloudflared en ejecución aplica el cambio automáticamente. Con `syncDns` en true se crea para cada nombre de host un registro CNAME con proxy que apunta a `\u003cID del túnel\u003e.cfargotunnel.com` (requiere permiso de edición de DNS); los registros existentes se dejan intactos. Los resultados están en `dns`: `created`, `unchanged`, `conflict` (`existing` contiene el registro existente) o `failed` (`error` contiene el motivo).\n\nPermiso necesario: `cloudflared:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Guardar las rutas de un túnel con token",
         "tags": [
           "Túnel de Cloudflare"
         ],

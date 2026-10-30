@@ -188,6 +188,8 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Reordenar Túnel Cloudflare |
 | GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | Ver segredos em texto puro |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Reiniciar um túnel Cloudflare |
+| GET | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:read` | Ler as rotas de um túnel com token |
+| PUT | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:write` | Salvar as rotas de um túnel com token |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Ler configurações do túnel Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Salvar configurações do túnel Cloudflare |
 | GET | `/api/cloudflared/install` | `cloudflared:read` | Ver as informações de instalação e o progresso de um programa gerenciado |
@@ -738,6 +740,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 
 | Campo | Tipo |
 | --- | --- |
+| `apiToken` | string |
 | `edgeIpVersion` | string |
 | `enable` | boolean |
 | `key` | string |

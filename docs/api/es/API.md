@@ -188,6 +188,8 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Reordenar Túnel de Cloudflare |
 | GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | Ver secretos en texto plano |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Reiniciar un túnel de Cloudflare |
+| GET | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:read` | Leer las rutas de un túnel con token |
+| PUT | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:write` | Guardar las rutas de un túnel con token |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Leer los ajustes del túnel de Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Guardar los ajustes del túnel de Cloudflare |
 | GET | `/api/cloudflared/install` | `cloudflared:read` | Ver la información de instalación y el progreso de un programa gestionado |
@@ -738,6 +740,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 
 | Campo | Tipo |
 | --- | --- |
+| `apiToken` | string |
 | `edgeIpVersion` | string |
 | `enable` | boolean |
 | `key` | string |

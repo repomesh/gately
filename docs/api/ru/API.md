@@ -188,6 +188,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Изменить порядок: Туннель Cloudflare |
 | GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | Показать секреты открытым текстом |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Перезапустить туннель Cloudflare |
+| GET | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:read` | Прочитать маршруты туннеля с токеном |
+| PUT | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:write` | Сохранить маршруты туннеля с токеном |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Чтение настроек туннеля Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Сохранить настройки туннеля Cloudflare |
 | GET | `/api/cloudflared/install` | `cloudflared:read` | Просмотр сведений об установке и хода установки управляемой программы |
@@ -738,6 +740,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | Поле | Тип |
 | --- | --- |
+| `apiToken` | string |
 | `edgeIpVersion` | string |
 | `enable` | boolean |
 | `key` | string |

@@ -51,7 +51,7 @@ func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options)
 			rep.Warnings = append(rep.Warnings, name+": 跳过，未填写隧道令牌（仅填写 API 令牌的隧道暂不支持）")
 			continue
 		}
-		t := Tunnel{Name: name, Enable: li.Enable && opts.KeepEnabled, Mode: ModeToken, Token: p.Token, Protocol: p.Protocol, EdgeIPVersion: p.EdgeIpVersion}
+		t := Tunnel{Name: name, Enable: li.Enable && opts.KeepEnabled, Mode: ModeToken, Token: p.Token, APIToken: p.CFApiToken, Protocol: p.Protocol, EdgeIPVersion: p.EdgeIpVersion}
 		if p.HaConnections != 0 && p.HaConnections != 4 {
 			rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: 边缘连接数 %d 暂不支持，使用默认值 4", name, p.HaConnections))
 		}

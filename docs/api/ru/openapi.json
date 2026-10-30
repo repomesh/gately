@@ -160,6 +160,9 @@
       },
       "cloudflared.Tunnel": {
         "properties": {
+          "apiToken": {
+            "type": "string"
+          },
           "edgeIpVersion": {
             "type": "string"
           },
@@ -5637,6 +5640,135 @@
           }
         ],
         "summary": "Включить или отключить: Туннель Cloudflare",
+        "tags": [
+          "Туннель Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/tunnels/{key}/ingress": {
+      "get": {
+        "description": "Читает удалённую конфигурацию туннеля через API Cloudflare; у туннеля должен быть `apiToken` (право чтения или редактирования Cloudflare Tunnel). Возвращает `rules` (без правила по умолчанию), `catchAll` (сервис по умолчанию, иначе `http_status:404`), `version` (версия конфигурации, при сохранении отправляется без изменений) и `source` (`cloudflare` — удалённое управление; `local` — туннель работает с локальным файлом конфигурации, удалённые правила не действуют).\n\nТребуемое разрешение: `cloudflared:read`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Прочитать маршруты туннеля с токеном",
+        "tags": [
+          "Туннель Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Тело запроса `{\"version\": 3, \"rules\": [{\"hostname\": \"app.example.com\", \"path\": \"\", \"service\": \"http://localhost:8080\", \"originRequest\": {}}], \"catchAll\": \"http_status:404\", \"syncDns\": true}`. Возвращает 409, если `version` отличается от текущей версии в Cloudflare. Заменяется только ingress; остальные поля удалённой конфигурации и настройки источника правила по умолчанию сохраняются, а запущенный cloudflared применяет изменения автоматически. При `syncDns` = true для каждого имени хоста создаётся проксируемая CNAME-запись на `\u003cID туннеля\u003e.cfargotunnel.com` (нужно право редактирования DNS); существующие записи остаются нетронутыми. Результаты в `dns`: `created`, `unchanged`, `conflict` (`existing` — существующая запись) или `failed` (`error` — причина).\n\nТребуемое разрешение: `cloudflared:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Сохранить маршруты туннеля с токеном",
         "tags": [
           "Туннель Cloudflare"
         ],

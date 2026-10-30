@@ -69,6 +69,15 @@ Tokens e chaves são armazenados com permissão 0600. O token do cloudflared é 
 - Vários túneis com reinício automático;
 - Exibe o endereço público.
 
+### Rotas {#cloudflared-ingress}
+
+Os hostnames públicos e os serviços de origem (rotas) de um túnel com token ficam salvos na Cloudflare, e o cloudflared em execução os obtém automaticamente. Informe o **token de API** opcional nas configurações do túnel e o botão Rotas do cartão permite editá-las diretamente:
+
+- O token precisa da permissão Cloudflare Tunnel: Edit e, para criar registros DNS automaticamente, DNS: Edit nas zonas correspondentes. A conta e o ID do túnel são lidos do token do túnel.
+- Cada regra tem um hostname, uma expressão regular de caminho opcional e um serviço (como `http://localhost:8080`, `ssh://localhost:22` ou `http_status:404`). As regras são comparadas em ordem e vale a primeira que corresponder. É possível ativar Ignorar a verificação TLS da origem e definir o cabeçalho Host para a origem; as demais configurações de origem são mantidas. O serviço padrão atende as requisições que não correspondem a nenhuma regra; o padrão é `http_status:404`.
+- As alterações valem assim que você salva, sem reiniciar o túnel. Se as rotas foram alteradas no painel da Cloudflare ou em outro lugar nesse meio-tempo, salvar pede para recarregar, preservando essas alterações.
+- Com Sincronizar DNS ativado, cada hostname recebe um registro CNAME com proxy apontando para `<ID do túnel>.cfargotunnel.com`; hostnames que já têm outros registros os mantêm e aparecem no resultado. Excluir uma regra mantém o registro DNS; remova-o na Cloudflare se necessário.
+
 ## Como escolher
 
 | Cenário | Recomendação |

@@ -69,6 +69,15 @@ Token und Schlüssel werden mit Rechten 0600 gespeichert. Das cloudflared-Token 
 - Mehrere Tunnel mit automatischem Neustart;
 - Zeigt die öffentliche Adresse an.
 
+### Routen {#cloudflared-ingress}
+
+Die öffentlichen Hostnamen und Ursprungsdienste (Routen) eines Token-Tunnels liegen bei Cloudflare, laufendes cloudflared ruft sie automatisch ab. Hinterlegen Sie in den Tunneleinstellungen das optionale **API-Token**, dann lassen sich die Routen über die Schaltfläche Routen auf der Karte direkt bearbeiten:
+
+- Das Token benötigt die Berechtigung Cloudflare Tunnel: Bearbeiten, zum automatischen Anlegen von DNS-Einträgen zusätzlich DNS: Bearbeiten für die Zonen. Konto und Tunnel-ID werden aus dem Tunnel-Token gelesen.
+- Jede Regel besteht aus Hostname, optionalem Pfad als regulärem Ausdruck und Dienst (etwa `http://localhost:8080`, `ssh://localhost:22` oder `http_status:404`). Regeln werden der Reihe nach geprüft, die erste passende gewinnt. TLS-Prüfung zum Ursprung überspringen und der Host-Header zum Ursprung lassen sich einstellen; weitere Ursprungseinstellungen bleiben erhalten. Der Standarddienst bedient Anfragen, auf die keine Regel passt, Standard ist `http_status:404`.
+- Änderungen wirken sofort nach dem Speichern, ohne Tunnel-Neustart. Wurden die Routen inzwischen im Cloudflare-Dashboard oder anderswo geändert, fordert das Speichern zum Neuladen auf, damit diese Änderungen erhalten bleiben.
+- Mit DNS synchronisieren erhält jeder Hostname einen proxied CNAME-Eintrag auf `<Tunnel-ID>.cfargotunnel.com`; Hostnamen mit vorhandenen anderen Einträgen behalten diese und werden im Ergebnis aufgeführt. Beim Löschen einer Regel bleibt ihr DNS-Eintrag bestehen; entfernen Sie ihn bei Bedarf in Cloudflare.
+
 ## Die richtige Wahl
 
 | Szenario | Empfehlung |

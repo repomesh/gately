@@ -188,6 +188,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | 调整Cloudflare 隧道排序 |
 | GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | 查看密钥明文 |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | 重启一条 Cloudflare 隧道 |
+| GET | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:read` | 读取令牌隧道的路由规则 |
+| PUT | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:write` | 保存令牌隧道的路由规则 |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | 读取 Cloudflare 隧道设置 |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | 保存 Cloudflare 隧道设置 |
 | GET | `/api/cloudflared/install` | `cloudflared:read` | 查看托管程序的安装信息与进度 |
@@ -738,6 +740,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 字段 | 类型 |
 | --- | --- |
+| `apiToken` | string |
 | `edgeIpVersion` | string |
 | `enable` | boolean |
 | `key` | string |

@@ -160,6 +160,9 @@
       },
       "cloudflared.Tunnel": {
         "properties": {
+          "apiToken": {
+            "type": "string"
+          },
           "edgeIpVersion": {
             "type": "string"
           },
@@ -5637,6 +5640,135 @@
           }
         ],
         "summary": "Cloudflare 터널 사용 설정/해제",
+        "tags": [
+          "Cloudflare 터널"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/tunnels/{key}/ingress": {
+      "get": {
+        "description": "Cloudflare API로 터널의 원격 설정을 읽습니다. 터널에 `apiToken`(Cloudflare Tunnel 읽기 또는 편집 권한)이 필요합니다. `rules`(기본 규칙 제외), `catchAll`(기본 서비스, 기본값 `http_status:404`), `version`(설정 버전, 저장 시 그대로 전송), `source`(`cloudflare`는 원격 관리, `local`은 터널이 로컬 설정 파일로 실행되어 원격 규칙이 적용되지 않음)를 반환합니다.\n\n필요한 권한: `cloudflared:read`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "토큰 터널의 라우팅 규칙 조회",
+        "tags": [
+          "Cloudflare 터널"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "요청 본문 `{\"version\": 3, \"rules\": [{\"hostname\": \"app.example.com\", \"path\": \"\", \"service\": \"http://localhost:8080\", \"originRequest\": {}}], \"catchAll\": \"http_status:404\", \"syncDns\": true}`. `version`이 Cloudflare의 현재 버전과 다르면 409를 반환합니다. ingress만 교체하며 원격 설정의 다른 필드와 기본 규칙의 원본 설정은 그대로 유지되고, 실행 중인 cloudflared에 자동으로 적용됩니다. `syncDns`가 true이면 호스트 이름마다 `\u003c터널ID\u003e.cfargotunnel.com`을 가리키는 프록시 CNAME 레코드를 만들며(DNS 편집 권한 필요), 기존 레코드는 그대로 둡니다. 결과는 `dns`에 `created`, `unchanged`, `conflict`(`existing`은 기존 레코드), `failed`(`error`는 원인)로 반환됩니다.\n\n필요한 권한: `cloudflared:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "토큰 터널의 라우팅 규칙 저장",
         "tags": [
           "Cloudflare 터널"
         ],

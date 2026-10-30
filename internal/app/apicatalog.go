@@ -65,6 +65,8 @@ var apiCatalog = map[string]epDoc{
 	"POST /api/tailscale/restart":                        {Summary: "重启 Tailscale"},
 	"POST /api/tailscale/logout":                         {Summary: "退出 Tailscale 登录"},
 	"POST /api/cloudflared/tunnels/{key}/restart":        {Summary: "重启一条 Cloudflare 隧道"},
+	"GET /api/cloudflared/tunnels/{key}/ingress":         {Summary: "读取令牌隧道的路由规则", Desc: "通过 Cloudflare API 读取隧道的远程配置，需要隧道填写了 `apiToken`（Cloudflare Tunnel 读取或编辑权限）。返回 `rules`（不含兜底规则）、`catchAll`（兜底服务，默认 `http_status:404`）、`version`（配置版本，保存时原样提交）与 `source`（`cloudflare` 为远程管理，`local` 表示隧道使用本地配置文件，远程规则不生效）。"},
+	"PUT /api/cloudflared/tunnels/{key}/ingress":         {Summary: "保存令牌隧道的路由规则", Desc: "请求体 `{\"version\": 3, \"rules\": [{\"hostname\": \"app.example.com\", \"path\": \"\", \"service\": \"http://localhost:8080\", \"originRequest\": {}}], \"catchAll\": \"http_status:404\", \"syncDns\": true}`。`version` 与 Cloudflare 上的当前版本不一致时返回 409。只替换 ingress，远程配置的其他字段与兜底规则的回源设置保持不变，运行中的 cloudflared 自动生效。`syncDns` 为 true 时为每个主机名创建开启代理、指向 `<隧道ID>.cfargotunnel.com` 的 CNAME 记录（需要 DNS 编辑权限），已有其他记录时不覆盖，结果在 `dns` 中：`created`、`unchanged`、`conflict`（`existing` 为已有记录）或 `failed`（`error` 为原因）。", Body: true},
 	"GET /api/cloudflared/settings":                      {Summary: "读取 Cloudflare 隧道设置"},
 	"PUT /api/cloudflared/settings":                      {Summary: "保存 Cloudflare 隧道设置", Body: true},
 	"POST /api/filebrowser/instances/{key}/restart":      {Summary: "重启一个 File Browser 实例"},

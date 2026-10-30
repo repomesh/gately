@@ -188,6 +188,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Cloudflare トンネル の並び順を変更 |
 | GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | シークレットを平文で表示 |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Cloudflare トンネルを 1 つ再起動 |
+| GET | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:read` | トークントンネルのルートを取得 |
+| PUT | `/api/cloudflared/tunnels/{key}/ingress` | `cloudflared:write` | トークントンネルのルートを保存 |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Cloudflare トンネル設定を読み取り |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Cloudflare トンネルの設定を保存 |
 | GET | `/api/cloudflared/install` | `cloudflared:read` | 管理プログラムのインストール情報と進捗を表示 |
@@ -738,6 +740,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | フィールド | 型 |
 | --- | --- |
+| `apiToken` | string |
 | `edgeIpVersion` | string |
 | `enable` | boolean |
 | `key` | string |
