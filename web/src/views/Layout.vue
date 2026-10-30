@@ -28,7 +28,7 @@
           </template>
         </div>
         <div class="header-right">
-          <LocaleSwitcher />
+          <LocaleSwitcher :remember="role === 'admin'" />
           <ThemePicker />
           <el-dropdown trigger="click" popper-class="user-popper" @command="onCommand" @visible-change="lockScroll">
             <button class="user-btn">

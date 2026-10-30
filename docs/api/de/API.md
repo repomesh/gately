@@ -648,6 +648,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | Methode | Pfad | Erforderliche Berechtigung | Beschreibung |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | Nur Anmeldesitzung | Administrator-Benutzername und -Passwort ändern |
+| PUT | `/api/account/ui-language` | Nur Anmeldesitzung | Sprache der Verwaltungsoberfläche speichern |
 | GET | `/api/account/passkeys` | Nur Anmeldesitzung | Registrierte Passkeys auflisten |
 | POST | `/api/account/passkeys/begin` | Nur Anmeldesitzung | Passkey-Registrierung starten |
 | POST | `/api/account/passkeys` | Nur Anmeldesitzung | Passkey-Registrierung abschließen |

@@ -648,6 +648,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | Метод | Путь | Необходимое право | Описание |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | Только сессия входа | Изменить имя пользователя и пароль администратора |
+| PUT | `/api/account/ui-language` | Только сессия входа | Сохранить язык панели управления |
 | GET | `/api/account/passkeys` | Только сессия входа | Список зарегистрированных Passkey |
 | POST | `/api/account/passkeys/begin` | Только сессия входа | Начать регистрацию Passkey |
 | POST | `/api/account/passkeys` | Только сессия входа | Завершить регистрацию Passkey |

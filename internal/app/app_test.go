@@ -983,3 +983,73 @@ func TestLoginRemembersUILanguage(t *testing.T) {
 		t.Fatalf("保存设置不应改写界面语言: %q", got)
 	}
 }
+
+// postWithLang 以指定 Accept-Language 发送 JSON 请求，返回状态码。
+func postWithLang(t *testing.T, c *http.Client, method, url, lang, body string) int {
+	t.Helper()
+	req, _ := http.NewRequest(method, url, strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept-Language", lang)
+	resp, err := c.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	return resp.StatusCode
+}
+
+// 管理员登录后在界面上切换语言时记录界面语言；只读账号与 API 令牌不能改，只读账号登录也不记录。
+func TestSwitchUILanguage(t *testing.T) {
+	for _, k := range []string{"GATELY_LANG", "LC_ALL", "LC_MESSAGES", "LANG"} {
+		t.Setenv(k, "")
+	}
+	t.Cleanup(func() { i18n.SetUILang("") })
+	a, srv, admin := loginApp(t)
+	if code := postWithLang(t, admin, "PUT", srv.URL+"/api/account/ui-language", "en", `{"language":"zh-CN"}`); code != 200 {
+		t.Fatalf("切换界面语言失败 %d", code)
+	}
+	if got := a.settingsSnapshot().UILanguage; got != "zh-CN" || i18n.ServerLang() != "zh-CN" {
+		t.Fatalf("界面语言未生效: %q %s", got, i18n.ServerLang())
+	}
+	var saved Settings
+	if _, err := a.store.Load(settingsName, &saved); err != nil || saved.UILanguage != "zh-CN" {
+		t.Fatalf("界面语言未写入设置文件: %q %v", saved.UILanguage, err)
+	}
+	if code := postWithLang(t, admin, "PUT", srv.URL+"/api/account/ui-language", "zh-CN", `{"language":"xx"}`); code != 400 {
+		t.Fatalf("不支持的语言应返回 400，实际 %d", code)
+	}
+
+	// 只读账号：登录不记录界面语言，也不能调用接口
+	if code, body := doJSON(t, admin, "POST", srv.URL+"/api/account/users", map[string]string{"username": "viewer", "password": "viewer-pass-1"}); code != 200 {
+		t.Fatalf("创建只读账号失败 %d %s", code, body)
+	}
+	jar, _ := cookiejar.New(nil)
+	ro := &http.Client{Jar: jar}
+	if code := postWithLang(t, ro, "POST", srv.URL+"/api/login", "ja", `{"username":"viewer","password":"viewer-pass-1"}`); code != 200 {
+		t.Fatalf("只读账号登录失败 %d", code)
+	}
+	if code := postWithLang(t, ro, "PUT", srv.URL+"/api/account/ui-language", "ja", `{"language":"ja"}`); code != 403 {
+		t.Fatalf("只读账号不应能切换服务端语言，实际 %d", code)
+	}
+
+	// API 令牌不能访问账号接口
+	_, body := doJSON(t, admin, "POST", srv.URL+"/api/tokens", map[string]any{"name": "测试", "scopes": []string{"status:read"}})
+	var created struct {
+		Secret string `json:"secret"`
+	}
+	_ = json.Unmarshal(body, &created)
+	req, _ := http.NewRequest("PUT", srv.URL+"/api/account/ui-language", strings.NewReader(`{"language":"ko"}`))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+created.Secret)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != 403 {
+		t.Fatalf("API 令牌不应能切换服务端语言，实际 %d", resp.StatusCode)
+	}
+	if got := a.settingsSnapshot().UILanguage; got != "zh-CN" {
+		t.Fatalf("界面语言不应被只读账号或令牌改变: %q", got)
+	}
+}

@@ -413,16 +413,23 @@ func hostOnly(h string) string {
 }
 
 // rememberUILanguage 记录登录时管理界面使用的语言（前端请求的 Accept-Language 即界面语言）。
-// 服务端语言为「跟随系统」且环境变量未指定语言时，日志与通知按该语言输出；语言没变时不写配置文件。
+// 服务端语言为「跟随系统」且环境变量未指定语言时，日志与通知按该语言输出。
 func (a *App) rememberUILanguage(r *http.Request) {
 	lang := i18n.FromAcceptLanguage(r.Header.Get("Accept-Language"))
 	if lang == "" {
 		return
 	}
+	if err := a.setUILanguage(lang); err != nil {
+		a.sysLogs.Add(logbuf.LevelWarn, "settings", "保存管理界面语言失败: "+err.Error())
+	}
+}
+
+// setUILanguage 保存管理界面语言并立即生效；语言没变时不写配置文件。
+func (a *App) setUILanguage(lang string) error {
 	a.settingsMu.Lock()
 	defer a.settingsMu.Unlock()
 	if a.settings.UILanguage == lang {
-		return
+		return nil
 	}
 	next := a.settings
 	next.UILanguage = lang
@@ -431,9 +438,31 @@ func (a *App) rememberUILanguage(r *http.Request) {
 		next.Listen = a.fileListen
 	}
 	if err := a.store.Save(settingsName, next); err != nil {
-		a.sysLogs.Add(logbuf.LevelWarn, "settings", "保存管理界面语言失败: "+err.Error())
-		return
+		return err
 	}
 	a.settings.UILanguage = lang
 	i18n.SetUILang(lang)
+	return nil
+}
+
+// handleUILanguage 在管理员登录状态下切换界面语言时调用，记录新的界面语言。
+// 位于 /api/account 下：API 令牌与只读账号不能访问，只有管理员的界面语言影响服务端输出。
+func (a *App) handleUILanguage(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Language string `json:"language"`
+	}
+	if err := httpx.ReadJSON(r, &req); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	lang := i18n.Normalize(req.Language)
+	if lang == "" {
+		httpx.Error(w, http.StatusBadRequest, "不支持的语言 %q", req.Language)
+		return
+	}
+	if err := a.setUILanguage(lang); err != nil {
+		httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
+		return
+	}
+	httpx.OK(w, map[string]string{"uiLanguage": lang})
 }

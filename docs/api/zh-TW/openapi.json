@@ -3233,6 +3233,61 @@
         "x-token-allowed": false
       }
     },
+    "/api/account/ui-language": {
+      "put": {
+        "description": "請求主體 `{\"language\": \"zh-CN\"}`。管理介面在管理員登入狀態下切換語言時呼叫；伺服端語言為「跟隨系統」且環境變數未指定語言時，記錄檔與通知依此語言輸出。僅限管理員登入工作階段。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "summary": "記錄管理介面語言",
+        "tags": [
+          "帳號"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/account/users": {
       "get": {
         "description": "僅限登入工作階段（管理員）使用。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",

@@ -22,9 +22,13 @@
 <script setup lang="ts">
 import { Check, Languages } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
+import { api } from '../api'
 import { setLocale } from '../i18n'
 import { locales } from '../i18n/locales'
 import { useScrollLock } from '../composables/useScrollLock'
+
+// remember 为 true 时（管理员已登录）把新语言告诉后端：服务端语言为「跟随系统」且环境变量未指定语言时，日志与通知随之切换
+const props = defineProps<{ remember?: boolean }>()
 
 const { t, locale } = useI18n()
 
@@ -33,11 +37,15 @@ const lockScroll = useScrollLock('.locale-popper')
 
 const ISSUES_URL = 'https://github.com/wangwanjie/gately/issues'
 
-function onCommand(code: string) {
-  if (code === '__notice') {
+async function onCommand(code: string) {
+  if (code === '__notice' || code === locale.value) {
     return
   }
-  setLocale(code)
+  await setLocale(code)
+  if (props.remember) {
+    // 只影响服务端输出语言，失败时不打扰用户，下次登录还会再记录
+    api.put('/api/account/ui-language', { language: locale.value }).catch(() => undefined)
+  }
 }
 </script>
 

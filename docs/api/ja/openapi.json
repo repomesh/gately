@@ -3233,6 +3233,61 @@
         "x-token-allowed": false
       }
     },
+    "/api/account/ui-language": {
+      "put": {
+        "description": "リクエストボディは `{\"language\": \"zh-CN\"}`。管理者としてログイン中に管理画面で言語を切り替えたときに呼び出されます。サーバー言語が「システムに従う」で環境変数に言語の指定がない場合、ログと通知はこの言語で出力されます。管理者のログインセッションでのみ利用できます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "管理画面の言語を記録",
+        "tags": [
+          "アカウント"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/account/users": {
       "get": {
         "description": "ログインセッション（管理者）でのみ利用できます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",

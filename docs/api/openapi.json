@@ -3233,6 +3233,61 @@
         "x-token-allowed": false
       }
     },
+    "/api/account/ui-language": {
+      "put": {
+        "description": "请求体 `{\"language\": \"zh-CN\"}`。管理界面在管理员登录状态下切换语言时调用；服务端语言为「跟随系统」且环境变量未指定语言时，日志与通知按该语言输出。仅管理员登录会话可用。\n\n**仅登录会话可用，API 令牌无法访问此接口。**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "summary": "记录管理界面语言",
+        "tags": [
+          "账号"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/account/users": {
       "get": {
         "description": "仅登录会话（管理员）可用。\n\n**仅登录会话可用，API 令牌无法访问此接口。**",

@@ -242,6 +242,7 @@ var apiCatalog = map[string]epDoc{
 	"POST /api/tokens/{id}/regenerate":                   {Summary: "重新生成令牌明文", Desc: "旧明文立即失效。"},
 	"DELETE /api/tokens/{id}":                            {Summary: "删除 API 令牌"},
 	"PUT /api/account":                                   {Summary: "修改管理员用户名与密码", Body: true},
+	"PUT /api/account/ui-language":                       {Summary: "记录管理界面语言", Desc: "请求体 `{\"language\": \"zh-CN\"}`。管理界面在管理员登录状态下切换语言时调用；服务端语言为「跟随系统」且环境变量未指定语言时，日志与通知按该语言输出。仅管理员登录会话可用。", Body: true},
 	"GET /api/account/totp":                              {Summary: "查看两步验证状态"},
 	"POST /api/account/totp/setup":                       {Summary: "生成两步验证密钥"},
 	"POST /api/account/totp/enable":                      {Summary: "启用两步验证", Body: true},

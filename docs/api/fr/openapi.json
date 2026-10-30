@@ -3233,6 +3233,61 @@
         "x-token-allowed": false
       }
     },
+    "/api/account/ui-language": {
+      "put": {
+        "description": "Corps de la requête : `{\"language\": \"zh-CN\"}`. Appelé par la console d'administration lorsque la langue change pendant une session administrateur ; si la langue du serveur est « Suivre le système » et que l'environnement n'indique aucune langue, les journaux et les notifications utilisent cette langue. Sessions administrateur uniquement.\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "summary": "Enregistrer la langue de la console d'administration",
+        "tags": [
+          "Compte"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/account/users": {
       "get": {
         "description": "Disponible uniquement pour les sessions de connexion (administrateur).\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",

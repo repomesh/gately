@@ -3233,6 +3233,61 @@
         "x-token-allowed": false
       }
     },
+    "/api/account/ui-language": {
+      "put": {
+        "description": "Request body `{\"language\": \"zh-CN\"}`. Called by the admin console when the language is switched while signed in as the administrator; when the server language is \"Follow system\" and the environment sets no language, logs and notifications use this language. Admin login sessions only.\n\n**Available only to login sessions; API tokens cannot access this endpoint.**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "summary": "Record the admin console language",
+        "tags": [
+          "Account"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/account/users": {
       "get": {
         "description": "Session login (administrator) only.\n\n**Available only to login sessions; API tokens cannot access this endpoint.**",

@@ -243,6 +243,7 @@ func (a *App) Handler() http.Handler {
 	rec.add("GET /api/session", a.handleSession, "")
 	rec.add("GET /api/status", a.handleStatus, "")
 	rec.add("PUT /api/account", a.handleAccount, "")
+	rec.add("PUT /api/account/ui-language", a.handleUILanguage, "")
 	rec.add("GET /api/account/passkeys", a.handlePasskeyList, "")
 	rec.add("POST /api/account/passkeys/begin", a.handlePasskeyBegin, "")
 	rec.add("POST /api/account/passkeys", a.handlePasskeyRegister, "")

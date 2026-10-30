@@ -648,6 +648,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | Method | Path | Required permission | Description |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | Login sessions only | Change the administrator username and password |
+| PUT | `/api/account/ui-language` | Login sessions only | Record the admin console language |
 | GET | `/api/account/passkeys` | Login sessions only | List registered Passkeys |
 | POST | `/api/account/passkeys/begin` | Login sessions only | Start Passkey registration |
 | POST | `/api/account/passkeys` | Login sessions only | Finish Passkey registration |

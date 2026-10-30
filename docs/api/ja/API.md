@@ -648,6 +648,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | メソッド | パス | 必要な権限 | 説明 |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | ログインセッションのみ | 管理者のユーザー名とパスワードを変更 |
+| PUT | `/api/account/ui-language` | ログインセッションのみ | 管理画面の言語を記録 |
 | GET | `/api/account/passkeys` | ログインセッションのみ | 登録済みの Passkey を一覧表示 |
 | POST | `/api/account/passkeys/begin` | ログインセッションのみ | Passkey の登録を開始 |
 | POST | `/api/account/passkeys` | ログインセッションのみ | Passkey の登録を完了 |

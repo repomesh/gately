@@ -648,6 +648,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | Método | Caminho | Permissão necessária | Descrição |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | Somente sessão de login | Modificar usuário e senha do administrador |
+| PUT | `/api/account/ui-language` | Somente sessão de login | Registrar o idioma do console de administração |
 | GET | `/api/account/passkeys` | Somente sessão de login | Listar Passkeys registradas |
 | POST | `/api/account/passkeys/begin` | Somente sessão de login | Iniciar o registro de uma Passkey |
 | POST | `/api/account/passkeys` | Somente sessão de login | Concluir o registro da Passkey |
