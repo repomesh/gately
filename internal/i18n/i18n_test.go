@@ -193,3 +193,25 @@ func TestCatalogLazyLoad(t *testing.T) {
 		t.Fatal("不存在的语言应返回 nil")
 	}
 }
+
+// 带前缀的日志行：通用模板（“%s失败: %v”）能整句匹配时，句中更具体的模板优先，避免前缀连同句子落进参数而漏翻。
+func TestSpecificTemplateInsidePrefixedLine(t *testing.T) {
+	testCatalog(map[string]string{
+		"%s失败: %v":        "%s failed: %v",
+		"来自 %s 的登录失败: %v": "Sign-in from %s failed: %v",
+		"用户名或密码错误":        "Incorrect username or password",
+		"加载 %s 失败: %w":    "failed to load %[1]s: %[2]s",
+	})
+	cases := map[string]string{
+		"[warn] [auth] 来自 1.2.3.4 的登录失败: 用户名或密码错误": "[warn] [auth] Sign-in from 1.2.3.4 failed: Incorrect username or password",
+		"来自 1.2.3.4 的登录失败: 用户名或密码错误":               "Sign-in from 1.2.3.4 failed: Incorrect username or password",
+		// 外层通用模板包住更具体的内层句子时，两层都要翻译
+		"加载 配置 失败: 来自 1.2.3.4 的登录失败: 用户名或密码错误": "failed to load 配置: Sign-in from 1.2.3.4 failed: Incorrect username or password",
+		"同步失败: 超时": "同步 failed: 超时",
+	}
+	for in, want := range cases {
+		if got := Tr("xx", in); got != want {
+			t.Errorf("Tr(%q) = %q，期望 %q", in, got, want)
+		}
+	}
+}

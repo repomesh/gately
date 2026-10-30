@@ -340,11 +340,16 @@ func (c *catalog) translateSlow(lang, s string, depth int) string {
 		return s
 	}
 	// 先尝试整句匹配，再对句中出现的已知模板逐段替换（如“加载失败: <内层错误>”）
-	for _, t := range c.tmpls {
+	for i, t := range c.tmpls {
 		if t.must != "" && !strings.Contains(s, t.must) {
 			continue
 		}
 		if m := t.re.FindStringSubmatchIndex(s); m != nil && m[0] == 0 && m[1] == len(s) {
+			// 句中还出现了更具体的模板时改走逐段替换：带前缀的日志行（“[warn] [auth] 来自 x 的登录失败: ...”）
+			// 会被“%s失败: %v”这类通用模板整句匹配，前缀连同具体句子落进参数里而无法翻译
+			if c.longerInside(s, i) {
+				break
+			}
 			return t.fill(lang, c.capture(lang, s, m, depth))
 		}
 	}
@@ -371,6 +376,22 @@ func (c *catalog) translateSlow(lang, s string, depth int) string {
 		}
 	}
 	return out
+}
+
+// longerInside 判断字面量比 tmpls[i] 更多的模板是否出现在句中（tmpls 已按字面量长度降序排列）。
+func (c *catalog) longerInside(s string, i int) bool {
+	for _, t := range c.tmpls[:i] {
+		if t.nlit <= c.tmpls[i].nlit {
+			break
+		}
+		if t.must != "" && !strings.Contains(s, t.must) {
+			continue
+		}
+		if t.re.MatchString(s) {
+			return true
+		}
+	}
+	return false
 }
 
 func (c *catalog) capture(lang, s string, m []int, depth int) []string {
