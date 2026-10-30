@@ -75,8 +75,9 @@ Os hostnames públicos e os serviços de origem (rotas) de um túnel com token f
 
 - O token precisa da permissão Cloudflare Tunnel: Edit e, para criar registros DNS automaticamente, DNS: Edit nas zonas correspondentes. A conta e o ID do túnel são lidos do token do túnel.
 - Cada regra tem um hostname, uma expressão regular de caminho opcional e um serviço (como `http://localhost:8080`, `ssh://localhost:22` ou `http_status:404`). As regras são comparadas em ordem e vale a primeira que corresponder. É possível ativar Ignorar a verificação TLS da origem e definir o cabeçalho Host para a origem; as demais configurações de origem são mantidas. O serviço padrão atende as requisições que não correspondem a nenhuma regra; o padrão é `http_status:404`.
-- As alterações valem assim que você salva, sem reiniciar o túnel. Se as rotas foram alteradas no painel da Cloudflare ou em outro lugar nesse meio-tempo, salvar pede para recarregar, preservando essas alterações.
-- Com Sincronizar DNS ativado, cada hostname recebe um registro CNAME com proxy apontando para `<ID do túnel>.cfargotunnel.com`; hostnames que já têm outros registros os mantêm e aparecem no resultado. Excluir uma regra mantém o registro DNS; remova-o na Cloudflare se necessário.
+- As alterações valem assim que você salva, sem reiniciar o túnel. Se as rotas foram alteradas no painel da Cloudflare ou em outro lugar nesse meio-tempo, salvar avisa e mostra Recarregar, preservando essas alterações. Serviços HTTP não podem ter caminho: uma `/` final solta (como `http://nas:5000/`) é removida ao salvar, pois o cloudflared rejeitaria a configuração inteira.
+- Quando o túnel é gerenciado por um arquivo de configuração local (o diálogo avisa que as rotas remotas não se aplicam), salvar pede mais uma confirmação: depois de gravar a configuração remota, o túnel passa a ser gerenciado remotamente e as rotas do arquivo de configuração local deixam de valer.
+- Com Sincronizar DNS ativado, cada hostname recebe um registro CNAME com proxy apontando para `<ID do túnel>.cfargotunnel.com`; hostnames que já têm outros registros, ou um CNAME para o túnel sem proxy (o tráfego então não entra no túnel), os mantêm e aparecem no resultado. As zonas são procuradas apenas na conta do túnel. Excluir uma regra mantém o registro DNS; remova-o na Cloudflare se necessário.
 
 ## Como escolher
 

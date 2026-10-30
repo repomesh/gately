@@ -7,6 +7,10 @@ description: Release announcements and notes for each Gately version.
 
 Announcements for major releases are listed below. See [GitHub Releases](https://github.com/wangwanjie/gately/releases) for the full changes and downloads of every version.
 
+## [v0.6.1.1](/en/news/v0.6.1.1)
+
+October 30, 2026 · Intrusion Prevention bans web path probing; a new Auth users page manages shared users and OIDC; shared users can change their own password; sites can close the connection when access is denied; Cloudflare token tunnel routes can be edited in Gately; logs get an Exclude filter.
+
 ## [v0.6.1](/en/news/v0.6.1)
 
 October 30, 2026 · Security fix: read-only accounts and read-only API tokens can no longer read container environment variables and start commands in plain text; certificates can be issued over IPv4 only or IPv6 only; the Docker page no longer upgrades or recreates Gately's own container; notifications and logs follow the admin interface language.

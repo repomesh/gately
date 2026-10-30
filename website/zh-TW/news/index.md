@@ -7,6 +7,10 @@ description: Gately 各版本的發布公告與更新說明。
 
 重要版本的發布公告如下，每個版本的完整變更與下載檔案見 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.6.1.1](/zh-TW/news/v0.6.1.1)
+
+2026 年 10 月 30 日 · 入侵防護新增 Web 路徑探測封鎖；新增「認證使用者」頁面集中管理共用使用者與 OIDC；共用使用者可自助修改密碼；站台被拒絕時可直接中斷連線；Cloudflare 權杖通道可在 Gately 中編輯路由規則；日誌新增「不包含」篩選。
+
 ## [v0.6.1](/zh-TW/news/v0.6.1)
 
 2026 年 10 月 30 日 · 安全修復：唯讀帳號與唯讀 API 權杖不再能讀到容器環境變數與啟動命令明文；憑證可限定 IPv4 或 IPv6 簽發；Docker 頁面不再升級或重建 Gately 自身容器；通知與日誌跟隨管理介面語言。

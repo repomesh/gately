@@ -167,7 +167,8 @@ Turn on Self-service password change on the Auth users page and shared users can
 
 - Visit `https://site-domain/__gately_auth/password` on a site with Use shared users enabled; the login page also shows a Change password link. Users of [OIDC single sign-on](/en/docs/modules/oidc) can use `/__gately_oidc/password` on the issuer domain;
 - Enter the username, the current password and the new password twice (8–128 characters, different from the current one); users with TOTP also enter a verification code;
-- Afterwards the user's sessions on all sites end immediately and they sign in again with the new password; issued OIDC refresh tokens and Access Tokens are revoked as well;
+- Afterwards the user's sessions on all sites end immediately and they sign in again with the new password; issued OIDC refresh tokens are revoked and old Access Tokens can no longer read user info, while tokens that apps validate on their own stay valid until they expire, and the apps' own sign-in sessions are unaffected;
+- After a successful change, the same account cannot change its password again for 1 minute, so repeated changes do not keep FTP and SMB reloading and dropping other people's connections; when a service check rejects the save, the details go only to the web service log and the page asks the user to contact the administrator;
 - A wrong current password or code counts toward the same rate limit and automatic ban as failed logins, and forms submitted from other websites are rejected; the web service log records the user and source IP;
 - The same page can also change the password of [shared file users](/en/docs/modules/tools#shared-users). Each kind of account has its own switch; with both on, the page lets the user pick the account type. Accounts of the two kinds with the same name are independent.
 

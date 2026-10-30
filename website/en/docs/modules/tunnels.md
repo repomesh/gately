@@ -75,8 +75,9 @@ The public hostnames and origin services (routes) of a token tunnel are stored o
 
 - The token needs the Cloudflare Tunnel: Edit permission, plus DNS: Edit on the zones to create DNS records automatically. The account and tunnel ID are read from the tunnel token.
 - Each rule has a hostname, an optional path regex and a service (such as `http://localhost:8080`, `ssh://localhost:22` or `http_status:404`). Rules are matched in order and the first match wins. You can turn on Skip origin TLS verification and set the origin Host header; other origin settings are kept. The catch-all service handles requests that match no rule and defaults to `http_status:404`.
-- Changes apply as soon as you save, with no tunnel restart. If the routes were changed in the Cloudflare dashboard or elsewhere in the meantime, saving asks you to refresh so their changes are kept.
-- With Sync DNS on, each hostname gets a proxied CNAME record pointing to `<tunnel ID>.cfargotunnel.com`; hostnames that already have other records keep them and are listed in the result. Deleting a rule keeps its DNS record; remove it in Cloudflare if needed.
+- Changes apply as soon as you save, with no tunnel restart. If the routes were changed in the Cloudflare dashboard or elsewhere in the meantime, saving says so and shows Reload, so their changes are kept. HTTP services cannot have a path: a lone trailing `/` (such as `http://nas:5000/`) is removed on save, since cloudflared would reject the whole config.
+- When the tunnel is managed by a local config file (the dialog notes that remote routes do not apply), saving asks for confirmation once more: after the remote config is written, the tunnel is managed remotely and the routes in the local config file stop applying.
+- With Sync DNS on, each hostname gets a proxied CNAME record pointing to `<tunnel ID>.cfargotunnel.com`; hostnames that already have other records, or a CNAME to the tunnel that is not proxied (traffic then does not enter the tunnel), keep them and are listed in the result. Zones are looked up only in the tunnel's account. Deleting a rule keeps its DNS record; remove it in Cloudflare if needed.
 
 ## How to choose
 

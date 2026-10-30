@@ -7,6 +7,10 @@ description: Anuncios y notas de cada versión de Gately.
 
 A continuación se listan los anuncios de las versiones principales. Consulta [GitHub Releases](https://github.com/wangwanjie/gately/releases) para ver todos los cambios y las descargas de cada versión.
 
+## [v0.6.1.1](/es/news/v0.6.1.1)
+
+30 de octubre de 2026 · La prevención de intrusiones bloquea el sondeo de rutas web; una nueva página Usuarios de autenticación gestiona los usuarios compartidos y OIDC; los usuarios compartidos pueden cambiar su propia contraseña; los sitios pueden cerrar la conexión al denegar el acceso; las rutas de los túneles de Cloudflare con token se editan en Gately; los registros incorporan un filtro Excluir.
+
 ## [v0.6.1](/es/news/v0.6.1)
 
 30 de octubre de 2026 · Corrección de seguridad: las cuentas y los tokens de API de solo lectura ya no pueden leer en texto plano las variables de entorno ni los comandos de inicio de los contenedores; los certificados pueden emitirse solo por IPv4 o solo por IPv6; la página de Docker ya no actualiza ni recrea el propio contenedor de Gately; las notificaciones y los registros siguen el idioma de la interfaz de administración.
