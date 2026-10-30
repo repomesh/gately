@@ -885,6 +885,58 @@ func TestContainerEditAPI(t *testing.T) {
 	}
 }
 
+// 按容器名编辑时，旧容器的停止、改名与删除都应使用完整 ID：改名备份后原名归新容器，
+// 按名称删除会误删刚创建的新容器。
+func TestContainerEditByName(t *testing.T) {
+	info := ctrSampleInfo(t)
+	var oldID string
+	_ = json.Unmarshal(info["Id"], &oldID)
+	newID := strings.Repeat("f", 64)
+	f, host := newCtrFake(t, map[string]http.HandlerFunc{
+		"GET /containers/web/json":              ctrJSON(info),
+		"POST /containers/" + oldID + "/stop":   ctrStatus(204),
+		"POST /containers/" + oldID + "/rename": ctrStatus(204),
+		"POST /containers/create":               ctrJSON(map[string]string{"Id": newID}),
+		"POST /networks/backend/connect":        ctrStatus(200),
+		"POST /containers/" + newID + "/start":  ctrStatus(204),
+		"DELETE /containers/" + oldID:           ctrStatus(204),
+	})
+	_, api := ctrAPI(t, host)
+	rec := api("POST", "/containers/web/edit", "application/json", jsonBody(specFromInspect(info, nil)))
+	if rec.Code != 200 || !strings.Contains(rec.Body.String(), newID) {
+		t.Fatalf("按名称编辑失败: %d %s", rec.Code, rec.Body)
+	}
+	if f.called("DELETE /containers/"+oldID) != 1 || f.called("DELETE /containers/web") != 0 {
+		t.Errorf("应按完整 ID 删除旧容器，不能按名称删除: %v", f.calls)
+	}
+	if f.called("DELETE /containers/"+newID) != 0 {
+		t.Errorf("新容器不应被删除: %v", f.calls)
+	}
+}
+
+// 按容器名编辑失败时，恢复旧容器也应使用完整 ID（原名已不再指向旧容器）。
+func TestContainerEditByNameRestoresOld(t *testing.T) {
+	info := ctrSampleInfo(t)
+	var oldID string
+	_ = json.Unmarshal(info["Id"], &oldID)
+	f, host := newCtrFake(t, map[string]http.HandlerFunc{
+		"GET /containers/web/json":              ctrJSON(info),
+		"POST /containers/" + oldID + "/stop":   ctrStatus(204),
+		"POST /containers/" + oldID + "/rename": ctrStatus(204),
+		"POST /containers/create":               ctrStatus(500),
+		"POST /containers/" + oldID + "/start":  ctrStatus(204),
+	})
+	_, api := ctrAPI(t, host)
+	rec := api("POST", "/containers/web/edit", "application/json", jsonBody(specFromInspect(info, nil)))
+	if rec.Code != http.StatusBadGateway {
+		t.Fatalf("创建失败应返回 502: %d %s", rec.Code, rec.Body)
+	}
+	// 一次改名备份、一次恢复原名，且旧容器被重新启动
+	if f.called("POST /containers/"+oldID+"/rename") != 2 || f.called("POST /containers/"+oldID+"/start") != 1 || f.called("POST /containers/web/") != 0 {
+		t.Errorf("应按完整 ID 恢复旧容器: %v", f.calls)
+	}
+}
+
 func TestContainerDetailAndListAPI(t *testing.T) {
 	info := ctrSampleInfo(t)
 	var id string

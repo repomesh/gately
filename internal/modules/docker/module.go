@@ -239,6 +239,13 @@ func (m *Module) rebuild(c *Client, id string, info map[string]json.RawMessage, 
 		Running bool `json:"Running"`
 	}
 	_ = json.Unmarshal(info["State"], &state)
+	// 调用方传入的 id 可能是容器名或 ID 前缀。旧容器改名备份后原名归新容器所有，
+	// 之后按原名操作（恢复、删除旧容器）会落到新容器上，因此统一改用 inspect 得到的完整 ID
+	var fullID string
+	_ = json.Unmarshal(info["Id"], &fullID)
+	if fullID != "" {
+		id = fullID
+	}
 
 	// step 为单个容器操作提供独立超时
 	step := func(fn func(context.Context) error) error {
