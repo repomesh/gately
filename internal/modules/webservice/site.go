@@ -549,23 +549,23 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.pipeline.ServeHTTP(rec, r)
 }
 
-// accessCheck 执行站点的访问控制：封禁、IP 名单、国家过滤与限流。不通过时已写出 403 或 429 并返回 false；
+// accessCheck 执行站点的访问控制：封禁、IP 名单、国家过滤与限流。不通过时已写出 403 或 429（开启拒绝时断开连接则直接断开）并返回 false；
 // 通过时返回的 release 需在请求结束后调用，以释放限流的并发计数。签发者域名上的 OIDC 协议路径同样经过这里。
 func (h *siteHandler) accessCheck(w http.ResponseWriter, r *http.Request) (release func(), ok bool) {
 	client := clientAddr(r)
 	noop := func() {}
 	if h.auth.banned(client.Addr()) {
-		http.Error(w, "403 Forbidden", http.StatusForbidden)
+		h.deny(w)
 		return noop, false
 	}
 	if !h.allowedIP(client.Addr(), h.matchRule(r.URL.Path)) {
 		h.reqLog(r).Warnf("拒绝 %s 访问 %s（访问控制）", client.Addr(), r.Host)
-		http.Error(w, "403 Forbidden", http.StatusForbidden)
+		h.deny(w)
 		return noop, false
 	}
 	if !h.countryAllowed(client.Addr()) {
 		h.reqLog(r).Warnf("拒绝 %s 访问 %s（国家过滤：%s）", client.Addr(), r.Host, geoip.Default.Country(client.Addr()))
-		http.Error(w, "403 Forbidden", http.StatusForbidden)
+		h.deny(w)
 		return noop, false
 	}
 	if h.limiter != nil {
@@ -578,6 +578,20 @@ func (h *siteHandler) accessCheck(w http.ResponseWriter, r *http.Request) (relea
 		return rel, true
 	}
 	return noop, true
+}
+
+// deny 拒绝一次访问控制未通过的请求：站点开启了“拒绝时断开连接”时不写响应直接断开，
+// 访问日志与统计记为 444（与断开连接站点相同，HTTP/2、HTTP/3 下重置这个请求流）；否则返回 403。
+func (h *siteHandler) deny(w http.ResponseWriter) {
+	if h.site.DenyClose {
+		// 经 ServeHTTP 进来时 w 是 statusRecorder，改记录的状态码供 defer 中的访问日志使用；
+		// 签发者域名上的 OIDC 协议路径直接传入原始 ResponseWriter，无需记录
+		if rec, ok := w.(*statusRecorder); ok {
+			rec.status = statusClosed
+		}
+		panic(http.ErrAbortHandler)
+	}
+	http.Error(w, "403 Forbidden", http.StatusForbidden)
 }
 
 // serveInner 处理跨域、认证并交给站点处理器。

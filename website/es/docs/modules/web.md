@@ -177,6 +177,18 @@ Activa Cambio de contraseña por el usuario en Ajustes globales → Usuarios com
 
 El «Control de acceso por IP» de la página «Seguridad» del sitio puede estar desactivado, en modo lista de permitidas o en modo lista de bloqueadas. La lista admite una IP o subred por línea (como `192.168.1.0/24`) y además puede hacer referencia a listas de IP suscritas.
 
+### Al denegar
+
+**Al denegar**, en la pestaña Seguridad del sitio, decide qué pasa con las solicitudes rechazadas por un bloqueo, el control de acceso por IP (incluidas las reglas de ruta) o el filtro de países: por defecto **Devolver 403**; **Cerrar conexión** no envía nada y corta la solicitud, registrada como 444, igual que un sitio Cerrar conexión. Con una lista de permitidos deja pasar tus propias IP y corta al resto. La limitación de tasa (429) y los bloqueos del WAF no cambian.
+
+Cerrar la conexión, como tipo de sitio o como acción al denegar, solo evita la respuesta HTTP y no oculta que el servicio está activo:
+
+- el handshake TCP ya se completó, así que el cliente sabe que el puerto escucha;
+- HTTP/1.x cierra la conexión, mientras que HTTP/2 y HTTP/3 solo reinician la solicitud y mantienen la conexión abierta para reutilizarla;
+- en HTTPS, los dominios sin certificado ya fallan durante el handshake TLS, así que las solicitudes que llegan al sitio por defecto ya recibieron el certificado y los dominios que contiene.
+
+Para que los escáneres solo vean tiempos de espera después, bloquea sus direcciones en [Prevención de intrusiones](/es/docs/modules/guard); con la sincronización del cortafuegos activada, su tráfico se descarta en el kernel.
+
 ### Listas de IP suscritas
 
 Añade listas en «Ajustes globales → Listas de IP suscritas»: indica la URL de descarga y el intervalo de actualización (24 horas por defecto). Gately las descarga periódicamente y las guarda en caché en el directorio de configuración, de modo que tras un reinicio se pueden usar sin conexión a Internet. El contenido admite una IP, un CIDR o un rango `inicio-fin` por línea; lo que va detrás de `#`, `;` o `//` es un comentario. Por ejemplo, para los rangos de IP de provincias y ciudades chinas puedes usar `https://metowolf.github.io/iplist/data/cncity/440000.txt` (provincia de Guangdong) de [metowolf/iplist](https://github.com/metowolf/iplist).

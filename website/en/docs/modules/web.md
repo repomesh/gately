@@ -177,6 +177,18 @@ Turn on Self-service password change in Global settings → Shared users and sha
 
 "IP access control" on the site's "Security" page can be off, allowlist or blocklist. The list takes one IP or subnet per line (such as `192.168.1.0/24`), and can also reference subscribed IP lists.
 
+### When denied
+
+**When denied** on the site's Security tab decides how requests rejected by a ban, IP access control (including path rules) or the country filter are handled: **Return 403** by default; **Close connection** sends nothing and drops the request, logged as 444, the same as a Close connection site. Combined with an allowlist this lets your own IPs in and drops everyone else. Rate limiting (429) and WAF blocks are not affected.
+
+Closing the connection, as a site type or as the deny action, only withholds the HTTP response and cannot hide that the service is up:
+
+- the TCP handshake has completed, so the client knows the port is listening;
+- HTTP/1.x closes the connection, while HTTP/2 and HTTP/3 only reset the request and keep the connection open for reuse;
+- over HTTPS, domains without a certificate already fail during the TLS handshake, so requests that reach the default site have received the certificate and the domain names in it.
+
+To make scanners see only timeouts afterwards, ban their addresses in [Intrusion Prevention](/en/docs/modules/guard); with firewall sync on, their traffic is dropped in the kernel.
+
 ### Subscribed IP lists
 
 Add lists under "Global settings → Subscribed IP lists": enter the URL and refresh interval (24 hours by default). Gately downloads each list on schedule and caches it in the configuration directory, so it works after a restart without network access. The content has one IP, CIDR or `start-end` range per line; anything after `#`, `;` or `//` is a comment. For Chinese provinces and cities you can use [metowolf/iplist](https://github.com/metowolf/iplist), for example `https://metowolf.github.io/iplist/data/cncity/440000.txt` (Guangdong).

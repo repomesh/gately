@@ -1615,6 +1615,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `cors` | boolean |
 | `countries` | Array of string |
 | `countryMode` | string |
+| `denyClose` | boolean |
 | `disableKeepAlives` | boolean |
 | `domains` | Array of string |
 | `enable` | boolean |

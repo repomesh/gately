@@ -177,6 +177,18 @@ Ative Troca de senha pelo próprio usuário em Configurações globais → Usuá
 
 O "Controle de acesso por IP" na página "Segurança" do site pode ficar desativado, como lista de permissão ou como lista de bloqueio. A lista recebe um IP ou sub-rede por linha (como `192.168.1.0/24`) e também pode referenciar listas de IP assinadas.
 
+### Ao negar
+
+**Ao negar**, na aba Segurança do site, define o que acontece com requisições rejeitadas por um banimento, pelo controle de acesso por IP (incluindo regras de caminho) ou pelo filtro de países: por padrão **Retornar 403**; **Fechar conexão** não envia nada e derruba a requisição, registrada como 444, igual a um site Fechar conexão. Com uma lista de permitidos, seus próprios IPs passam e o restante é derrubado. Limite de taxa (429) e bloqueios do WAF não mudam.
+
+Fechar a conexão, como tipo de site ou como ação ao negar, apenas omite a resposta HTTP e não esconde que o serviço está no ar:
+
+- o handshake TCP já foi concluído, então o cliente sabe que a porta está escutando;
+- o HTTP/1.x fecha a conexão, enquanto HTTP/2 e HTTP/3 só redefinem a requisição e mantêm a conexão aberta para reutilização;
+- no HTTPS, domínios sem certificado já falham no handshake TLS, então as requisições que chegam ao site padrão já receberam o certificado e os domínios nele.
+
+Para que scanners vejam apenas tempo esgotado depois, bana os endereços deles na [Prevenção de intrusão](/pt-BR/docs/modules/guard); com a sincronização do firewall ativada, o tráfego deles é descartado no kernel.
+
 ### Listas de IP assinadas
 
 Adicione listas em "Configurações globais → Listas de IP assinadas": informe a URL e o intervalo de atualização (padrão de 24 horas). O Gately baixa a lista periodicamente e guarda uma cópia no diretório de configuração, que continua disponível após reiniciar, mesmo sem acesso à internet. O conteúdo tem um IP, CIDR ou intervalo `início-fim` por linha; tudo depois de `#`, `;` ou `//` é comentário. Para faixas de IP de províncias e cidades chinesas, use, por exemplo, `https://metowolf.github.io/iplist/data/cncity/440000.txt` (província de Guangdong) do [metowolf/iplist](https://github.com/metowolf/iplist).

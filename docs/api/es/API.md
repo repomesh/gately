@@ -1615,6 +1615,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `cors` | boolean |
 | `countries` | Lista de string |
 | `countryMode` | string |
+| `denyClose` | boolean |
 | `disableKeepAlives` | boolean |
 | `domains` | Lista de string |
 | `enable` | boolean |

@@ -177,6 +177,18 @@ Aktivieren Sie unter Globale Einstellungen → Gemeinsame Benutzer die Option Pa
 
 „IP-Zugriffskontrolle“ auf der Seite „Sicherheit“ der Site kann aus, Allowlist oder Blocklist sein. Die Liste nimmt je Zeile eine IP oder ein Subnetz auf (etwa `192.168.1.0/24`); zusätzlich lassen sich abonnierte IP-Listen einbinden.
 
+### Bei Ablehnung
+
+**Bei Ablehnung** im Tab Sicherheit der Site legt fest, wie Anfragen behandelt werden, die durch eine Sperre, die IP-Zugriffskontrolle (einschließlich Pfadregeln) oder den Länderfilter abgelehnt werden: standardmäßig **403 zurückgeben**; **Verbindung schließen** sendet nichts und bricht die Anfrage ab, protokolliert als 444, wie bei einer Site vom Typ Verbindung schließen. Zusammen mit einer Allowlist kommen eigene IPs durch, alle anderen werden abgewiesen. Ratenbegrenzung (429) und WAF-Blockaden bleiben unverändert.
+
+Das Schließen der Verbindung, ob als Site-Typ oder als Ablehnungsaktion, hält nur die HTTP-Antwort zurück und verbirgt nicht, dass der Dienst läuft:
+
+- der TCP-Handshake ist abgeschlossen, der Client weiß also, dass der Port lauscht;
+- HTTP/1.x schließt die Verbindung, HTTP/2 und HTTP/3 setzen nur die Anfrage zurück und halten die Verbindung zur Wiederverwendung offen;
+- bei HTTPS scheitern Domains ohne Zertifikat schon im TLS-Handshake; Anfragen, die die Standard-Site erreichen, haben das Zertifikat und die darin enthaltenen Domains bereits erhalten.
+
+Damit Scanner danach nur noch Zeitüberschreitungen sehen, sperren Sie ihre Adressen im [Einbruchschutz](/de/docs/modules/guard); mit Firewall-Synchronisierung wird ihr Verkehr im Kernel verworfen.
+
 ### Abonnierte IP-Listen
 
 Legen Sie Listen unter „Globale Einstellungen → Abonnierte IP-Listen“ an: Geben Sie die URL und das Aktualisierungsintervall an (standardmäßig 24 Stunden). Gately lädt die Liste regelmäßig herunter und speichert sie im Konfigurationsverzeichnis, sodass sie nach einem Neustart auch ohne Internetverbindung verfügbar ist. Der Inhalt enthält je Zeile eine IP, ein CIDR oder einen Bereich `Start-Ende`; alles nach `#`, `;` oder `//` gilt als Kommentar. IP-Bereiche chinesischer Provinzen und Städte liefert etwa [metowolf/iplist](https://github.com/metowolf/iplist), zum Beispiel `https://metowolf.github.io/iplist/data/cncity/440000.txt` (Provinz Guangdong).

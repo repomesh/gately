@@ -1615,6 +1615,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `cors` | boolean |
 | `countries` | Tableau de string |
 | `countryMode` | string |
+| `denyClose` | boolean |
 | `disableKeepAlives` | boolean |
 | `domains` | Tableau de string |
 | `enable` | boolean |

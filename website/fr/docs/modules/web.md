@@ -177,6 +177,18 @@ Activez Changement de mot de passe en libre-service dans Paramètres globaux →
 
 Le « Contrôle d'accès par IP » de la page « Sécurité » du site peut être désactivé, en liste d'autorisation ou en liste de blocage. La liste accepte une IP ou un sous-réseau par ligne (comme `192.168.1.0/24`), et peut aussi référencer des listes d'IP abonnées.
 
+### En cas de refus
+
+**En cas de refus**, dans l'onglet Sécurité du site, détermine le traitement des requêtes rejetées par un bannissement, le contrôle d'accès par IP (règles de chemin comprises) ou le filtre par pays : **Renvoyer 403** par défaut ; **Fermer la connexion** n'envoie rien et coupe la requête, journalisée en 444, comme un site Fermer la connexion. Associé à une liste d'autorisation, cela laisse passer vos propres IP et coupe toutes les autres. La limitation de débit (429) et les blocages du WAF ne changent pas.
+
+Fermer la connexion, comme type de site ou comme action de refus, retient seulement la réponse HTTP et ne masque pas que le service fonctionne :
+
+- la poignée de main TCP est terminée, le client sait donc que le port écoute ;
+- HTTP/1.x ferme la connexion, alors que HTTP/2 et HTTP/3 ne réinitialisent que la requête et gardent la connexion ouverte, réutilisable ;
+- en HTTPS, les domaines sans certificat échouent déjà pendant la poignée de main TLS : les requêtes qui atteignent le site par défaut ont reçu le certificat et les noms de domaine qu'il contient.
+
+Pour que les scanners ne voient ensuite que des délais d'attente, bannissez leurs adresses dans [Prévention d'intrusion](/fr/docs/modules/guard) ; avec la synchronisation du pare-feu, leur trafic est rejeté dans le noyau.
+
 ### Listes d'IP abonnées
 
 Ajoutez des listes dans « Paramètres globaux → Listes d'IP abonnées » : indiquez l'URL de téléchargement et l'intervalle d'actualisation (24 heures par défaut). Gately télécharge la liste périodiquement et la met en cache dans le répertoire de configuration, elle reste donc utilisable après un redémarrage sans accès à Internet. Le contenu comporte une IP, un CIDR ou une plage `début-fin` par ligne ; tout ce qui suit `#`, `;` ou `//` est un commentaire. Pour les plages d'IP des provinces et villes chinoises, vous pouvez par exemple utiliser `https://metowolf.github.io/iplist/data/cncity/440000.txt` (province du Guangdong) de [metowolf/iplist](https://github.com/metowolf/iplist).

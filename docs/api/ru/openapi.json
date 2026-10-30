@@ -2239,6 +2239,9 @@
           "countryMode": {
             "type": "string"
           },
+          "denyClose": {
+            "type": "boolean"
+          },
           "disableKeepAlives": {
             "type": "boolean"
           },

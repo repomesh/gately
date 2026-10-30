@@ -1615,6 +1615,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `cors` | boolean |
 | `countries` | Массив из string |
 | `countryMode` | string |
+| `denyClose` | boolean |
 | `disableKeepAlives` | boolean |
 | `domains` | Массив из string |
 | `enable` | boolean |

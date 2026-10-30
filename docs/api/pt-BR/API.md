@@ -1615,6 +1615,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `cors` | boolean |
 | `countries` | Array de string |
 | `countryMode` | string |
+| `denyClose` | boolean |
 | `disableKeepAlives` | boolean |
 | `domains` | Array de string |
 | `enable` | boolean |

@@ -1615,6 +1615,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `cors` | boolean |
 | `countries` | Array von string |
 | `countryMode` | string |
+| `denyClose` | boolean |
 | `disableKeepAlives` | boolean |
 | `domains` | Array von string |
 | `enable` | boolean |

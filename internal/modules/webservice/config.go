@@ -105,6 +105,9 @@ type Site struct {
 	CountryMode string `json:"countryMode"`
 	// Countries 为两位 ISO 国家代码，如 CN、US
 	Countries []string `json:"countries"`
+	// DenyClose 为 true 时，被封禁、IP 访问控制（含路径规则）或国家过滤拒绝的请求不返回 403，
+	// 而是像断开连接站点一样不写响应直接断开（访问日志记为 444），用于“自家 IP 放行、其余断开”
+	DenyClose bool `json:"denyClose"`
 	// ForwardAuth 把认证交给外部服务（如 Authelia），与基本认证、网页认证不能同时使用
 	ForwardAuth ForwardAuth `json:"forwardAuth"`
 	// AuthOptional 为 true 时，认证只作用于路径规则中标记为"必须认证"的路径，其余路径公开

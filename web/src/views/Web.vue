@@ -259,6 +259,7 @@
                 <el-radio-button value="close">{{ t('web.typeClose') }}</el-radio-button>
               </el-radio-group>
               <div v-if="site.type === 'close'" class="form-help">{{ t('web.typeCloseHelp') }}</div>
+              <div v-if="site.type === 'close'" class="form-help">{{ t('web.typeCloseLimit') }}</div>
             </el-form-item>
             <template v-if="site.type === 'proxy'">
               <el-form-item :label="t('web.targets')" required>
@@ -403,6 +404,13 @@
               <div class="form-help">{{ site.ipMode === 'whitelist' ? t('web.ipSetsWhitelistHelp') : t('web.ipSetsHelp') }}</div>
             </el-form-item>
             <SiteAccess v-model:site="site" :tls="siteTls" :port="sitePort" :ip-lists="ipLists" />
+            <el-form-item :label="t('web.denyAction')">
+              <el-radio-group v-model="site.denyClose">
+                <el-radio-button :value="false">{{ t('web.deny403') }}</el-radio-button>
+                <el-radio-button :value="true">{{ t('web.denyClose') }}</el-radio-button>
+              </el-radio-group>
+              <div class="form-help">{{ t('web.denyActionHelp') }}</div>
+            </el-form-item>
             <el-form-item :label="t('web.wafInstance')">
               <el-select v-model="site.waf" clearable :placeholder="t('web.wafNone')" class="w-260">
                 <el-option v-for="w in wafInstances" :key="w.key" :label="w.name" :value="w.key" />
@@ -574,6 +582,8 @@ interface Site {
   forwardAuth: { url: string; loginUrl: string; copyHeaders: string[] | null }
   countryMode: string
   countries: string[] | null
+  // denyClose 为 true 时访问控制拒绝的请求直接断开连接（记为 444），不返回 403
+  denyClose: boolean
   rules: PathRule[]
   shareLinks: ShareLink[]
   lbPolicy: string
@@ -762,6 +772,7 @@ function emptySite(): Site {
     forwardAuth: { url: '', loginUrl: '', copyHeaders: [] },
     countryMode: '',
     countries: [],
+    denyClose: false,
     rules: [],
     shareLinks: [],
     lbPolicy: '',
