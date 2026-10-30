@@ -259,3 +259,19 @@ func TestSpecificTemplateInsidePrefixedLine(t *testing.T) {
 		}
 	}
 }
+
+// 以字面量开头的模板已锚定句首，即使句中出现字面量更多的模板，也按整句匹配翻译
+func TestLiteralLeadTemplateKeepsWholeMatch(t *testing.T) {
+	testCatalog(map[string]string{
+		"解析配置 %s 失败: %w":         "Failed to parse configuration %s: %w",
+		"配置 %s 已回滚到历史版本 %s，正在重启": "Configuration %s rolled back to history version %s, restarting",
+	})
+	cases := map[string]string{
+		"解析配置 abc 失败: 配置 abc 已回滚到历史版本 v1，正在重启": "Failed to parse configuration abc: Configuration abc rolled back to history version v1, restarting",
+	}
+	for in, want := range cases {
+		if got := Tr("xx", in); got != want {
+			t.Errorf("Tr(%q) = %q，期望 %q", in, got, want)
+		}
+	}
+}

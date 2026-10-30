@@ -150,6 +150,8 @@ type tmpl struct {
 	re   *regexp.Regexp
 	out  string
 	nlit int
+	// lead 为模板以动词开头（如“%s失败: %v”）：整句匹配时前缀会落进第一个参数
+	lead bool
 	// must 是模板中最长的固定片段，用于在跑正则前快速排除不相关的句子
 	must string
 }
@@ -257,7 +259,7 @@ func buildCatalog(m map[string]string) *catalog {
 		if err != nil {
 			continue
 		}
-		c.tmpls = append(c.tmpls, &tmpl{re: re, out: v, nlit: nlit, must: must})
+		c.tmpls = append(c.tmpls, &tmpl{re: re, out: v, nlit: nlit, must: must, lead: locs[0][0] == 0})
 		// 模板同时保留一份精确匹配，避免格式串本身被当作普通文本时漏翻
 		c.exact[k] = v
 	}
@@ -386,8 +388,9 @@ func (c *catalog) translateSlow(lang, s string, depth int) string {
 		}
 		if m := t.re.FindStringSubmatchIndex(s); m != nil && m[0] == 0 && m[1] == len(s) {
 			// 句中还出现了更具体的模板时改走逐段替换：带前缀的日志行（“[warn] [auth] 来自 x 的登录失败: ...”）
-			// 会被“%s失败: %v”这类通用模板整句匹配，前缀连同具体句子落进参数里而无法翻译
-			if c.longerInside(s, i) {
+			// 会被“%s失败: %v”这类通用模板整句匹配，前缀连同具体句子落进参数里而无法翻译。
+			// 只有以动词开头的模板会把前缀吞进参数；以字面量开头的模板已锚定句首，整句匹配更准确
+			if t.lead && c.longerInside(s, i) {
 				break
 			}
 			return t.fill(lang, c.capture(lang, s, m, depth))
