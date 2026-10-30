@@ -52,7 +52,7 @@ func (c *Config) Validate() error {
 	return nil
 }
 
-// Render 把 s 中的 {name}（或 Lucky 风格的 #{name}）替换为 vars[name]；未知变量保持原样。
+// Render 把 s 中的 {name}（或 #{name}）替换为 vars[name]；未知变量保持原样。
 // escape 不为 nil 时对替换值做转义（例如 URL 中使用 url.QueryEscape）。
 func Render(s string, vars map[string]string, escape func(string) string) string {
 	if !strings.Contains(s, "{") {

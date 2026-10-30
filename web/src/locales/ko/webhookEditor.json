@@ -10,5 +10,5 @@
   "timeout": "제한 시간(초)",
   "ignoreCertError": "인증서 오류 무시",
   "variables": "사용 가능한 변수",
-  "varsTip": "{plain} 또는 {lucky}"
+  "varsTip": "{plain} 또는 {hash}"
 }

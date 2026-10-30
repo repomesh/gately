@@ -64,7 +64,7 @@ type Rule struct {
 	NATPMP           bool   `json:"natpmp"`
 	NATPMPGateway    string `json:"natpmpGateway"`
 
-	// 以下时间单位为毫秒，与 Lucky 一致
+	// 以下时间单位为毫秒
 	HeartbeatInterval int  `json:"heartbeatInterval"`
 	StunTimeout       int  `json:"stunTimeout"`
 	RetryInterval     int  `json:"retryInterval"`

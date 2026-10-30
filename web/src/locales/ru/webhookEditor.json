@@ -10,5 +10,5 @@
   "timeout": "Тайм-аут (с)",
   "ignoreCertError": "Игнорировать ошибки сертификата",
   "variables": "Доступные переменные",
-  "varsTip": "{plain} или {lucky}"
+  "varsTip": "{plain} или {hash}"
 }

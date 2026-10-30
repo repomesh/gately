@@ -30,7 +30,7 @@
           <div class="vars-tip">
             <i18n-t keypath="webhookEditor.varsTip" tag="span">
               <template #plain><span class="mono">{name}</span></template>
-              <template #lucky><span class="mono">#{name}</span></template>
+              <template #hash><span class="mono">#{name}</span></template>
             </i18n-t>
           </div>
           <el-tag v-for="v in variables" :key="v" size="small" type="info" class="var mono">{{ '{' + v + '}' }}</el-tag>

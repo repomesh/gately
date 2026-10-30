@@ -10,5 +10,5 @@
   "timeout": "Timeout (s)",
   "ignoreCertError": "Ignore certificate errors",
   "variables": "Available variables",
-  "varsTip": "{plain} or {lucky}"
+  "varsTip": "{plain} or {hash}"
 }

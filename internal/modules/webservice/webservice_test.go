@@ -527,7 +527,7 @@ func TestWAFIntegration(t *testing.T) {
 	if err := fw.Init(module.Env{Store: st, Logs: logbuf.New(50, log.New(io.Discard, "", 0))}); err != nil {
 		t.Fatal(err)
 	}
-	// 通过导入接口创建与 Lucky 相同 key 的实例
+	// 通过导入接口创建指定 key 的实例
 	raw, _ := json.Marshal([]map[string]any{{"Key": "k1", "Name": "waf-main", "Enable": true, "InboundScoreThreshold": 6, "OutboundScoreThreshold": 4,
 		"CorazaWAFConfigList": []map[string]any{{"Enable": true, "Type": "OWASPCoreRuleset", "Param": "REQUEST-930-APPLICATION-ATTACK-LFI.conf"}}}})
 	if _, err := fw.ImportLucky(luckyimport.Document{"CorazaList": raw}, luckyimport.Options{}); err != nil {
@@ -561,7 +561,7 @@ func TestWAFIntegration(t *testing.T) {
 		t.Fatalf("WAF 应拦截路径穿越: %d", resp.StatusCode)
 	}
 	if resp, _ := get(t, http.DefaultClient, addr, "stale.test", attack, nil); resp.StatusCode != 200 {
-		t.Fatalf("引用不存在的实例时应放行（与 Lucky 一致）: %d", resp.StatusCode)
+		t.Fatalf("引用不存在的实例时应放行: %d", resp.StatusCode)
 	}
 }
 

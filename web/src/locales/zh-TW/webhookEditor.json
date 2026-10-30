@@ -10,5 +10,5 @@
   "timeout": "逾時(秒)",
   "ignoreCertError": "忽略憑證錯誤",
   "variables": "可用變數",
-  "varsTip": "{plain} 或 {lucky}"
+  "varsTip": "{plain} 或 {hash}"
 }

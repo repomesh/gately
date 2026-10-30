@@ -29,7 +29,7 @@ import (
 // ID 是模块标识。
 const ID = "ftp"
 
-// TLS 模式，与 Lucky 的 TLSRequired 取值一致。
+// TLS 模式，取值与导入配置中的 TLSRequired 对应。
 const (
 	TLSOptional  = 0 // 明文与 FTPS 均可
 	TLSMandatory = 1 // 必须先 AUTH TLS（显式 FTPS）

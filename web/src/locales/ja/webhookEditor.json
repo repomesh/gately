@@ -10,5 +10,5 @@
   "timeout": "タイムアウト(秒)",
   "ignoreCertError": "証明書エラーを無視",
   "variables": "利用可能な変数",
-  "varsTip": "{plain}、または {lucky}"
+  "varsTip": "{plain}、または {hash}"
 }

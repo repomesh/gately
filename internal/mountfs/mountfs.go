@@ -1,5 +1,5 @@
 // Package mountfs 把多个本地目录组合成一个虚拟文件系统：根目录只读，按挂载名称列出各目录，
-// 每个挂载可单独设为只读。FTP 与 WebDAV 用户挂载多个目录时使用，行为与 Lucky 的「挂载列表」一致。
+// 每个挂载可单独设为只读。FTP 与 WebDAV 用户挂载多个目录时使用。
 package mountfs
 
 import (

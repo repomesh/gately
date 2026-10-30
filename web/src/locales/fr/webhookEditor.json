@@ -10,5 +10,5 @@
   "timeout": "Délai d'expiration (s)",
   "ignoreCertError": "Ignorer les erreurs de certificat",
   "variables": "Variables disponibles",
-  "varsTip": "{plain} ou {lucky}"
+  "varsTip": "{plain} ou {hash}"
 }

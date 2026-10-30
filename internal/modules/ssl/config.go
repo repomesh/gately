@@ -87,7 +87,7 @@ type ACMEConfig struct {
 	Network string `json:"network,omitempty"`
 }
 
-// Mapping 把证书写到目录供其他服务使用，文件名为 <备注>.crt/.key/.pem/_issuerCertificate.crt（与 Lucky 一致）。
+// Mapping 把证书写到目录供其他服务使用，文件名为 <备注>.crt/.key/.pem/_issuerCertificate.crt。
 type Mapping struct {
 	Enable bool   `json:"enable"`
 	Dir    string `json:"dir"`

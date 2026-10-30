@@ -10,5 +10,5 @@
   "timeout": "Zeitlimit (s)",
   "ignoreCertError": "Zertifikatsfehler ignorieren",
   "variables": "Verfügbare Variablen",
-  "varsTip": "{plain} oder {lucky}"
+  "varsTip": "{plain} oder {hash}"
 }
