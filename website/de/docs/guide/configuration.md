@@ -59,6 +59,7 @@ Die Seite Systemprotokolle und die Protokollkarte unten auf jeder Modulseite ver
 
 - Stufe und Quelle (eine bereits aufgetretene Quelle auswählen oder eingeben);
 - Suchbegriffe: durch Leerzeichen getrennte Begriffe müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt einen Begriff aus, z. B. `GET "timeout" -debug`; Treffer werden hervorgehoben. Ist die Oberfläche in einer anderen Sprache, suchen Sie mit dem übersetzten Text, den Sie auf dem Bildschirm sehen;
+- Ausschließen: Einträge mit einem der Begriffe werden ausgeblendet, zusammen mit den Suchbegriffen; die Schreibweise ist dieselbe (durch Leerzeichen getrennt, doppelte Anführungszeichen für Phrasen), z. B. `debug "health check"`. Um einen Begriff auszuschließen, der selbst mit `-` beginnt, setzen Sie ihn in doppelte Anführungszeichen, etwa `"-v"`;
 - IP unter Weitere Filter: vollständige Adresse, Bereich (z. B. `10.0.0.0/8`) oder Adressteil, durch Kommas getrennt; hat ein Eintrag kein eigenes IP-Feld, werden Adressen im Protokolltext erkannt, sodass auch fehlgeschlagene Anmeldungen und Einbruchschutz-Protokolle funktionieren;
 - Zeitraum unter Weitere Filter: von den letzten 15 Minuten bis zu den letzten 7 Tagen oder benutzerdefinierter Beginn und Ende;
 - Protokolle des Webdienstes lassen sich zusätzlich nach Site-Name oder Domain und Statuscode (`404`, `4xx`, `500-599`, durch Kommas getrennt) filtern; die der WAF-Firewall nach Domain, und Treffer enthalten Domain und Regel-ID.

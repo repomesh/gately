@@ -59,6 +59,7 @@ La página Registros del sistema y la tarjeta de registros al final de cada pág
 
 - Nivel y origen (elija un origen que ya haya aparecido o escríbalo);
 - Palabras clave: los términos separados por espacios deben coincidir todos, las comillas dobles agrupan una frase y un `-` inicial excluye un término, por ejemplo `GET "timeout" -debug`; las coincidencias se resaltan. Si la interfaz está en otro idioma, busque con el texto traducido que ve en pantalla;
+- Excluir: se ocultan las entradas que contienen cualquiera de sus términos, junto con las palabras clave; se escribe igual (separado por espacios, comillas dobles para frases), por ejemplo `debug "health check"`. Para excluir un término que empieza por `-`, póngalo entre comillas dobles, como `"-v"`;
 - IP en Más filtros: dirección completa, rango (como `10.0.0.0/8`) o parte de una dirección, separadas por comas; cuando una entrada no tiene un campo IP propio, las direcciones se reconocen en el texto, así que también sirve para inicios de sesión fallidos y registros de protección contra intrusiones;
 - Intervalo de tiempo en Más filtros: desde los últimos 15 minutos hasta los últimos 7 días, o un inicio y fin personalizados;
 - Los registros del Servicio web también se pueden filtrar por nombre de sitio o dominio y por código de estado (`404`, `4xx`, `500-599`, separados por comas); los del Cortafuegos WAF, por dominio, y las detecciones registran el dominio y el ID de la regla.

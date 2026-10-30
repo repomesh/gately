@@ -72,7 +72,7 @@ With the source set to "Web path probing", the jail counts requests handled by t
 - **Listeners**: pick one or more; leave empty for all listeners;
 - **Paths**: one per line; leave empty for all paths. `*` matches any characters (including `/`), the whole path must match, case-insensitive. For example `*/.env` matches `/.env` and `/api/.env`. Lines starting with `~` are Go regular expressions. Variants such as `//.env` or `/a/../.env` also match through the normalized path;
 - **Excluded paths**: same syntax; matching requests are not counted;
-- **What counts**: by default only 404 and 444 (missing content, or a connection closed by a "Close connection" site), so regular visitors and users sharing an outbound IP are not banned by mistake. With "Any status code" every response counts, which suits decoy paths because single-page apps return 200 for any path;
+- **What counts**: by default only 404 and 444 (missing content, or a connection closed by a "Close connection" site), so requests for pages that exist do not count. With "Any status code" every response counts, which suits decoy paths because single-page apps return 200 for any path. "Any status code" needs path rules or "Unknown domains only", otherwise saving is rejected;
 - **Unknown domains only**: counts only requests whose domain matches no site, that is, requests handled by the default site, or answered with 404 by the listener when there is no default site.
 
 Three templates are included:
@@ -81,7 +81,7 @@ Three templates are included:
 | --- | --- | --- |
 | Web decoy paths | `/.env`, `/.git`, `wp-login.php`, `phpinfo.php`, `phpmyadmin` and more, any status code, once | Bans for 1 day. Remove matching lines first if a site actually runs WordPress, phpMyAdmin and the like |
 | Unknown domain scans | Unknown domains only, 5 times in 1 minute | Bans for 1 day. Pairs with a "Close connection" default site: a scanner is banned after a few 444s, and with firewall sync later connections are dropped |
-| Web 404 probing | All paths, 10 times in 1 minute | Paths browsers request on their own, such as favicon, robots.txt and `.map` files, are excluded |
+| Web 404 probing | All paths, 10 times in 1 minute | Paths browsers request on their own, such as favicon, robots.txt and `.map` files, are excluded. 404s returned by proxied backends count too, so missing gallery thumbnails or an app polling a missing endpoint can trigger it; check the access log before enabling and raise the count or add excluded paths if needed |
 
 "Probe ban" on a listener card of the web service opens this page with that listener selected and the decoy template applied; the rule is stored and enforced by intrusion protection. While editing a jail you can paste request paths to test the path rules.
 

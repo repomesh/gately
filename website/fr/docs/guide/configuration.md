@@ -59,6 +59,7 @@ La page Journaux système et la carte de journaux en bas de chaque page de modul
 
 - Niveau et source (choisissez une source déjà apparue ou saisissez-la) ;
 - Mots-clés : les termes séparés par des espaces doivent tous correspondre, les guillemets doubles regroupent une expression, un `-` initial exclut un terme, par exemple `GET "timeout" -debug` ; les correspondances sont surlignées. Si l'interface est dans une autre langue, recherchez avec le texte traduit affiché à l'écran ;
+- Exclure : les entrées contenant l'un des termes sont masquées, en plus des mots-clés ; même syntaxe (termes séparés par des espaces, guillemets doubles pour une expression), par exemple `debug "health check"`. Pour exclure un terme qui commence lui-même par `-`, mettez-le entre guillemets doubles, comme `"-v"` ;
 - IP dans Plus de filtres : adresse complète, plage (comme `10.0.0.0/8`) ou partie d'adresse, séparées par des virgules ; lorsqu'une entrée n'a pas de champ IP propre, les adresses sont reconnues dans le texte, ce qui couvre aussi les échecs de connexion et les journaux de protection contre les intrusions ;
 - Période dans Plus de filtres : des 15 dernières minutes aux 7 derniers jours, ou un début et une fin personnalisés ;
 - Les journaux du Service Web se filtrent aussi par nom de site ou domaine et par code d'état (`404`, `4xx`, `500-599`, séparés par des virgules) ; ceux du Pare-feu WAF par domaine, et les détections enregistrent le domaine et l'ID de la règle.

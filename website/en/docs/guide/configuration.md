@@ -59,6 +59,7 @@ The System Logs page and the log card at the bottom of each module page use the 
 
 - Level and source (pick a source that has appeared, or type one);
 - Keywords: space-separated terms must all match, double quotes group a phrase, a leading `-` excludes a term, for example `GET "timeout" -debug`; matches are highlighted. When the interface is in another language, search with the translated text you see on screen;
+- Exclude: entries containing any of its terms are hidden, combined with the keywords; terms are written the same way (space-separated, double quotes for phrases), for example `debug "health check"`. To exclude a term that itself starts with `-`, wrap it in double quotes, such as `"-v"`;
 - IP under More filters: a full address, a range (such as `10.0.0.0/8`) or part of an address, comma-separated; when an entry has no separate IP field, addresses are recognised in the log text, so sign-in failures and intrusion protection logs work too;
 - Time range under More filters: from the last 15 minutes to the last 7 days, or a custom start and end;
 - Web Service logs can also be filtered by site name or domain and by status code (`404`, `4xx`, `500-599`, comma-separated); WAF Firewall logs can be filtered by domain, and match entries record the domain and rule ID.

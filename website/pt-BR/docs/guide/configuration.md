@@ -59,6 +59,7 @@ A página Logs do sistema e o cartão de logs no fim de cada página de módulo 
 
 - Nível e origem (escolha uma origem que já apareceu ou digite);
 - Palavras-chave: termos separados por espaço devem corresponder todos, aspas duplas agrupam uma frase e um `-` inicial exclui um termo, por exemplo `GET "timeout" -debug`; as correspondências ficam destacadas. Com a interface em outro idioma, pesquise pelo texto traduzido que aparece na tela;
+- Excluir: entradas que contêm qualquer um dos termos ficam ocultas, junto com as palavras-chave; a escrita é a mesma (separado por espaço, aspas duplas para frases), por exemplo `debug "health check"`. Para excluir um termo que começa com `-`, coloque-o entre aspas duplas, como `"-v"`;
 - IP em Mais filtros: endereço completo, faixa (como `10.0.0.0/8`) ou parte do endereço, separados por vírgula; quando a entrada não tem um campo de IP próprio, os endereços são reconhecidos no texto, então também funciona com falhas de login e logs da proteção contra intrusão;
 - Intervalo de tempo em Mais filtros: dos últimos 15 minutos aos últimos 7 dias, ou início e fim personalizados;
 - Os logs do Serviço Web também podem ser filtrados por nome do site ou domínio e por código de status (`404`, `4xx`, `500-599`, separados por vírgula); os do Firewall WAF, por domínio, e as detecções registram o domínio e o ID da regra.

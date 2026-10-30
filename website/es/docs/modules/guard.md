@@ -72,7 +72,7 @@ Con el origen «Sondeo de rutas web», la regla cuenta directamente las solicitu
 - **Escuchas**: elija una o varias; vacío para todas;
 - **Rutas**: una por línea; vacío para todas. `*` coincide con cualquier carácter (incluido `/`), se compara la ruta completa sin distinguir mayúsculas. Por ejemplo, `*/.env` coincide con `/.env` y `/api/.env`. Las líneas que empiezan por `~` son expresiones regulares de Go. Variantes como `//.env` o `/a/../.env` también coinciden mediante la ruta normalizada;
 - **Rutas excluidas**: misma sintaxis; las solicitudes que coincidan no se cuentan;
-- **Qué se cuenta**: por defecto solo 404 y 444 (contenido inexistente, o conexión cerrada por un sitio «Cerrar conexión»), así no se bloquea por error a visitantes normales ni a usuarios que comparten IP de salida. Con «Cualquier código de estado» cuenta toda respuesta, lo que conviene a las rutas señuelo porque las aplicaciones de una sola página devuelven 200 para cualquier ruta;
+- **Qué se cuenta**: por defecto solo 404 y 444 (contenido inexistente, o conexión cerrada por un sitio «Cerrar conexión»); las peticiones a páginas que existen no cuentan. Con «Cualquier código de estado» cuenta toda respuesta, lo que conviene a las rutas señuelo porque las aplicaciones de una sola página devuelven 200 para cualquier ruta. «Cualquier código de estado» requiere reglas de ruta o «Solo dominios desconocidos»; si no, se rechaza al guardar;
 - **Solo dominios desconocidos**: cuenta solo las solicitudes cuyo dominio no coincide con ningún sitio, es decir, las atendidas por el sitio predeterminado o, si no lo hay, respondidas con 404 por la escucha.
 
 Se incluyen tres plantillas:
@@ -81,7 +81,7 @@ Se incluyen tres plantillas:
 | --- | --- | --- |
 | Rutas señuelo web | `/.env`, `/.git`, `wp-login.php`, `phpinfo.php`, `phpmyadmin` y otras, cualquier código de estado, 1 vez | Bloquea 1 día. Si un sitio usa realmente WordPress, phpMyAdmin u otros similares, elimine antes las líneas correspondientes |
 | Escaneo de dominios desconocidos | Solo dominios desconocidos, 5 veces en 1 minuto | Bloquea 1 día. Combina con un sitio predeterminado «Cerrar conexión»: el escáner queda bloqueado tras unos pocos 444 y, con la sincronización del cortafuegos, las conexiones posteriores se descartan |
-| Sondeo web 404 | Todas las rutas, 10 veces en 1 minuto | Se excluyen las rutas que los navegadores piden por sí solos, como favicon, robots.txt y archivos `.map` |
+| Sondeo web 404 | Todas las rutas, 10 veces en 1 minuto | Se excluyen las rutas que los navegadores piden por sí solos, como favicon, robots.txt y archivos `.map`. También cuentan los 404 que devuelven los backends del proxy: miniaturas de galería ausentes o una aplicación que consulta un endpoint inexistente pueden activarla; revise el registro de acceso antes de activarla y suba el número o añada rutas excluidas si hace falta |
 
 «Bloqueo de sondeos» en la tarjeta de una escucha del servicio web abre esta página con esa escucha elegida y la plantilla de señuelos aplicada; la regla se guarda y se aplica en la protección contra intrusiones. Al editar una regla puede pegar rutas de solicitud para probar las reglas de ruta.
 

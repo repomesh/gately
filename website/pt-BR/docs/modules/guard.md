@@ -72,7 +72,7 @@ Com a origem "Sondagem de caminhos web", a regra conta diretamente as requisiç�
 - **Listeners**: um ou mais; vazio para todos;
 - **Caminhos**: um por linha; vazio para todos. `*` corresponde a quaisquer caracteres (inclusive `/`), o caminho inteiro é comparado sem diferenciar maiúsculas. Por exemplo, `*/.env` corresponde a `/.env` e `/api/.env`. Linhas iniciadas por `~` são expressões regulares Go. Variantes como `//.env` ou `/a/../.env` também correspondem pelo caminho normalizado;
 - **Caminhos excluídos**: mesma sintaxe; requisições correspondentes não são contadas;
-- **O que conta**: por padrão só 404 e 444 (conteúdo inexistente, ou conexão encerrada por um site "Fechar conexão"), para não bloquear por engano visitantes comuns nem usuários que compartilham IP de saída. Com "Qualquer código de status" toda resposta conta, o que serve para caminhos isca, já que aplicativos de página única respondem 200 a qualquer caminho;
+- **O que conta**: por padrão só 404 e 444 (conteúdo inexistente, ou conexão encerrada por um site "Fechar conexão"); requisições a páginas que existem não contam. Com "Qualquer código de status" toda resposta conta, o que serve para caminhos isca, já que aplicativos de página única respondem 200 a qualquer caminho. "Qualquer código de status" exige regras de caminho ou "Só domínios desconhecidos"; caso contrário, o salvamento é recusado;
 - **Só domínios desconhecidos**: conta apenas requisições cujo domínio não corresponde a nenhum site, ou seja, tratadas pelo site padrão ou, sem ele, respondidas com 404 pelo listener.
 
 Há três modelos:
@@ -81,7 +81,7 @@ Há três modelos:
 | --- | --- | --- |
 | Caminhos isca web | `/.env`, `/.git`, `wp-login.php`, `phpinfo.php`, `phpmyadmin` e outros, qualquer código de status, 1 vez | Bloqueia por 1 dia. Se um site realmente roda WordPress, phpMyAdmin e similares, remova antes as linhas correspondentes |
 | Varredura de domínios desconhecidos | Só domínios desconhecidos, 5 vezes em 1 minuto | Bloqueia por 1 dia. Combina com um site padrão "Fechar conexão": o scanner é bloqueado após alguns 444 e, com a sincronização do firewall, as conexões seguintes são descartadas |
-| Sondagem web 404 | Todos os caminhos, 10 vezes em 1 minuto | Caminhos que os navegadores pedem sozinhos, como favicon, robots.txt e arquivos `.map`, ficam de fora |
+| Sondagem web 404 | Todos os caminhos, 10 vezes em 1 minuto | Caminhos que os navegadores pedem sozinhos, como favicon, robots.txt e arquivos `.map`, ficam de fora. Os 404 devolvidos por backends do proxy também contam: miniaturas de galeria ausentes ou um app consultando um endpoint inexistente podem acioná-la; confira o log de acesso antes de ativar e aumente a contagem ou adicione caminhos excluídos se necessário |
 
 "Bloquear sondagem" no cartão de um listener do serviço web abre esta página com esse listener selecionado e o modelo de iscas aplicado; a regra é guardada e aplicada pela proteção contra intrusões. Ao editar uma regra, você pode colar caminhos de requisição para testar as regras de caminho.
 

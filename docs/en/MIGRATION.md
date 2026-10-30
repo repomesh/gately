@@ -38,7 +38,7 @@ Supported files:
 | lucky_ftpserver.lkcf | FTP | Listen port, passive port range, TLS and timeout parameters, plus users (handled the same way as WebDAV) |
 | lucky_storagemanagement.lkcf | Storage Mounts | Local directories and WebDAV storage; Alibaba Cloud Drive, system mounts, and access proxies are not migrated |
 | lucky_frp.lkcf | frp | The first client instance (server address, token, transport protocol, and proxies) and the first server instance; visitors, plugin proxies, and the dashboard are not migrated |
-| lucky_cloudflared.lkcf | Cloudflare Tunnel | Tunnels that use a tunnel token; Access clients and tunnels that only have an API token are not migrated |
+| lucky_cloudflared.lkcf | Cloudflare Tunnel | Tunnels that use a tunnel token (with their API token); Access clients and tunnels that only have an API token are not migrated |
 | lucky_base.lkcf | Global settings, Web Services | Intranet-only access, login failure limit, session duration, time zone, custom DNS (including the `doh@` syntax), GC parameters, and trusted PROXY protocol sources. The admin port, security entrance, administrator account, and two-factor authentication are not migrated |
 
 Lucky's scheduled tasks, IP filters, and Docker settings are empty in typical configurations and are not migrated yet. If yours have content, configure them manually.

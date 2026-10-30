@@ -72,7 +72,7 @@ Mit der Quelle „Web-Pfadsondierung“ zählt die Regel direkt die vom Webdiens
 - **Listener**: einer oder mehrere; leer für alle;
 - **Pfade**: einer pro Zeile; leer für alle. `*` passt auf beliebige Zeichen (auch `/`), verglichen wird der ganze Pfad ohne Beachtung der Groß-/Kleinschreibung. Beispiel: `*/.env` passt auf `/.env` und `/api/.env`. Zeilen mit `~` am Anfang sind reguläre Ausdrücke in Go-Syntax. Varianten wie `//.env` oder `/a/../.env` treffen über den normalisierten Pfad ebenfalls;
 - **Ausgenommene Pfade**: gleiche Syntax; passende Anfragen werden nicht gezählt;
-- **Was zählt**: standardmäßig nur 404 und 444 (nicht vorhandene Inhalte oder von einer Site „Verbindung schließen“ getrennt), damit normale Besucher und Nutzer mit gemeinsamer Ausgangs-IP nicht versehentlich gesperrt werden. Mit „Jeder Statuscode“ zählt jede Antwort – passend für Köderpfade, denn Single-Page-Apps liefern für jeden Pfad 200;
+- **Was zählt**: standardmäßig nur 404 und 444 (nicht vorhandene Inhalte oder von einer Site „Verbindung schließen“ getrennt), Anfragen an vorhandene Seiten zählen also nicht. Mit „Jeder Statuscode“ zählt jede Antwort – passend für Köderpfade, denn Single-Page-Apps liefern für jeden Pfad 200. „Jeder Statuscode“ braucht Pfadregeln oder „Nur unbekannte Domains“, sonst wird das Speichern abgelehnt;
 - **Nur unbekannte Domains**: zählt nur Anfragen, deren Domain zu keiner Site passt, also solche, die die Standardsite verarbeitet oder die der Listener ohne Standardsite mit 404 beantwortet.
 
 Drei Vorlagen sind enthalten:
@@ -81,7 +81,7 @@ Drei Vorlagen sind enthalten:
 | --- | --- | --- |
 | Web-Köderpfade | `/.env`, `/.git`, `wp-login.php`, `phpinfo.php`, `phpmyadmin` u. a., jeder Statuscode, 1-mal | Sperrt 1 Tag. Läuft auf einer Site tatsächlich WordPress, phpMyAdmin o. Ä., zuerst die passenden Zeilen entfernen |
 | Scans unbekannter Domains | Nur unbekannte Domains, 5-mal in 1 Minute | Sperrt 1 Tag. Passt zu einer Standardsite „Verbindung schließen“: Ein Scanner wird nach einigen 444 gesperrt, mit Firewall-Synchronisation werden spätere Verbindungen verworfen |
-| Web-404-Sondierung | Alle Pfade, 10-mal in 1 Minute | Pfade, die Browser von selbst abrufen, etwa favicon, robots.txt und `.map`-Dateien, sind ausgenommen |
+| Web-404-Sondierung | Alle Pfade, 10-mal in 1 Minute | Pfade, die Browser von selbst abrufen, etwa favicon, robots.txt und `.map`-Dateien, sind ausgenommen. 404 von Proxy-Backends zählen ebenfalls, fehlende Galerie-Vorschaubilder oder eine App, die einen fehlenden Endpunkt abfragt, können die Regel auslösen; vor dem Aktivieren das Zugriffsprotokoll prüfen und bei Bedarf die Anzahl erhöhen oder Pfade ausnehmen |
 
 „Sondierung sperren“ auf der Karte eines Listeners im Webdienst öffnet diese Seite mit diesem Listener und der Köder-Vorlage; gespeichert und durchgesetzt wird die Regel vom Einbruchschutz. Beim Bearbeiten einer Regel lassen sich Anfragepfade einfügen, um die Pfadregeln zu testen.
 

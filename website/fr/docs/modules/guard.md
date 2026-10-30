@@ -72,7 +72,7 @@ Avec la source « Sondage de chemins web », la règle compte directement les re
 - **Écouteurs** : un ou plusieurs ; vide pour tous ;
 - **Chemins** : un par ligne ; vide pour tous. `*` correspond à n’importe quels caractères (y compris `/`), le chemin entier doit correspondre, sans tenir compte de la casse. Par exemple `*/.env` correspond à `/.env` et `/api/.env`. Les lignes commençant par `~` sont des expressions régulières Go. Des variantes comme `//.env` ou `/a/../.env` correspondent aussi via le chemin normalisé ;
 - **Chemins exclus** : même syntaxe ; les requêtes correspondantes ne sont pas comptées ;
-- **Ce qui compte** : par défaut seuls 404 et 444 (contenu inexistant, ou connexion fermée par un site « Fermer la connexion »), pour ne pas bannir par erreur les visiteurs normaux ni les utilisateurs partageant une IP de sortie. Avec « Tout code d’état », chaque réponse compte, ce qui convient aux chemins leurres, car les applications monopage renvoient 200 pour n’importe quel chemin ;
+- **Ce qui compte** : par défaut seuls 404 et 444 (contenu inexistant, ou connexion fermée par un site « Fermer la connexion ») ; les requêtes vers des pages existantes ne comptent pas. Avec « Tout code d’état », chaque réponse compte, ce qui convient aux chemins leurres, car les applications monopage renvoient 200 pour n’importe quel chemin. « Tout code d’état » exige des règles de chemin ou « Domaines inconnus uniquement », sinon l’enregistrement est refusé ;
 - **Domaines inconnus uniquement** : ne compte que les requêtes dont le domaine ne correspond à aucun site, c’est-à-dire traitées par le site par défaut ou, à défaut, répondues par 404 par l’écouteur.
 
 Trois modèles sont fournis :
@@ -81,7 +81,7 @@ Trois modèles sont fournis :
 | --- | --- | --- |
 | Chemins leurres web | `/.env`, `/.git`, `wp-login.php`, `phpinfo.php`, `phpmyadmin` et d’autres, tout code d’état, 1 fois | Bannit 1 jour. Si un site exécute réellement WordPress, phpMyAdmin ou autre, supprimez d’abord les lignes correspondantes |
 | Scans de domaines inconnus | Domaines inconnus uniquement, 5 fois en 1 minute | Bannit 1 jour. À associer à un site par défaut « Fermer la connexion » : le scanner est banni après quelques 444 et, avec la synchronisation du pare-feu, les connexions suivantes sont rejetées |
-| Sondage web 404 | Tous les chemins, 10 fois en 1 minute | Les chemins que les navigateurs demandent d’eux-mêmes, comme favicon, robots.txt et les fichiers `.map`, sont exclus |
+| Sondage web 404 | Tous les chemins, 10 fois en 1 minute | Les chemins que les navigateurs demandent d’eux-mêmes, comme favicon, robots.txt et les fichiers `.map`, sont exclus. Les 404 renvoyés par les backends proxifiés comptent aussi : des miniatures de galerie manquantes ou une application qui interroge un point d’accès absent peuvent la déclencher ; consultez le journal d’accès avant de l’activer et augmentez le nombre ou ajoutez des chemins exclus si besoin |
 
 « Bannir les sondages » sur la carte d’un écouteur du service web ouvre cette page avec cet écouteur sélectionné et le modèle de leurres appliqué ; la règle est stockée et appliquée par la protection contre les intrusions. En modifiant une règle, vous pouvez coller des chemins de requête pour tester les règles de chemin.
 
