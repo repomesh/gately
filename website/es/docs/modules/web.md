@@ -161,6 +161,16 @@ Comportamiento:
 
 Para que Gitea, OpenList, Grafana y otras aplicaciones sepan qué usuario ha iniciado sesión, ofrece los usuarios compartidos mediante el [inicio de sesión único OIDC](/es/docs/modules/oidc).
 
+### Cambio de contraseña por el usuario {#self-service-password}
+
+Activa Cambio de contraseña por el usuario en Ajustes globales → Usuarios compartidos y los usuarios compartidos podrán cambiar su contraseña sin pedírselo al administrador:
+
+- Visita `https://dominio-del-sitio/__gately_auth/password` en un sitio con Usar usuarios compartidos activado; la página de inicio de sesión también muestra el enlace Cambiar contraseña. Los usuarios de [inicio de sesión único OIDC](/es/docs/modules/oidc) pueden usar `/__gately_oidc/password` en el dominio emisor;
+- Introduce el nombre de usuario, la contraseña actual y dos veces la nueva (de 8 a 128 caracteres y distinta de la actual); los usuarios con TOTP también indican un código de verificación;
+- Después, las sesiones del usuario en todos los sitios terminan de inmediato y debe iniciar sesión con la nueva contraseña; también se revocan los tokens de actualización y Access Tokens OIDC emitidos;
+- Una contraseña actual o un código incorrectos cuentan para el mismo límite de intentos y bloqueo automático que los inicios de sesión fallidos, y se rechazan los formularios enviados desde otros sitios web; el registro del servicio web anota el usuario y la IP de origen;
+- La misma página también cambia la contraseña de los [usuarios de archivos compartidos](/es/docs/modules/tools#shared-users). Cada tipo de cuenta tiene su propio interruptor; con ambos activados, la página permite elegir el tipo de cuenta. Las cuentas de ambos tipos con el mismo nombre son independientes.
+
 ## Control de acceso
 
 ### Listas de IP permitidas y bloqueadas

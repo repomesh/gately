@@ -26,5 +26,9 @@
     "off": "Usuarios compartidos no permitidos",
     "disabled": "Servicio desactivado",
     "none": "Los módulos WebDAV, FTP y SMB están desactivados"
+  },
+  "selfService": {
+    "title": "Cambio de contraseña por el usuario",
+    "help": "Si se activa, los usuarios de archivos compartidos pueden cambiar su contraseña en {path} de cualquier sitio del servicio web con autenticación web, indicando la contraseña actual; WebDAV, FTP y SMB usan la nueva contraseña de inmediato. Las contraseñas en texto plano siguen en texto plano y los hashes bcrypt siguen como hash"
   }
 }

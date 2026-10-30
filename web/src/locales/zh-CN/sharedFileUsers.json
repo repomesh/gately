@@ -26,5 +26,9 @@
     "off": "未允许共享用户登录",
     "disabled": "服务未启用",
     "none": "WebDAV、FTP、SMB 模块都已关闭"
+  },
+  "selfService": {
+    "title": "自助修改密码",
+    "help": "开启后，文件服务共享用户可在任一开启网页认证的 Web 服务站点访问 {path}，输入当前密码后修改自己的密码，WebDAV、FTP、SMB 随即使用新密码。原密码为明文的仍按明文保存，为 bcrypt 哈希的按哈希保存"
   }
 }

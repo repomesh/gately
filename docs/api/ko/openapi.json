@@ -2165,6 +2165,9 @@
           "oidc": {
             "$ref": "#/components/schemas/webservice.OIDCSettings"
           },
+          "selfServicePassword": {
+            "type": "boolean"
+          },
           "ssoDomain": {
             "type": "string"
           },
@@ -12944,7 +12947,7 @@
     },
     "/api/fileusers": {
       "get": {
-        "description": "WebDAV, FTP, SMB가 함께 쓰는 파일 서비스 공유 사용자를 반환하며 비밀번호는 마스킹됩니다. `services`는 파일 서비스별 사용 현황입니다: `enable` 서비스 사용 여부, `sharedUsers` 공유 사용자 로그인 허용 여부, `localUsers` 로컬 사용자 이름(같은 이름의 공유 사용자는 그 서비스에서 로컬 사용자로만 확인), `caseInsensitive`가 true이면 사용자 이름을 대소문자 구분 없이 비교(SMB), `issues` 그 서비스에서 쓸 수 없는 공유 사용자와 이유: `name`(SMB에서 허용하지 않는 문자가 있는 사용자 이름), `bcrypt`(비밀번호가 bcrypt 해시), `share`(디렉터리 이름을 공유 이름으로 쓸 수 없거나 중복). 꺼진 모듈은 나열하지 않습니다. fileusers.json이 검증을 통과하지 못하면 `error`를 반환하며, 유효한 목록을 저장할 때까지 공유 사용자는 모두 로그인할 수 없습니다.\n\n필요한 권한: `fileusers:read`.",
+        "description": "返回 WebDAV、FTP、SMB 共用的파일 서비스 공유 사용자，密码脱敏。`services` 列出各文件服务的使用情况：`enable` 服务是否启用，`sharedUsers` 是否允许共享用户登录，`localUsers` 本地用户名（同名的共享用户在该服务中只按本地用户校验），`caseInsensitive` 为 true 时按不区分大小写比较用户名（SMB），`issues` 为无法用于该服务的共享用户及原因：`name`（用户名含 SMB 不允许的字符）、`bcrypt`（密码是 bcrypt 哈希）、`share`（目录名称不能作为共享名或重复）。已关闭的模块不列出。`selfService` 为是否允许共享用户在 Web 서비스站点的 `/__gately_auth/password` 页面自助密码。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。\n\n필요한 권한: `fileusers:read`. 수정",
         "responses": {
           "200": {
             "description": "성공"
@@ -12993,7 +12996,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中（字段 `sharedUsers`）。\n\n필요한 권한: `fileusers:write`. 수정 수정 수정",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中（字段 `sharedUsers`）。可选字段 `selfService` 为自助密码开关，省略时保持原值。\n\n필요한 권한: `fileusers:write`. 수정 수정 수정 수정",
         "requestBody": {
           "content": {
             "application/json": {

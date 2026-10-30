@@ -161,6 +161,16 @@ Comportamento:
 
 Para que Gitea, OpenList, Grafana e outros aplicativos saibam qual usuário entrou, ofereça os usuários compartilhados a eles pelo [login único OIDC](/pt-BR/docs/modules/oidc).
 
+### Troca de senha pelo próprio usuário {#self-service-password}
+
+Ative Troca de senha pelo próprio usuário em Configurações globais → Usuários compartilhados e os usuários compartilhados poderão trocar a própria senha sem recorrer ao administrador:
+
+- Acesse `https://dominio-do-site/__gately_auth/password` em um site com Usar usuários compartilhados ativado; a página de login também mostra o link Trocar senha. Usuários do [login único OIDC](/pt-BR/docs/modules/oidc) podem usar `/__gately_oidc/password` no domínio emissor;
+- Informe o nome de usuário, a senha atual e duas vezes a nova (de 8 a 128 caracteres, diferente da atual); usuários com TOTP também informam o código de verificação;
+- Depois, as sessões do usuário em todos os sites terminam imediatamente e ele entra de novo com a nova senha; os tokens de atualização e Access Tokens OIDC emitidos também são revogados;
+- Senha atual ou código incorretos contam para o mesmo limite de tentativas e bloqueio automático das falhas de login, e formulários enviados a partir de outros sites são recusados; o log do serviço web registra o usuário e o IP de origem;
+- A mesma página também troca a senha dos [usuários de arquivos compartilhados](/pt-BR/docs/modules/tools#shared-users). Cada tipo de conta tem seu próprio botão; com os dois ativados, a página permite escolher o tipo de conta. Contas dos dois tipos com o mesmo nome são independentes.
+
 ## Controle de acesso
 
 ### Lista de IPs permitidos e bloqueados

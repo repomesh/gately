@@ -26,5 +26,9 @@
     "off": "Usuários compartilhados não permitidos",
     "disabled": "Serviço desativado",
     "none": "Os módulos WebDAV, FTP e SMB estão todos desligados"
+  },
+  "selfService": {
+    "title": "Troca de senha pelo próprio usuário",
+    "help": "Quando ativado, usuários de arquivos compartilhados podem trocar a própria senha em {path} em qualquer site do serviço web com autenticação web, informando a senha atual; WebDAV, FTP e SMB passam a usar a nova senha na hora. Senhas em texto puro continuam em texto puro e hashes bcrypt continuam como hash"
   }
 }

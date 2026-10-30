@@ -26,5 +26,9 @@
     "off": "未允許共用使用者登入",
     "disabled": "服務未啟用",
     "none": "WebDAV、FTP、SMB 模組都已關閉"
+  },
+  "selfService": {
+    "title": "自助修改密碼",
+    "help": "開啟後，檔案服務共用使用者可在任一開啟網頁認證的 Web 服務站點造訪 {path}，輸入目前密碼後修改自己的密碼，WebDAV、FTP、SMB 隨即使用新密碼。原密碼為明文的仍以明文儲存，為 bcrypt 雜湊的以雜湊儲存"
   }
 }

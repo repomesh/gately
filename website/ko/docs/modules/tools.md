@@ -80,6 +80,8 @@ WebDAV, FTP, SMB는 '공유 사용자' 목록 하나를 함께 씁니다. 필드
 
 API는 `GET` / `PUT /api/fileusers`이며 API 토큰에는 `fileusers:read` / `fileusers:write` 권한이 필요합니다. 응답의 `services`에 서비스별 사용 현황이 들어 있습니다. 기존 서비스별 `GET` / `PUT /api/<서비스>/shared-users`는 더 이상 권장하지 않지만 계속 동작하며 같은 목록을 읽고 씁니다. 읽기는 해당 서비스의 읽기 권한을 쓰고, 변경에는 `webdav:write`, `ftp:write`, `smb:write`가 모두 필요합니다.
 
+**비밀번호 직접 변경**: 「파일 공유 사용자」 페이지에서 「비밀번호 직접 변경」을 켜고 저장하면, 공유 사용자가 웹 인증이 켜진 아무 웹 서비스 사이트의 `https://사이트 도메인/__gately_auth/password`에서 사용자 이름, 현재 비밀번호, 새 비밀번호(8~128자)를 입력해 직접 비밀번호를 바꿀 수 있습니다. WebDAV, FTP, SMB는 바로 새 비밀번호를 사용합니다(FTP와 SMB는 서비스를 다시 시작하므로 연결된 클라이언트는 다시 연결해야 합니다). 평문 비밀번호는 평문으로, bcrypt 해시는 해시로 저장되며, 현재 비밀번호 오류는 웹 로그인과 같은 속도 제한·자동 차단에 포함됩니다. 스위치는 `fileusers.json`의 `selfService`에 저장되며 API 필드 이름도 같습니다. 웹 로그인 공유 사용자는 [웹 서비스의 비밀번호 직접 변경](/ko/docs/modules/web#self-service-password)을 참고하세요.
+
 ## File Browser {#filebrowser}
 
 "파일 서비스" 그룹의 "File Browser"에서 설정합니다. Gately는 [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser)을 호스팅합니다. 이미지·동영상·문서 미리 보기, 업로드와 다운로드, 공유 링크 생성을 지원하고 자체 사용자와 권한 관리를 갖춘 웹 파일 관리자입니다. 원본 filebrowser/filebrowser는 2026년에 보관 처리되어 더 이상 보안 수정이 없으므로, 유지 관리가 계속되는 Quantum 포크를 호스팅합니다.

@@ -161,6 +161,16 @@ Verhalten:
 
 Damit Gitea, OpenList, Grafana und andere Anwendungen wissen, welcher Benutzer angemeldet ist, stellen Sie ihnen die gemeinsamen Benutzer über [OIDC-Single-Sign-on](/de/docs/modules/oidc) bereit.
 
+### Passwort selbst ändern {#self-service-password}
+
+Aktivieren Sie unter Globale Einstellungen → Gemeinsame Benutzer die Option Passwort selbst ändern, dann können gemeinsame Benutzer ihr Passwort ohne Administrator ändern:
+
+- Rufen Sie auf einer Site mit „Gemeinsame Benutzer verwenden“ `https://site-domain/__gately_auth/password` auf; die Anmeldeseite zeigt ebenfalls einen Link Passwort ändern. Benutzer des [OIDC-Single-Sign-on](/de/docs/modules/oidc) verwenden `/__gately_oidc/password` auf der Aussteller-Domain;
+- Benutzername, aktuelles Passwort und zweimal das neue Passwort eingeben (8–128 Zeichen, anders als das aktuelle); Benutzer mit TOTP geben zusätzlich einen Bestätigungscode ein;
+- Danach enden die Sitzungen des Benutzers auf allen Sites sofort, die Anmeldung erfolgt mit dem neuen Passwort; ausgestellte OIDC-Refresh-Tokens und Access Tokens werden ebenfalls widerrufen;
+- Ein falsches aktuelles Passwort oder ein falscher Code zählt zur selben Ratenbegrenzung und automatischen Sperre wie fehlgeschlagene Anmeldungen, von anderen Websites abgeschickte Formulare werden abgelehnt; das Log des Webdienstes vermerkt Benutzer und Quell-IP;
+- Auf derselben Seite lässt sich auch das Passwort [gemeinsamer Dateibenutzer](/de/docs/modules/tools#shared-users) ändern. Beide Kontoarten haben einen eigenen Schalter; sind beide aktiv, wählt man auf der Seite die Kontoart. Gleichnamige Konten beider Arten sind unabhängig voneinander.
+
 ## Zugriffskontrolle
 
 ### IP-Allowlist und -Blocklist

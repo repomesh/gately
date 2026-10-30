@@ -1586,6 +1586,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `oauthCallbackBase` | string |
 | `oauthProviders` | Array de `thirdauth.Provider` |
 | `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
 | `ssoDomain` | string |
 | `trustedProxies` | Array de string |
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"golang.org/x/crypto/bcrypt"
@@ -266,5 +267,101 @@ func TestPasswords(t *testing.T) {
 	}
 	if rec.Code != http.StatusOK || len(out) != 2 || out["alice"] != "pa" || out["bob"] != "pb" {
 		t.Fatalf("应按用户名返回密码明文: %d %s", rec.Code, rec.Body.String())
+	}
+}
+
+// TestChangePassword 验证共享用户自助修改密码：开关、当前密码校验、新密码规则、保持原有的明文或哈希格式并通知各服务。
+func TestChangePassword(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	r := New()
+	if err := r.Init(st); err != nil {
+		t.Fatal(err)
+	}
+	hash, _ := bcrypt.GenerateFromPassword([]byte("hashed-old-1"), bcrypt.MinCost)
+	if err := r.Save([]User{{Name: "alice", Password: "plain-old-1", Root: "/a"}, {Name: "bob", Password: string(hash), Root: "/b"}}); err != nil {
+		t.Fatal(err)
+	}
+	if r.SelfService() {
+		t.Fatal("自助修改密码默认关闭")
+	}
+	if err := r.ChangePassword("alice", "plain-old-1", "plain-new-1"); !errors.Is(err, ErrSelfServiceOff) {
+		t.Fatalf("未开启时应拒绝: %v", err)
+	}
+	on := true
+	if err := r.save(r.List(), &on); err != nil || !r.SelfService() {
+		t.Fatalf("开启失败: %v", err)
+	}
+	notified := 0
+	r.Subscribe(func() { notified++ })
+
+	for _, c := range []struct{ name, cur, next string }{
+		{"alice", "wrong", "plain-new-1"},
+		{"nobody", "plain-old-1", "plain-new-1"},
+		{"Alice", "plain-old-1", "plain-new-1"},
+	} {
+		if err := r.ChangePassword(c.name, c.cur, c.next); !errors.Is(err, ErrBadCredentials) {
+			t.Errorf("%+v 应返回用户名或密码错误: %v", c, err)
+		}
+	}
+	for _, next := range []string{"short", "plain-old-1", crud.SecretMask, "$2a$10$abcdefgh"} {
+		if err := r.ChangePassword("alice", "plain-old-1", next); err == nil || errors.Is(err, ErrBadCredentials) {
+			t.Errorf("新密码 %q 应被拒绝: %v", next, err)
+		}
+	}
+	if notified != 0 {
+		t.Fatal("失败时不应保存")
+	}
+	if err := r.ChangePassword("alice", "plain-old-1", "plain-new-1"); err != nil {
+		t.Fatal(err)
+	}
+	if u, _ := r.Lookup("alice"); u.Password != "plain-new-1" || u.Root != "/a" {
+		t.Fatalf("明文密码应保持明文保存: %+v", u)
+	}
+	if err := r.ChangePassword("bob", "hashed-old-1", "hashed-new-1"); err != nil {
+		t.Fatal(err)
+	}
+	if u, _ := r.Lookup("bob"); !CheckPassword(u.Password, "hashed-new-1") || u.Password == "hashed-new-1" {
+		t.Fatalf("哈希密码应保持哈希保存: %+v", u)
+	}
+	if notified != 2 {
+		t.Fatalf("每次修改应通知一次: %d", notified)
+	}
+	// 开关与修改后的密码写入文件
+	r2 := New()
+	if err := r2.Init(st); err != nil {
+		t.Fatal(err)
+	}
+	if u, _ := r2.Lookup("alice"); !r2.SelfService() || u.Password != "plain-new-1" {
+		t.Fatalf("应从文件读到开关与新密码: %v %+v", r2.SelfService(), u)
+	}
+}
+
+// TestHandlePutSelfService 验证接口读写自助修改密码开关，旧接口不带该字段时保持原值。
+func TestHandlePutSelfService(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	r := New()
+	if err := r.Init(st); err != nil {
+		t.Fatal(err)
+	}
+	put := func(body string) map[string]any {
+		req := httptest.NewRequest("PUT", "/api/fileusers", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		r.HandlePut(nil)(rec, req)
+		var out map[string]any
+		_ = json.Unmarshal(rec.Body.Bytes(), &out)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("保存失败: %d %s", rec.Code, rec.Body.String())
+		}
+		return out
+	}
+	if out := put(`{"users":[{"name":"a","password":"p","root":"/a"}],"selfService":true}`); out["selfService"] != true {
+		t.Fatalf("应开启: %v", out)
+	}
+	if out := put(`{"users":[{"name":"a","password":"********","root":"/a"}]}`); out["selfService"] != true {
+		t.Fatalf("不带字段时应保持原值: %v", out)
+	}
+	if out := put(`{"users":[{"name":"a","password":"********","root":"/a"}],"selfService":false}`); out["selfService"] != false {
+		t.Fatalf("应关闭: %v", out)
 	}
 }

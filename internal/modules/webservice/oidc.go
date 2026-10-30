@@ -432,7 +432,8 @@ func (a *authenticator) serveOIDC(w http.ResponseWriter, r *http.Request, e *oid
 		a.oidcUserinfo(w, r, e)
 	case oidcLogoutPath:
 		a.oidcLogout(w, r, e)
-	case oidcLoginPath:
+	case oidcLoginPath, oidcPath + passwordSuffix:
+		// 登录页与自助修改密码页都由 handleLogin 按路径分发
 		a.handleLogin(w, r, e.loginSite(r), clientAddr(r).Addr().String())
 	default:
 		http.NotFound(w, r)

@@ -27,6 +27,16 @@
       </div>
     </div>
 
+    <div v-if="shared.loaded.value" class="g-card">
+      <div class="g-card-head">
+        <div class="g-card-title"><KeyRound :size="16" />{{ t('sharedFileUsers.selfService.title') }}</div>
+        <el-switch v-model="shared.selfService.value" />
+      </div>
+      <div class="g-card-body">
+        <div class="notice no-gap">{{ t('sharedFileUsers.selfService.help', { path: '/__gately_auth/password' }) }}</div>
+      </div>
+    </div>
+
     <FileUsers v-if="shared.loaded.value" v-model="shared.users.value" :title="t('sharedFileUsers.title')" :desc="t('sharedFileUsers.usersDesc')" secrets-url="/api/fileusers/secrets">
       <template #notice>
         <div class="notice">{{ t('sharedFileUsers.help') }}</div>
@@ -39,7 +49,7 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { Save, Server, UsersRound } from 'lucide-vue-next'
+import { KeyRound, Save, Server, UsersRound } from 'lucide-vue-next'
 import PageHeader from '../components/PageHeader.vue'
 import FileUsers from '../components/FileUsers.vue'
 import { issueText, shadowedNames, useSharedFileUsers, type FileService } from '../composables/useSharedFileUsers'
@@ -129,5 +139,8 @@ onMounted(() => shared.load())
   line-height: 1.6;
   color: var(--el-text-color-secondary);
   margin-bottom: 10px;
+}
+.notice.no-gap {
+  margin-bottom: 0;
 }
 </style>

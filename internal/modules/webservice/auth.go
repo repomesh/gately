@@ -10,11 +10,13 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/wangwanjie/gately/internal/banlist"
+	"github.com/wangwanjie/gately/internal/fileusers"
 	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/thirdauth"
 	"github.com/wangwanjie/gately/internal/webpage"
@@ -49,6 +51,14 @@ type authenticator struct {
 	shared sharedStore
 	// oidc 为内置 OIDC 身份提供方的配置，未启用时为空
 	oidc oidcHolder
+
+	// selfAuth 为是否允许共享认证用户自助修改密码；files 为文件服务共享用户（自助改密开关保存在 fileusers.json）
+	selfAuth atomic.Bool
+	files    fileUserStore
+	// changeShared 保存共享认证用户的新密码哈希（u 为校验通过时的用户），由模块设置
+	changeShared func(u AuthUser, hash string) error
+	// onPasswordChanged 在自助修改密码成功后调用，用于记录日志
+	onPasswordChanged func(kind, name, ip string)
 }
 
 func (a *authenticator) setOAuth(env oauthEnv) {
@@ -71,7 +81,7 @@ type failCount struct {
 
 func newAuthenticator(secret string) *authenticator {
 	return &authenticator{secret: []byte(secret), fails: map[string]*failCount{}, used: map[string]int64{},
-		bans: banlist.Default, shareUses: map[string]int{}}
+		bans: banlist.Default, shareUses: map[string]int{}, files: fileusers.Default}
 }
 
 // verifyUser 校验用户名密码，密码支持明文（兼容 Lucky）与 bcrypt 哈希。
@@ -362,6 +372,7 @@ const loginSrc = `{{define "body"}}<section class="card login"{{if .Pending}} ar
 <input type="hidden" name="next" value="{{.Next}}">
 <button class="btn primary" type="submit">{{.T.submit}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
 </form>{{end}}
+{{if .PasswordURL}}<a class="back" href="{{.PasswordURL}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>{{.T.changePassword}}</a>{{end}}
 {{if .Providers}}{{if .HasPassword}}<div class="or">{{.T.or}}</div>{{else}}<div class="gap"></div>{{end}}
 <div class="oauth">{{range .Providers}}<a class="btn ghost" href="{{$.StartURL}}?p={{.Key}}&next={{$.Next}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>{{printf $.T.loginWith .Name}}</a>{{end}}</div>{{end}}
 </section>
@@ -440,6 +451,7 @@ var loginTexts = map[string]string{
 	"verify":         "验证",
 	"totpAuto":       "输满 6 位后自动提交",
 	"back":           "返回重新登录",
+	"changePassword": "修改密码",
 }
 
 func init() {
@@ -497,11 +509,18 @@ const totpStepTTL = 5 * time.Minute
 func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Site, ip string) {
 	host := hostOnly(r.Host)
 	base := s.authPrefix()
+	if r.URL.Path == base+passwordSuffix {
+		a.handlePassword(w, r, s, ip)
+		return
+	}
 	data := map[string]any{
 		"Host": host, "Action": base + "/login", "Next": safeNext(r.URL.Query().Get("next")), "Client": s.loginClient,
 		"HasPassword": len(s.Users) > 0 || s.SharedUsers, "Providers": a.siteProviders(s), "StartURL": oauthStart,
 		// 从验证码对话框返回时带回用户名，免得重新输入
 		"Username": r.URL.Query().Get("u"),
+	}
+	if authKind, _ := a.selfServiceKinds(s); authKind {
+		data["PasswordURL"] = base + passwordSuffix
 	}
 	if r.URL.Path == base+"/logout" {
 		http.SetCookie(w, &http.Cookie{Name: cookieName(s), Value: "", Path: "/", MaxAge: -1})

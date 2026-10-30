@@ -161,6 +161,16 @@ Behavior:
 
 To let Gitea, OpenList, Grafana and other applications know which user signed in, offer the shared users to them through [OIDC single sign-on](/en/docs/modules/oidc).
 
+### Self-service password change {#self-service-password}
+
+Turn on Self-service password change in Global settings → Shared users and shared users can change their own password without asking an administrator:
+
+- Visit `https://site-domain/__gately_auth/password` on a site with Use shared users enabled; the login page also shows a Change password link. Users of [OIDC single sign-on](/en/docs/modules/oidc) can use `/__gately_oidc/password` on the issuer domain;
+- Enter the username, the current password and the new password twice (8–128 characters, different from the current one); users with TOTP also enter a verification code;
+- Afterwards the user's sessions on all sites end immediately and they sign in again with the new password; issued OIDC refresh tokens and Access Tokens are revoked as well;
+- A wrong current password or code counts toward the same rate limit and automatic ban as failed logins, and forms submitted from other websites are rejected; the web service log records the user and source IP;
+- The same page can also change the password of [shared file users](/en/docs/modules/tools#shared-users). Each kind of account has its own switch; with both on, the page lets the user pick the account type. Accounts of the two kinds with the same name are independent.
+
 ## Access control
 
 ### IP allowlist and blocklist

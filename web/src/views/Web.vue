@@ -451,6 +451,10 @@
           <el-input v-if="settings" v-model="settings.ssoDomain" class="w-260" placeholder="example.com" />
           <div class="form-help">{{ t('web.ssoDomainHelp') }}</div>
         </el-form-item>
+        <el-form-item :label="t('web.selfServicePassword')">
+          <el-switch v-if="settings" v-model="settings.selfServicePassword" />
+          <div class="form-help">{{ t('web.selfServicePasswordHelp', { site: '/__gately_auth/password', oidc: '/__gately_oidc/password' }) }}</div>
+        </el-form-item>
         <el-divider content-position="left">{{ t('web.oidcDivider') }}</el-divider>
         <div class="form-help oidc-intro">{{ t('web.oidcIntro') }}</div>
         <OIDCProvider v-if="settings" v-model="settings.oidc" />
@@ -663,6 +667,8 @@ interface WebSettings {
   authUsers: AuthUser[]
   ssoDomain: string
   oidc: OIDCSettings
+  // selfServicePassword 为是否允许共享用户自助修改密码
+  selfServicePassword: boolean
 }
 const settings = ref<WebSettings>()
 // 定时刷新，标签页在后台时暂停
@@ -1188,7 +1194,7 @@ async function fetchSettings() {
     Omit<WebSettings, 'oauthProviders' | 'authUsers' | 'oidc'> & { oauthProviders: OAuthProvider[] | null; authUsers: AuthUser[] | null; oidc?: Partial<OIDCSettings> | null }
   >('/api/webservice/settings')
   moduleEnabled.value = s.enable
-  return { ...s, oauthProviders: s.oauthProviders ?? [], authUsers: fromAPI(s.authUsers), ssoDomain: s.ssoDomain ?? '', oidc: oidcFromAPI(s.oidc) }
+  return { ...s, oauthProviders: s.oauthProviders ?? [], authUsers: fromAPI(s.authUsers), ssoDomain: s.ssoDomain ?? '', oidc: oidcFromAPI(s.oidc), selfServicePassword: !!s.selfServicePassword }
 }
 
 async function openSettings() {

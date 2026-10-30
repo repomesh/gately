@@ -161,6 +161,16 @@ Comportement :
 
 Pour que Gitea, OpenList, Grafana et les autres applications sachent quel utilisateur s'est connecté, proposez-leur les utilisateurs partagés via l'[authentification unique OIDC](/fr/docs/modules/oidc).
 
+### Changement de mot de passe en libre-service {#self-service-password}
+
+Activez Changement de mot de passe en libre-service dans Paramètres globaux → Utilisateurs partagés : les utilisateurs partagés peuvent alors changer leur mot de passe sans passer par l'administrateur.
+
+- Rendez-vous sur `https://domaine-du-site/__gately_auth/password` sur un site où Utiliser les utilisateurs partagés est activé ; la page de connexion affiche aussi un lien Changer le mot de passe. Les utilisateurs de l'[authentification unique OIDC](/fr/docs/modules/oidc) peuvent utiliser `/__gately_oidc/password` sur le domaine émetteur ;
+- Saisissez le nom d'utilisateur, le mot de passe actuel et deux fois le nouveau (8 à 128 caractères, différent de l'actuel) ; les utilisateurs avec TOTP saisissent aussi un code de vérification ;
+- Ensuite, les sessions de l'utilisateur sur tous les sites prennent fin immédiatement et il se reconnecte avec le nouveau mot de passe ; les jetons d'actualisation et Access Tokens OIDC émis sont également révoqués ;
+- Un mot de passe actuel ou un code erroné compte dans la même limitation et le même bannissement automatique que les échecs de connexion, et les formulaires envoyés depuis d'autres sites sont refusés ; le journal du service web enregistre l'utilisateur et l'IP source ;
+- La même page change aussi le mot de passe des [utilisateurs de fichiers partagés](/fr/docs/modules/tools#shared-users). Chaque type de compte a son propre interrupteur ; si les deux sont activés, la page permet de choisir le type de compte. Les comptes des deux types portant le même nom sont indépendants.
+
 ## Contrôle d'accès
 
 ### Liste d'autorisation et liste de blocage d'IP

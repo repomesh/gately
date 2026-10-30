@@ -26,5 +26,9 @@
     "off": "Gemeinsame Benutzer nicht erlaubt",
     "disabled": "Dienst deaktiviert",
     "none": "Die Module WebDAV, FTP und SMB sind alle ausgeschaltet"
+  },
+  "selfService": {
+    "title": "Passwort selbst ändern",
+    "help": "Wenn aktiviert, können gemeinsame Dateibenutzer ihr Passwort unter {path} auf jeder Webdienst-Site mit Web-Authentifizierung selbst ändern, nach Eingabe des aktuellen Passworts; WebDAV, FTP und SMB verwenden sofort das neue Passwort. Klartext-Passwörter bleiben im Klartext, bcrypt-Hashes bleiben gehasht"
   }
 }

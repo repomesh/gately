@@ -199,6 +199,8 @@ type Settings struct {
 	SSODomain string `json:"ssoDomain"`
 	// OIDC 为内置的 OIDC 身份提供方，把共享用户提供给支持 OpenID Connect 的应用登录
 	OIDC OIDCSettings `json:"oidc"`
+	// SelfServicePassword 为 true 时共享用户可在开启“使用共享用户”的站点与 OIDC 签发者域名上自助修改密码（认证路径下的 /password）
+	SelfServicePassword bool `json:"selfServicePassword"`
 }
 
 type fileConfig struct {

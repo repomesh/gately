@@ -65,6 +65,8 @@ var serviceOrder = []string{"webdav", "ftp", "smb"}
 // file 是 fileusers.json 的结构，外面包一层便于以后增加字段。
 type file struct {
 	Users []User `json:"users"`
+	// SelfService 为 true 时共享用户可以在 Web 服务站点的自助页面修改自己的密码（见 ChangePassword）
+	SelfService bool `json:"selfService,omitempty"`
 }
 
 // Validate 校验并规范化共享用户。用户名不区分大小写不可重复（SMB 按不区分大小写匹配用户名），
@@ -118,6 +120,8 @@ type Registry struct {
 	mu    sync.RWMutex
 	store *config.Store
 	users []User
+	// selfService 为是否允许共享用户自助修改密码
+	selfService bool
 	// loadErr 为读取到的 fileusers.json 未通过校验的错误；此时共享用户全部不能登录，直到保存一份有效的列表
 	loadErr error
 	// saveMu 串行化保存，保证写文件与内存列表的顺序一致
@@ -166,11 +170,18 @@ func (r *Registry) Init(store *config.Store) error {
 	if r.loadErr == nil {
 		f.Users = users
 	}
-	r.store, r.users = store, f.Users
+	r.store, r.users, r.selfService = store, f.Users, f.SelfService
 	r.subMu.Lock()
 	r.subs, r.checks, r.services = map[int]func(){}, map[int]check{}, map[string]func() Service{}
 	r.subMu.Unlock()
 	return nil
+}
+
+// SelfService 返回是否允许共享用户自助修改密码。
+func (r *Registry) SelfService() bool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.selfService
 }
 
 // LoadErr 返回读取 fileusers.json 时的校验错误，为 nil 表示列表有效。
@@ -208,11 +219,24 @@ func (r *Registry) Lookup(name string) (User, bool) {
 
 // Save 校验并保存共享用户，仍为脱敏占位符的密码沿用原值，经各服务的检查（见 AddCheck）后保存并同步通知订阅者。
 func (r *Registry) Save(users []User) error {
+	return r.save(users, nil)
+}
+
+// save 同 Save；selfService 不为 nil 时一并修改自助修改密码开关，否则沿用原值。
+func (r *Registry) save(users []User, selfService *bool) error {
 	r.saveMu.Lock()
 	defer r.saveMu.Unlock()
+	return r.saveLocked(users, selfService)
+}
+
+// saveLocked 执行保存；调用方持有 saveMu。
+func (r *Registry) saveLocked(users []User, selfService *bool) error {
 	r.mu.RLock()
-	store, old := r.store, clone(r.users)
+	store, old, self := r.store, clone(r.users), r.selfService
 	r.mu.RUnlock()
+	if selfService != nil {
+		self = *selfService
+	}
 	if store == nil {
 		return errors.New("共享用户尚未初始化")
 	}
@@ -225,15 +249,94 @@ func (r *Registry) Save(users []User) error {
 	if err := r.check(users); err != nil {
 		return err
 	}
-	if err := store.Save(ID, file{Users: users}); err != nil {
+	if err := store.Save(ID, file{Users: users, SelfService: self}); err != nil {
 		return err
 	}
 	r.mu.Lock()
-	r.users, r.loadErr = users, nil
+	r.users, r.loadErr, r.selfService = users, nil, self
 	r.mu.Unlock()
 	r.notify()
 	return nil
 }
+
+// 自助修改密码的错误，调用方据此决定提示与是否计入失败次数。
+var (
+	// ErrSelfServiceOff 表示未开启自助修改密码
+	ErrSelfServiceOff = errors.New("未开启自助修改密码")
+	// ErrBadCredentials 表示用户不存在或当前密码错误
+	ErrBadCredentials = errors.New("用户名或当前密码错误")
+)
+
+// ChangePassword 由共享用户自己修改密码：校验当前密码后保存新密码。原密码为 bcrypt 哈希时新密码也按哈希保存，
+// 原为明文时仍保存明文（SMB 的 NTLM 认证需要明文）。保存经过与 Save 相同的校验与检查，并通知各文件服务。
+func (r *Registry) ChangePassword(name, current, next string) error {
+	r.mu.RLock()
+	on, broken := r.selfService, r.loadErr != nil
+	r.mu.RUnlock()
+	if !on {
+		return ErrSelfServiceOff
+	}
+	u, ok := r.Lookup(name)
+	if broken || !ok {
+		// 用户不存在时也做一次哈希比较，使耗时与真实用户一致，避免据此探测用户名
+		_ = bcrypt.CompareHashAndPassword(dummyHash(), []byte(current))
+		return ErrBadCredentials
+	}
+	if !CheckPassword(u.Password, current) {
+		return ErrBadCredentials
+	}
+	if err := ValidateNewPassword(current, next); err != nil {
+		return err
+	}
+	// 新密码不能写成脱敏占位符或 bcrypt 哈希的样子，否则保存时会被当作“未修改”或哈希
+	if next == crud.SecretMask || strings.HasPrefix(next, "$2") {
+		return errors.New("新密码不能以 $2 开头，也不能是 ********")
+	}
+	stored := next
+	if strings.HasPrefix(u.Password, "$2") {
+		h, err := bcrypt.GenerateFromPassword([]byte(next), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		stored = string(h)
+	}
+	// 读取、修改与保存在同一把保存锁内完成，避免覆盖管理员在此期间保存的修改
+	r.saveMu.Lock()
+	defer r.saveMu.Unlock()
+	r.mu.RLock()
+	users := clone(r.users)
+	r.mu.RUnlock()
+	found := false
+	for i := range users {
+		// 校验期间密码被管理员改过时按当前密码错误处理，避免覆盖管理员刚设置的密码
+		if users[i].Name == name && users[i].Password == u.Password {
+			users[i].Password = stored
+			found = true
+		}
+	}
+	if !found {
+		return ErrBadCredentials
+	}
+	return r.saveLocked(users, nil)
+}
+
+// ValidateNewPassword 校验自助修改的新密码：长度 8～128 个字符，且与当前密码不同。
+func ValidateNewPassword(current, next string) error {
+	n := len([]rune(next))
+	if n < 8 || n > 128 {
+		return errors.New("新密码长度需为 8 到 128 个字符")
+	}
+	if next == current {
+		return errors.New("新密码不能与当前密码相同")
+	}
+	return nil
+}
+
+// dummyHash 是用户不存在时用于比较的哈希，使耗时与真实用户一致。
+var dummyHash = sync.OnceValue(func() []byte {
+	h, _ := bcrypt.GenerateFromPassword([]byte("gately-dummy"), bcrypt.DefaultCost)
+	return h
+})
 
 // Subscribe 注册共享用户变化时的回调，返回取消函数。回调在保存请求中同步执行，不能持有调用方的锁。
 func (r *Registry) Subscribe(fn func()) (cancel func()) {
@@ -392,12 +495,14 @@ func (r *Registry) HandlePut(extra func(map[string]any)) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var body struct {
 			Users []User `json:"users"`
+			// SelfService 为自助修改密码开关，省略时保持原值（旧接口不带该字段）
+			SelfService *bool `json:"selfService"`
 		}
 		if err := httpx.ReadJSON(req, &body); err != nil {
 			httpx.Error(w, http.StatusBadRequest, "%v", err)
 			return
 		}
-		if err := r.Save(body.Users); err != nil {
+		if err := r.save(body.Users, body.SelfService); err != nil {
 			httpx.Error(w, http.StatusBadRequest, "%v", err)
 			return
 		}
@@ -406,7 +511,7 @@ func (r *Registry) HandlePut(extra func(map[string]any)) http.HandlerFunc {
 }
 
 func (r *Registry) reply(w http.ResponseWriter, extra func(map[string]any)) {
-	out := map[string]any{"users": r.Masked()}
+	out := map[string]any{"users": r.Masked(), "selfService": r.SelfService()}
 	if err := r.LoadErr(); err != nil {
 		out["error"] = err.Error()
 	}

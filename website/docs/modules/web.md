@@ -161,6 +161,16 @@ https://auth.example.com/__gately_auth/oauth/callback
 
 要让 Gitea、OpenList、Grafana 等应用识别登录的是哪个用户，可以把共享用户通过 [OIDC 单点登录](/docs/modules/oidc) 提供给应用。
 
+### 自助修改密码 {#self-service-password}
+
+在「全局设置 → 共享用户」中打开「自助修改密码」后，共享用户可以自己修改密码，不必找管理员：
+
+- 在开启了「使用共享用户」的站点访问 `https://站点域名/__gately_auth/password`，登录页也会显示「修改密码」入口；使用 [OIDC 单点登录](/docs/modules/oidc) 的用户在签发者域名访问 `/__gately_oidc/password`；
+- 输入用户名、当前密码和两次新密码（8～128 个字符，且与当前密码不同）；启用了 TOTP 的用户还需填写动态验证码；
+- 修改后该用户在各站点的会话立即失效，需要用新密码重新登录；已签发的 OIDC 刷新令牌与 Access Token 同时作废；
+- 当前密码或验证码错误与登录失败共用同一套限流与自动封禁，其他网站代为提交的表单会被拒绝；Web 服务日志会记录修改的用户与来源 IP；
+- 同一页面也可以修改[文件服务共享用户](/docs/modules/tools#shared-users)的密码，两种账号分别开关，都打开时页面上可切换账号类型；同名的两种账号互不影响。
+
 ## 访问控制
 
 ### IP 黑白名单

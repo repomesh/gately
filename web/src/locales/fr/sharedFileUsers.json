@@ -26,5 +26,9 @@
     "off": "Utilisateurs partagés non autorisés",
     "disabled": "Service désactivé",
     "none": "Les modules WebDAV, FTP et SMB sont tous désactivés"
+  },
+  "selfService": {
+    "title": "Changement de mot de passe en libre-service",
+    "help": "Une fois activé, les utilisateurs de fichiers partagés peuvent changer leur mot de passe sur {path} de n'importe quel site du service web avec authentification web, après avoir saisi le mot de passe actuel ; WebDAV, FTP et SMB utilisent aussitôt le nouveau mot de passe. Les mots de passe en clair restent en clair et les hachages bcrypt restent hachés"
   }
 }

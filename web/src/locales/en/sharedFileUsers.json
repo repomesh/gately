@@ -26,5 +26,9 @@
     "off": "Shared users not allowed",
     "disabled": "Service disabled",
     "none": "The WebDAV, FTP and SMB modules are all turned off"
+  },
+  "selfService": {
+    "title": "Self-service password change",
+    "help": "When on, shared file users can change their own password at {path} on any web service site with web authentication, after entering the current password; WebDAV, FTP and SMB use the new password right away. Plaintext passwords stay plaintext and bcrypt hashes stay hashed"
   }
 }

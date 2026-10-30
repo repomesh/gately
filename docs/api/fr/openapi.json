@@ -2165,6 +2165,9 @@
           "oidc": {
             "$ref": "#/components/schemas/webservice.OIDCSettings"
           },
+          "selfServicePassword": {
+            "type": "boolean"
+          },
           "ssoDomain": {
             "type": "string"
           },
@@ -12944,7 +12947,7 @@
     },
     "/api/fileusers": {
       "get": {
-        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si `services` indique comment chaque service de fichiers les utilise : `enable` si le service est activé, `sharedUsers` si les utilisateurs partagés peuvent se connecter, `localUsers` les noms des utilisateurs locaux (un utilisateur partagé du même nom n’est vérifié que comme utilisateur local dans ce service), `caseInsensitive` vrai quand les noms sont comparés sans tenir compte de la casse (SMB), `issues` les utilisateurs partagés inutilisables par ce service et la raison : `name` (le nom contient des caractères refusés par SMB), `bcrypt` (le mot de passe est un hachage bcrypt), `share` (un nom de répertoire ne peut pas servir de nom de partage ou est en double). Les modules désactivés ne sont pas listés. fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée.\n\nPermission requise : `fileusers:read`.",
+        "description": "返回 WebDAV、FTP、SMB 共用的Utilisateurs partagés des services de fichiers，密码脱敏。`services` 列出各文件服务的使用情况：`enable` 服务是否启用，`sharedUsers` 是否允许共享用户登录，`localUsers` 本地用户名（同名的共享用户在该服务中只按本地用户校验），`caseInsensitive` 为 true 时按不区分大小写比较用户名（SMB），`issues` 为无法用于该服务的共享用户及原因：`name`（用户名含 SMB 不允许的字符）、`bcrypt`（密码是 bcrypt 哈希）、`share`（目录名称不能作为共享名或重复）。已关闭的模块不列出。`selfService` 为是否允许共享用户在 Service Web站点的 `/__gately_auth/password` 页面自助Modifier 密码。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。\n\nPermission requise : `fileusers:read`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -12993,7 +12996,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中Modifier （字段 `sharedUsers`）。\n\nPermission requise : `fileusers:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中Modifier （字段 `sharedUsers`）。可选字段 `selfService` 为自助Modifier 密码开关，省略时保持原值。\n\nPermission requise : `fileusers:write`.",
         "requestBody": {
           "content": {
             "application/json": {

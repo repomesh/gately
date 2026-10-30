@@ -80,6 +80,8 @@ WebDAV、FTP、SMB は 1 つの「共有ユーザー」リストを共用しま�
 
 API は `GET` / `PUT /api/fileusers` で、API トークンには `fileusers:read` / `fileusers:write` 権限が必要です。読み取り結果の `services` に各サービスの利用状況が含まれます。以前の各サービスの `GET` / `PUT /api/<サービス>/shared-users` は非推奨ですが引き続き使え、同じリストを読み書きします。読み取りはそのサービスの読み取り権限、変更には `webdav:write`、`ftp:write`、`smb:write` のすべてが必要です。
 
+**パスワードのセルフ変更**：「ファイル共有ユーザー」ページで「パスワードのセルフ変更」をオンにして保存すると、共有ユーザーは Web 認証が有効な任意の Web サービスサイトの `https://サイトのドメイン/__gately_auth/password` で、ユーザー名・現在のパスワード・新しいパスワード（8〜128 文字）を入力して自分のパスワードを変更できます。WebDAV、FTP、SMB はすぐに新しいパスワードを使います（FTP と SMB は再起動するため、接続中のクライアントは再接続が必要です）。平文のパスワードは平文のまま、bcrypt ハッシュはハッシュのまま保存されます。現在のパスワードの誤りは Web ログインと同じレート制限・自動ブロックの対象です。スイッチは `fileusers.json` の `selfService` に保存され、API のフィールド名も同じです。Web ログインの共有ユーザーについては [Web サービスのパスワードのセルフ変更](/ja/docs/modules/web#self-service-password)を参照してください。
+
 ## File Browser {#filebrowser}
 
 「ファイルサービス」グループの「File Browser」で設定します。Gately は [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser) をホストします。画像・動画・文書のプレビュー、アップロードとダウンロード、共有リンクの作成ができ、独自のユーザーと権限管理を持つ Web ファイルマネージャーです。元の filebrowser/filebrowser は 2026 年にアーカイブされセキュリティ修正が行われなくなったため、保守が続いている Quantum フォークをホストします。

@@ -145,6 +145,8 @@
   "sharedUsersHelp": "Cuentas de acceso compartidas por varios sitios, cada una con verificación TOTP opcional. Un sitio las usa al marcar «Usar usuarios compartidos» en la autenticación web; sustituye a autenticaciones externas como Authelia",
   "ssoDomain": "Dominio de SSO",
   "ssoDomainHelp": "p. ej. example.com: tras iniciar sesión en cualquier sitio de este dominio o sus subdominios, los demás no lo piden de nuevo. Vacío para iniciar sesión por sitio",
+  "selfServicePassword": "Cambio de contraseña por el usuario",
+  "selfServicePasswordHelp": "Si se activa, los usuarios compartidos pueden cambiar su contraseña en {site} de los sitios con Usar usuarios compartidos activado, o en {oidc} del dominio emisor OIDC, indicando la contraseña actual (y el código de verificación); la página de inicio de sesión también muestra el enlace. Después, las sesiones del usuario en todos los sitios terminan de inmediato y se revocan los tokens de actualización y Access Tokens OIDC emitidos",
   "oidcDivider": "Proveedor de identidad OIDC",
   "oidcIntro": "Permite que Gitea, OpenList, Grafana y otras aplicaciones OpenID Connect inicien sesión con los usuarios compartidos de arriba, de modo que cada aplicación sabe quién ha entrado. Puede sustituir al proveedor OIDC de Authelia.",
   "sharedUsersSite": "Usuarios compartidos",

@@ -145,6 +145,8 @@
   "sharedUsersHelp": "Comptes de connexion partagés entre plusieurs sites, avec TOTP optionnel par utilisateur. Un site les utilise une fois « Utiliser les utilisateurs partagés » coché dans l'authentification web ; remplace une authentification externe comme Authelia",
   "ssoDomain": "Domaine SSO",
   "ssoDomainHelp": "ex. example.com : après connexion sur un site de ce domaine ou de ses sous-domaines, les autres sites ne redemandent pas de connexion. Vide pour une connexion par site",
+  "selfServicePassword": "Changement de mot de passe en libre-service",
+  "selfServicePasswordHelp": "Une fois activé, les utilisateurs partagés peuvent changer leur mot de passe sur {site} des sites où Utiliser les utilisateurs partagés est activé, ou sur {oidc} du domaine émetteur OIDC, après avoir saisi le mot de passe actuel (et le code de vérification) ; la page de connexion affiche aussi un lien. Ensuite, les sessions de l'utilisateur sur tous les sites prennent fin immédiatement et les jetons d'actualisation et Access Tokens OIDC émis sont révoqués",
   "oidcDivider": "Fournisseur d'identité OIDC",
   "oidcIntro": "Permet à Gitea, OpenList, Grafana et aux autres applications OpenID Connect de connecter les utilisateurs partagés ci-dessus ; chaque application sait qui est connecté. Peut remplacer le fournisseur OIDC d'Authelia.",
   "sharedUsersSite": "Utilisateurs partagés",

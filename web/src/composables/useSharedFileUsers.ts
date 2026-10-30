@@ -24,6 +24,8 @@ export interface FileService {
 
 interface Reply {
   users: FileUser[] | null
+  // selfService 为是否允许共享用户自助修改密码
+  selfService?: boolean
   services?: FileService[]
   error?: string
 }
@@ -38,6 +40,8 @@ export function useSharedFileUsers() {
   // savedUsers 为已保存的共享用户（不随表单编辑变化），用于展示连接地址、数量等以已保存配置为准的内容
   const savedUsers = ref<FileUser[]>([])
   const loaded = ref(false)
+  // selfService 为是否允许共享用户在 Web 服务站点的自助页面修改密码，随列表一起保存
+  const selfService = ref(false)
   // saved 为最近一次读取或保存的内容，用于判断是否有未保存的修改
   let saved = ''
 
@@ -45,8 +49,9 @@ export function useSharedFileUsers() {
     users.value = (r.users ?? []).map((u) => ({ ...u, mounts: u.mounts ?? [] }))
     services.value = r.services ?? []
     loadError.value = r.error ?? ''
-    saved = JSON.stringify(users.value)
-    savedUsers.value = JSON.parse(saved)
+    selfService.value = !!r.selfService
+    saved = snapshot()
+    savedUsers.value = JSON.parse(saved).users
     loaded.value = true
   }
 
@@ -55,12 +60,17 @@ export function useSharedFileUsers() {
   }
 
   async function save() {
-    apply(await api.put<Reply>('/api/fileusers', { users: users.value }))
+    apply(await api.put<Reply>('/api/fileusers', { users: users.value, selfService: selfService.value }))
   }
 
-  // dirty 判断列表是否有未保存的修改
+  // snapshot 返回列表与开关的快照，用于判断是否有未保存的修改
+  function snapshot(): string {
+    return JSON.stringify({ users: users.value, selfService: selfService.value })
+  }
+
+  // dirty 判断列表或开关是否有未保存的修改
   function dirty(): boolean {
-    return JSON.stringify(users.value) !== saved
+    return snapshot() !== saved
   }
 
   // service 返回指定服务的使用情况，模块已关闭时为 undefined
@@ -68,7 +78,7 @@ export function useSharedFileUsers() {
     return services.value.find((s) => s.id === id)
   }
 
-  return { users, savedUsers, services, loadError, loaded, load, save, dirty, service }
+  return { users, savedUsers, selfService, services, loadError, loaded, load, save, dirty, service }
 }
 
 // issueText 按原因代码返回无法用于 SMB 的说明，未知代码按共享名问题处理

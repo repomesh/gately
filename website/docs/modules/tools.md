@@ -80,6 +80,8 @@ WebDAV、FTP 与 SMB 共用一份「共享用户」，字段与各服务的本�
 
 接口为 `GET` / `PUT /api/fileusers`，API 令牌需要 `fileusers:read` / `fileusers:write` 权限，读取结果中的 `services` 列出各服务的使用情况。原来各服务下的 `GET` / `PUT /api/<服务>/shared-users` 已弃用，仍可使用并读写同一份列表：读取沿用所在服务的读权限，修改需要同时具备 `webdav:write`、`ftp:write` 与 `smb:write`。
 
+**自助修改密码**：在「文件共享用户」页面打开「自助修改密码」并保存后，共享用户可以在任一开启网页认证的 Web 服务站点访问 `https://站点域名/__gately_auth/password`，输入用户名、当前密码和新密码（8～128 个字符）修改自己的密码，WebDAV、FTP、SMB 随即使用新密码（FTP 与 SMB 会重启服务，已连接的客户端需要重新连接）。原密码为明文的仍按明文保存，为 bcrypt 哈希的按哈希保存；当前密码错误与网页登录共用限流与自动封禁。开关保存在 `fileusers.json` 的 `selfService` 字段，接口字段同名。网页登录的共享用户见 [Web 服务的自助修改密码](/docs/modules/web#self-service-password)。
+
 ## File Browser {#filebrowser}
 
 在「文件服务」分组的「File Browser」中配置。Gately 托管 [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser)：一个网页文件管理器，可以在线预览图片、视频与文档、上传下载、生成分享链接，并有自己的多用户与权限管理。原版 filebrowser/filebrowser 已于 2026 年归档、不再修复安全问题，因此托管的是仍在维护的 Quantum 分支。

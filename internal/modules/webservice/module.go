@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -91,6 +92,15 @@ func (m *Module) Init(env module.Env) error {
 	m.auth.setBanSeconds(m.cfg.Settings.AutoBanSeconds)
 	m.applyOAuthLocked()
 	m.auth.shared.set(m.cfg.Settings.AuthUsers, m.cfg.Settings.SSODomain)
+	m.auth.selfAuth.Store(m.cfg.Settings.SelfServicePassword)
+	m.auth.changeShared = m.changeSharedPassword
+	m.auth.onPasswordChanged = func(kind, name, ip string) {
+		if kind == kindFile {
+			m.logs.Logger("").Infof("文件服务共享用户 %s 从 %s 自助修改了密码", name, ip)
+		} else {
+			m.logs.Logger("").Infof("共享用户 %s 从 %s 自助修改了密码", name, ip)
+		}
+	}
 	if err := m.auth.oidc.set(m.cfg.Settings.OIDC); err != nil {
 		m.logs.Add(logbuf.LevelWarn, "", "OIDC 身份提供方未启动: "+err.Error())
 	}
@@ -389,6 +399,7 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	m.applyOAuthLocked()
 	m.auth.shared.set(s.AuthUsers, s.SSODomain)
+	m.auth.selfAuth.Store(s.SelfServicePassword)
 	if err := m.auth.oidc.set(s.OIDC); err != nil {
 		m.logs.Add(logbuf.LevelWarn, "", "OIDC 身份提供方未启动: "+err.Error())
 	}
@@ -408,6 +419,27 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	s.AuthUsers = maskAuthUsers(s.AuthUsers)
 	s.OIDC = maskOIDC(s.OIDC)
 	httpx.OK(w, s)
+}
+
+// changeSharedPassword 保存共享用户自助修改的密码哈希。u 为校验当前密码时的用户：
+// 期间管理员改过该用户的密码、改名或删除了该用户时拒绝保存，避免覆盖管理员的修改。
+func (m *Module) changeSharedPassword(u AuthUser, hash string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	old := m.cfg.Settings.AuthUsers
+	users := slices.Clone(old)
+	i := slices.IndexFunc(users, func(x AuthUser) bool { return x.ID == u.ID && x.Name == u.Name && x.Password == u.Password })
+	if i < 0 {
+		return errPasswordChanged
+	}
+	users[i].Password = hash
+	m.cfg.Settings.AuthUsers = users
+	if err := m.saveLocked(); err != nil {
+		m.cfg.Settings.AuthUsers = old
+		return fmt.Errorf("保存失败: %v", err)
+	}
+	m.auth.shared.set(users, m.cfg.Settings.SSODomain)
+	return nil
 }
 
 type totpRequest struct {
