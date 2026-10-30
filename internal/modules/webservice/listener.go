@@ -18,6 +18,7 @@ import (
 
 	"github.com/wangwanjie/gately/internal/acmehttp"
 	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/webprobe"
 )
 
 // CertSource 提供按 SNI 选择证书的能力（由证书模块实现）。
@@ -147,6 +148,9 @@ func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s := l.route(r.Host)
 	if s == nil {
 		writeNotFound(w, r, "站点不存在", "这个域名没有配置对应的站点，请检查访问地址是否正确。")
+		// 未知域名且没有默认站点时，同样交给路径探测规则计数
+		webprobe.Report(webprobe.Hit{Addr: clientAddr(r).Addr(), Listener: l.cfg.Key, Unknown: true,
+			Method: r.Method, Host: r.Host, Path: r.URL.Path, Status: http.StatusNotFound})
 		return
 	}
 	s.ServeHTTP(w, r)
@@ -180,6 +184,7 @@ func buildSiteTable(cfg Listener, log *logbuf.Logger, auth *authenticator, waf W
 		if o := old[s.Key]; o != nil {
 			h.inherit(o)
 		}
+		h.listener = cfg.Key
 		return h, nil
 	}
 	for _, s := range cfg.Sites {
@@ -205,6 +210,7 @@ func buildSiteTable(cfg Listener, log *logbuf.Logger, auth *authenticator, waf W
 		if err != nil {
 			return nil, err
 		}
+		h.deflt = true
 		t.deflt = h
 	}
 	return t, nil

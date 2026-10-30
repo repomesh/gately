@@ -172,6 +172,8 @@
           <!-- 默认站点未配置时不在站点列表中显示，这里提供配置入口 -->
           <el-button v-if="!hasDefaultRow(l)" text size="small" :icon="Shield" @click="openDefaultSite(l)">{{ t('web.setDefaultSite') }}</el-button>
           <el-button text size="small" :icon="Pencil" @click="openListener(l)">{{ t('web.editListener') }}</el-button>
+          <!-- 规则的存储与执行都在入侵防护，这里只是带上监听跳过去创建 -->
+          <el-button text size="small" :icon="ShieldBan" :title="t('web.probeRuleHelp')" @click="router.push({ name: 'guard', query: { webProbe: l.key } })">{{ t('web.probeRule') }}</el-button>
           <el-popconfirm :title="t('web.deleteListenerConfirm')" width="240" @confirm="removeListener(l)">
             <template #reference>
               <el-button text size="small" type="danger" :icon="Trash2">{{ t('common.delete') }}</el-button>
@@ -475,6 +477,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
   ArrowUpDown,
@@ -490,6 +493,7 @@ import {
   Search,
   Server,
   Shield,
+  ShieldBan,
   SlidersHorizontal,
   Trash2,
 } from 'lucide-vue-next'
@@ -632,6 +636,7 @@ interface SiteRow {
 }
 
 const { t } = useI18n()
+const router = useRouter()
 const compact = useCompactView('web')
 const listeners = ref<ListenerView[]>([])
 // 每个监听下的站点列表可单独收起，状态按监听 key 持久化

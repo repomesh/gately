@@ -1,0 +1,173 @@
+package guard
+
+import (
+	"net/netip"
+	"strings"
+	"testing"
+
+	"github.com/wangwanjie/gately/internal/banlist"
+	"github.com/wangwanjie/gately/internal/webprobe"
+)
+
+func TestCompilePaths(t *testing.T) {
+	res, err := compilePaths("*/.env\n/admin/*\n~^/wp-.*\\.php$")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases := map[string]bool{
+		"/.env":           true,
+		"/api/.env":       true,
+		"/.ENV":           true, // 通配不区分大小写
+		"/.env.bak":       false,
+		"//.env":          true, // 规范化后为 /.env
+		"/a/../.env":      true,
+		"/admin/x":        true,
+		"/admin":          false,
+		"/wp-login.php":   true,
+		"/index.html":     false,
+		"/x/wp-login.php": false, // 正则按原样匹配，不自动加前缀
+	}
+	for p, want := range cases {
+		if got := matchPath(res, p); got != want {
+			t.Errorf("%s 匹配结果 %v，期望 %v", p, got, want)
+		}
+	}
+	for _, bad := range []string{"env", "~", "~(", "/a\n.git"} {
+		if _, err := compilePaths(bad); err == nil {
+			t.Errorf("%q 应校验失败", bad)
+		}
+	}
+}
+
+func TestWebJailValidate(t *testing.T) {
+	j := Jail{Name: "probe", Source: SourceWeb, Target: " l1 \n\nl2 ", Filter: "*/.env\n", Ignore: ""}
+	if err := j.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if j.Target != "l1\nl2" || j.Filter != "*/.env" || j.MaxRetry != defaultMaxRetry || j.FindTime != defaultFindTime {
+		t.Fatalf("未规范化: %+v", j)
+	}
+	// 路径规则都可留空，表示全部路径
+	if err := (&Jail{Name: "all", Source: SourceWeb}).Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if err := (&Jail{Name: "bad", Source: SourceWeb, Filter: "env"}).Validate(); err == nil {
+		t.Fatal("路径规则不以 / 或 * 开头应校验失败")
+	}
+	if err := (&Jail{Name: "bad", Source: SourceWeb, Target: "a b"}).Validate(); err == nil {
+		t.Fatal("监听 key 含空格应校验失败")
+	}
+}
+
+func TestWebPresets(t *testing.T) {
+	get := func(id string) *webMatcher {
+		for _, p := range Presets {
+			if p.Preset == id {
+				w, err := newWebMatcher(p)
+				if err != nil {
+					t.Fatal(err)
+				}
+				return w
+			}
+		}
+		t.Fatalf("缺少预设 %s", id)
+		return nil
+	}
+	decoy := get("web-decoy")
+	for _, p := range []string{"/.env", "/backend/.env.local", "/.git/config", "/wp-login.php", "/phpMyAdmin/index.php", "/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php"} {
+		// 诱饵路径任何状态码都计数
+		if !decoy.match(webprobe.Hit{Path: p, Status: 200}) {
+			t.Errorf("诱饵路径应命中 %s", p)
+		}
+	}
+	for _, p := range []string{"/", "/index.html", "/.well-known/acme-challenge/x", "/environment"} {
+		if decoy.match(webprobe.Hit{Path: p, Status: 404}) {
+			t.Errorf("不应命中 %s", p)
+		}
+	}
+	unknown := get("web-unknown-host")
+	if !unknown.match(webprobe.Hit{Path: "/", Status: 444, Unknown: true}) || unknown.match(webprobe.Hit{Path: "/x", Status: 404}) {
+		t.Fatal("未知域名规则只统计未匹配站点的请求")
+	}
+	generic := get("web-404")
+	if generic.match(webprobe.Hit{Path: "/favicon.ico", Status: 404}) || generic.match(webprobe.Hit{Path: "/app.js.map", Status: 404}) {
+		t.Fatal("常见资源缺失不应计数")
+	}
+	if !generic.match(webprobe.Hit{Path: "/admin.php", Status: 404}) || generic.match(webprobe.Hit{Path: "/admin.php", Status: 200}) {
+		t.Fatal("默认只统计 404 与 444")
+	}
+}
+
+func TestWebJailBans(t *testing.T) {
+	m := newTestModule(t)
+	add := func(j Jail) {
+		t.Helper()
+		if err := j.Validate(); err != nil {
+			t.Fatal(err)
+		}
+		m.mu.Lock()
+		m.cfg.Jails = append(m.cfg.Jails, j)
+		m.startJailLocked(j)
+		m.mu.Unlock()
+	}
+	add(Jail{Key: "w1", Name: "probe", Enable: true, Source: SourceWeb, Target: "l1", Filter: "/x/*", MaxRetry: 3, FindTime: 60})
+	hit := func(ip, listener, path string, status int) {
+		webprobe.Report(webprobe.Hit{Addr: netip.MustParseAddr(ip), Listener: listener, Method: "GET", Host: "a.example.com", Path: path, Status: status})
+	}
+	a := netip.MustParseAddr("203.0.113.9")
+	// 其他监听、其他路径、200 状态都不计数
+	for i := 0; i < 5; i++ {
+		hit("203.0.113.9", "l2", "/x/1", 404)
+		hit("203.0.113.9", "l1", "/y", 404)
+		hit("203.0.113.9", "l1", "/x/1", 200)
+	}
+	if banlist.Default.Banned(a) {
+		t.Fatal("不符合条件的请求不应计数")
+	}
+	hit("203.0.113.9", "l1", "/x/1", 404)
+	hit("203.0.113.9", "l1", "/x/2", 444)
+	if banlist.Default.Banned(a) {
+		t.Fatal("未达到次数不应封禁")
+	}
+	hit("::ffff:203.0.113.9", "l1", "/x/3", 404)
+	e, ok := banlist.Default.Get("203.0.113.9")
+	if !ok || e.Source != banlist.SourceJailPrefix+"w1" || !strings.Contains(e.Reason, "/x/3") {
+		t.Fatalf("应由路径探测规则封禁: %+v %v", e, ok)
+	}
+	// 白名单（内网）地址不计数
+	for i := 0; i < 5; i++ {
+		hit("192.168.1.5", "l1", "/x/1", 404)
+	}
+	if banlist.Default.Banned(netip.MustParseAddr("192.168.1.5")) {
+		t.Fatal("白名单地址不应被封禁")
+	}
+
+	// 停用后不再计数
+	m.mu.Lock()
+	m.cfg.Jails[0].Enable = false
+	m.startJailLocked(m.cfg.Jails[0])
+	m.mu.Unlock()
+	for i := 0; i < 5; i++ {
+		hit("198.51.100.3", "l1", "/x/1", 404)
+	}
+	if banlist.Default.Banned(netip.MustParseAddr("198.51.100.3")) {
+		t.Fatal("停用的规则不应计数")
+	}
+	// 删除后快照为空；模块停止后取消注册
+	m.mu.Lock()
+	m.jailRemovedLocked("w1")
+	m.mu.Unlock()
+	if p := m.webJails.Load(); p == nil || len(*p) != 0 {
+		t.Fatal("删除规则后快照应为空")
+	}
+	add(Jail{Key: "w2", Name: "decoy", Enable: true, Source: SourceWeb, Filter: "*/.env", MaxRetry: 1, FindTime: 60, AnyStatus: true})
+	hit("198.51.100.4", "any", "//.env", 200)
+	if !banlist.Default.Banned(netip.MustParseAddr("198.51.100.4")) {
+		t.Fatal("诱饵路径一次即应封禁")
+	}
+	_ = m.Stop()
+	hit("198.51.100.5", "any", "/.env", 200)
+	if banlist.Default.Banned(netip.MustParseAddr("198.51.100.5")) {
+		t.Fatal("模块停止后不应再计数")
+	}
+}

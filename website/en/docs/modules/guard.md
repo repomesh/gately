@@ -6,6 +6,7 @@ fail2ban-style intrusion prevention: Gately finds brute-force attempts in logs, 
 
 - **Log jails**: read log files, the systemd journal, command output (such as `logread -f` on OpenWrt) or Docker container logs, find failures with regular expressions and ban an IP that reaches the count within the time window. Templates are included for SSH, Dropbear, Nginx, Vaultwarden, Home Assistant, Proxmox VE and more, and you can paste sample lines into the editor to test the filters;
 - **Gately events**: failed admin console logins and WAF blocks can also feed a jail, no regular expression needed;
+- **Web path probing**: counts requests handled by the web service by listener, path and status code, without reading logs; sources that request decoy paths such as `/.env` or `/.git`, or keep scanning unknown domains, are banned;
 - **Trap ports**: traps on ports this host does not use (23, 135, 1433, 3389, 5900, 6379 and others by default). Any source that connects is banned;
 - **Port-scan detection**: a source that connects to closed ports on this host more often than the threshold per minute is banned;
 - **One ban list**: manual bans (CIDR networks and permanent bans included) and the web service's authentication-failure bans are managed here. Bans are persisted and restored after a restart;
@@ -54,6 +55,7 @@ Without it, bans still apply to Gately's own services. To read host logs, mount 
 | Command output | One command such as `logread -f` | Restarted when it exits |
 | Docker container | Container name | Read through the Docker connection of the Docker module |
 | Gately event | Admin login failure / WAF block | Events carry the source IP, no filter needed |
+| Web path probing | Listeners (optional) and path rules | Counts web service requests, see below |
 
 Filters are Go regular expressions (RE2 syntax), one per line, with `<HOST>` standing for the source address, for example:
 
@@ -62,6 +64,32 @@ Failed password for (?:invalid user )?\S* ?from <HOST>
 ```
 
 Lines matching an "Ignore" expression are not counted. The time window, failure count and ban duration are set per jail; the duration can be the default, custom or permanent.
+
+## Web path probing
+
+With the source set to "Web path probing", the jail counts requests handled by the web service directly, without reading logs:
+
+- **Listeners**: pick one or more; leave empty for all listeners;
+- **Paths**: one per line; leave empty for all paths. `*` matches any characters (including `/`), the whole path must match, case-insensitive. For example `*/.env` matches `/.env` and `/api/.env`. Lines starting with `~` are Go regular expressions. Variants such as `//.env` or `/a/../.env` also match through the normalized path;
+- **Excluded paths**: same syntax; matching requests are not counted;
+- **What counts**: by default only 404 and 444 (missing content, or a connection closed by a "Close connection" site), so regular visitors and users sharing an outbound IP are not banned by mistake. With "Any status code" every response counts, which suits decoy paths because single-page apps return 200 for any path;
+- **Unknown domains only**: counts only requests whose domain matches no site, that is, requests handled by the default site, or answered with 404 by the listener when there is no default site.
+
+Three templates are included:
+
+| Template | Condition | Notes |
+| --- | --- | --- |
+| Web decoy paths | `/.env`, `/.git`, `wp-login.php`, `phpinfo.php`, `phpmyadmin` and more, any status code, once | Bans for 1 day. Remove matching lines first if a site actually runs WordPress, phpMyAdmin and the like |
+| Unknown domain scans | Unknown domains only, 5 times in 1 minute | Bans for 1 day. Pairs with a "Close connection" default site: a scanner is banned after a few 444s, and with firewall sync later connections are dropped |
+| Web 404 probing | All paths, 10 times in 1 minute | Paths browsers request on their own, such as favicon, robots.txt and `.map` files, are excluded |
+
+"Probe ban" on a listener card of the web service opens this page with that listener selected and the decoy template applied; the rule is stored and enforced by intrusion protection. While editing a jail you can paste request paths to test the path rules.
+
+::: warning Ban scope
+Whichever listener triggers it, the ban goes into the same ban list and applies to all listeners, sites and Gately's other services; with firewall sync on, the system firewall also drops all traffic from the address.
+:::
+
+The source address is the same as in the access log and is only restored through the PROXY protocol. For sites behind a CDN that passes the real IP in a request header, the CDN node would be banned, so do not use path probing on such listeners. When Gately sits behind another reverse proxy on the same host, the source is a loopback address: with "Ignore LAN addresses" on it is never banned, and the jail has no effect.
 
 ## Port-scan detection trade-offs
 

@@ -1031,6 +1031,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 
 | Campo | Tipo |
 | --- | --- |
+| `anyStatus` | boolean |
 | `banTime` | integer |
 | `enable` | boolean |
 | `filter` | string |
@@ -1043,6 +1044,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `remark` | string |
 | `source` | string |
 | `target` | string |
+| `unknownHost` | boolean |
 
 ### guard.Platform
 
@@ -1116,6 +1118,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `filter` | string |
 | `ignore` | string |
 | `lines` | string |
+| `source` | string |
 
 ### ipsource.Source
 

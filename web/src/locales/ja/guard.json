@@ -70,14 +70,16 @@
     "journal": "systemd ジャーナル",
     "command": "コマンド出力",
     "docker": "Docker コンテナ",
-    "event": "Gately イベント"
+    "event": "Gately イベント",
+    "web": "Web パス探索"
   },
   "target": {
     "file": "ファイルパス",
     "journal": "サービスユニット",
     "command": "コマンド",
     "docker": "コンテナ名",
-    "event": "イベント"
+    "event": "イベント",
+    "web": "リスナー"
   },
   "event": {
     "authFailed": "管理画面のログイン失敗",
@@ -90,7 +92,8 @@
     "journalMissing": "journalctl が見つかりません（コンテナ内または systemd を使わないシステム）。このソースは利用できません。",
     "command": "ログを出力し続けるコマンドを実行してその出力を読み取ります（例：OpenWrt の logread -f）。コマンドが終了すると自動で再起動します。",
     "docker": "指定したコンテナのログを読み取ります。Docker 管理モジュールが Docker に接続できる必要があります。",
-    "event": "送信元 IP を含む Gately 自身のイベントを集計します。フィルターは不要です。"
+    "event": "送信元 IP を含む Gately 自身のイベントを集計します。フィルターは不要です。",
+    "web": "Web サービスが処理したリクエストをリスナー、パス、ステータスコードで数えます。ログの読み取りは不要です。どのリスナーで発動しても、ブロックはすべてのサイトとシステムファイアウォールに適用されます。"
   },
   "jail": {
     "intro": "ログから失敗記録を見つけ、集計期間内に回数に達した IP をブロックします。",
@@ -121,7 +124,30 @@
     "testPlaceholder": "ログを数行貼り付けて、フィルターで IP を取り出せるか確認します",
     "testSummary": "{total} 行中 {matched} 行が一致",
     "testNoMatch": "一致なし",
-    "testIgnored": "{host}（ホワイトリスト）"
+    "testIgnored": "{host}（ホワイトリスト）",
+    "allListeners": "すべてのリスナー",
+    "listenersHelp": "空欄ですべてのリスナー。どのリスナーで発動しても、ブロックはすべてのサイトとシステムファイアウォールに適用されます。",
+    "webPreset": "テンプレート",
+    "webPresetNone": "テンプレートを使わない",
+    "paths": "パスルール",
+    "pathsPlaceholder": "*/.env\n/wp-login.php\n~^/api/v[0-9]+/debug",
+    "pathsHelp": "1 行に 1 つ。空欄ですべてのパス。* は / を含む任意の文字に一致し、パス全体で照合、大文字小文字は区別しません。例えば */.env は /.env と /api/.env に一致します。~ で始まる行は Go の正規表現です。",
+    "ignorePaths": "除外パス",
+    "ignorePathsHelp": "任意。書き方はパスルールと同じで、一致したリクエストは数えません。",
+    "anyStatus": "任意のステータスコード",
+    "anyStatusHelp": "オフのときは 404 と 444（存在しない内容へのアクセスまたは切断）だけを数えるため、通常の利用者や出口 IP を共有する利用者を誤ってブロックしません。おとりパスは通常の利用者がアクセスしないのでオンにできます。シングルページアプリはどのパスにも 200 を返すためです。",
+    "unknownHost": "未知ドメインのみ",
+    "unknownHostHelp": "ドメインがどのサイトにも一致しないリクエスト、つまり既定サイトが処理するか 404 を返すリクエストだけを数えます。",
+    "withinWeb": "以内に",
+    "webCount": "集計対象",
+    "scopeNotFound": "404 と 444",
+    "scopeAnyStatus": "任意のステータスコード",
+    "scopeUnknownHost": "未知ドメインのみ",
+    "allPaths": "すべてのパス",
+    "morePaths": "ほか {n} 件",
+    "testPaths": "リクエストパス",
+    "testPathsPlaceholder": "1 行に 1 つのパス（例: /.env）。パスルールだけをテストします",
+    "testHit": "一致"
   },
   "trap": {
     "title": "おとりポート",
@@ -195,6 +221,18 @@
     "gately-waf": {
       "name": "WAF ブロック",
       "desc": "WAF に繰り返しブロックされた送信元。CDN 経由（実 IP をヘッダーで渡す方式）のサイトでは使わないでください。CDN のノードがブロックされます"
+    },
+    "web-decoy": {
+      "name": "Web おとりパス",
+      "desc": "/.env、/.git、wp-login.php などスキャナーがよく探すパスに 1 回アクセスした時点でブロックします。ステータスコードは問いません。サイト自体が WordPress や phpMyAdmin などの場合は該当行を先に削除してください"
+    },
+    "web-unknown-host": {
+      "name": "未知ドメインのスキャン",
+      "desc": "IP や未設定のドメインでのアクセス（既定サイトが処理するか 404 を返す）が 1 分以内に 5 回でブロック"
+    },
+    "web-404": {
+      "name": "Web 404 探索",
+      "desc": "存在しないパスへのアクセス（404 または 444）が 1 分以内に 10 回でブロック。favicon、robots.txt などのよくあるパスは除外済み"
     }
   }
 }

@@ -70,14 +70,16 @@
     "journal": "systemd journal",
     "command": "Command output",
     "docker": "Docker container",
-    "event": "Gately event"
+    "event": "Gately event",
+    "web": "Web path probing"
   },
   "target": {
     "file": "File path",
     "journal": "Service unit",
     "command": "Command",
     "docker": "Container",
-    "event": "Event"
+    "event": "Event",
+    "web": "Listeners"
   },
   "event": {
     "authFailed": "Admin console login failed",
@@ -90,7 +92,8 @@
     "journalMissing": "journalctl was not found (in a container or on a system without systemd), so this source is unavailable.",
     "command": "Runs a command that keeps printing log lines and reads its output, e.g. logread -f on OpenWrt. The command is restarted when it exits.",
     "docker": "Reads the container's log. The Docker module must be able to reach Docker.",
-    "event": "Counts Gately's own events, which carry the source IP. No filter is needed."
+    "event": "Counts Gately's own events, which carry the source IP. No filter is needed.",
+    "web": "Counts requests handled by the Web service by listener, path and status code, without reading any log. Whichever listener triggers it, the ban applies to all sites and the system firewall."
   },
   "jail": {
     "intro": "Finds failures in logs. An IP that reaches the count within the time window is banned.",
@@ -121,7 +124,30 @@
     "testPlaceholder": "Paste a few log lines to check that the filters extract the IP",
     "testSummary": "{matched} of {total} lines matched",
     "testNoMatch": "No match",
-    "testIgnored": "{host} (whitelisted)"
+    "testIgnored": "{host} (whitelisted)",
+    "allListeners": "All listeners",
+    "listenersHelp": "Leave empty for all listeners. Whichever listener triggers it, the ban applies to all sites and the system firewall.",
+    "webPreset": "Template",
+    "webPresetNone": "No template",
+    "paths": "Paths",
+    "pathsPlaceholder": "*/.env\n/wp-login.php\n~^/api/v[0-9]+/debug",
+    "pathsHelp": "One per line; leave empty for all paths. * matches any characters (including /), the whole path must match, case-insensitive. For example */.env matches /.env and /api/.env. Lines starting with ~ are Go regular expressions.",
+    "ignorePaths": "Excluded paths",
+    "ignorePathsHelp": "Optional, same syntax as Paths. Matching requests are not counted.",
+    "anyStatus": "Any status code",
+    "anyStatusHelp": "When off, only 404 and 444 (missing content or closed connection) are counted, so regular visitors and users sharing an outbound IP are not banned by mistake. Decoy paths are never visited by regular users, so it can be turned on there: single-page apps return 200 for any path.",
+    "unknownHost": "Unknown domains only",
+    "unknownHostHelp": "Counts only requests whose domain matches no site, that is, requests handled by the default site or answered with 404.",
+    "withinWeb": "window,",
+    "webCount": "Counts",
+    "scopeNotFound": "404 and 444",
+    "scopeAnyStatus": "Any status code",
+    "scopeUnknownHost": "unknown domains only",
+    "allPaths": "All paths",
+    "morePaths": "{n} more",
+    "testPaths": "Request paths",
+    "testPathsPlaceholder": "One path per line, such as /.env. Only the path rules are tested",
+    "testHit": "Match"
   },
   "trap": {
     "title": "Trap ports",
@@ -195,6 +221,18 @@
     "gately-waf": {
       "name": "WAF blocks",
       "desc": "Sources blocked by the WAF repeatedly. Do not use it for sites behind a CDN that passes the real IP in a header, or the CDN's nodes get banned"
+    },
+    "web-decoy": {
+      "name": "Web decoy paths",
+      "desc": "Bans on the first request to paths scanners love, such as /.env, /.git and wp-login.php, whatever the status code. Remove matching lines first if a site actually runs WordPress, phpMyAdmin and the like"
+    },
+    "web-unknown-host": {
+      "name": "Unknown domain scans",
+      "desc": "Bans after 5 requests within 1 minute by IP or by a domain with no site (handled by the default site or answered with 404)"
+    },
+    "web-404": {
+      "name": "Web 404 probing",
+      "desc": "Bans after 10 requests for missing paths (404 or 444) within 1 minute; common paths such as favicon and robots.txt are excluded"
     }
   }
 }

@@ -24,6 +24,7 @@ import (
 	"github.com/wangwanjie/gately/internal/iplist"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/webpage"
+	"github.com/wangwanjie/gately/internal/webprobe"
 )
 
 // SiteStats 是站点的请求统计。
@@ -64,6 +65,9 @@ type siteHandler struct {
 	// rules 为预编译的路径规则（最长前缀在前），countries 为国家过滤集合
 	rules     []compiledRule
 	countries map[string]bool
+	// listener 为所属监听的 key，deflt 表示这是监听的默认站点（处理未匹配任何站点域名的请求），供路径探测上报
+	listener string
+	deflt    bool
 }
 
 type ctxKeyClientAddr struct{}
@@ -461,6 +465,8 @@ type statusRecorder struct {
 	http.ResponseWriter
 	status int
 	bytes  int64
+	// denied 表示请求被访问控制拒绝并断开连接（记为 444）
+	denied bool
 }
 
 func (s *statusRecorder) Write(p []byte) (int, error) {
@@ -531,6 +537,14 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				Infof("%s %s %s%s %d %dms %q %q", client.Addr(), r.Method, r.Host, clip(uri, maxLogURI), rec.status, time.Since(start).Milliseconds(),
 					orDash(clip(r.Referer(), maxLogHeader)), orDash(clip(r.UserAgent(), maxLogHeader)))
 		}
+		// 交给入侵防护的路径探测规则计数（444 断开连接同样经过这里）。访问控制拒绝后断开的请求按 403 上报，
+		// 与未开启“拒绝时断开连接”时一致：它们是被名单或国家过滤挡下的访客，不是在探测不存在的路径
+		status := rec.status
+		if rec.denied {
+			status = http.StatusForbidden
+		}
+		webprobe.Report(webprobe.Hit{Addr: client.Addr(), Listener: h.listener, Site: h.site.Key, Unknown: h.deflt,
+			Method: r.Method, Host: r.Host, Path: r.URL.Path, Status: status})
 	}()
 
 	// 断开连接的站点不经过访问控制、WAF、跨域、认证与重写，直接断开，与 nginx server 级 return 444 在 rewrite 阶段生效一致。
@@ -588,6 +602,7 @@ func (h *siteHandler) deny(w http.ResponseWriter) {
 		// 签发者域名上的 OIDC 协议路径直接传入原始 ResponseWriter，无需记录
 		if rec, ok := w.(*statusRecorder); ok {
 			rec.status = statusClosed
+			rec.denied = true
 		}
 		panic(http.ErrAbortHandler)
 	}

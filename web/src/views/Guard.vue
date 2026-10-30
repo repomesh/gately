@@ -112,6 +112,10 @@
             <Field :label="sourceLabel(j.source)" mono wide>
               <div v-for="line in targetLines(j)" :key="line" class="target-line">{{ line }}</div>
             </Field>
+            <Field v-if="j.source === 'web'" :label="t('guard.jail.paths')" mono wide>
+              <div v-for="line in pathLines(j)" :key="line" class="target-line">{{ line }}</div>
+            </Field>
+            <Field v-if="j.source === 'web'" :label="t('guard.jail.webCount')">{{ webScopeText(j) }}</Field>
             <Field :label="t('guard.jail.condition')">{{ t('guard.jail.conditionValue', { window: humanDuration(j.findTime), count: j.maxRetry }) }}</Field>
             <Field :label="t('guard.jail.banTime')">{{ banTimeText(j.banTime) }}</Field>
             <Field :label="t('guard.jail.matches')">{{ j.matches }}</Field>
@@ -253,7 +257,7 @@
       <el-form :model="editing" label-width="120px" :label-position="labelPosition">
         <el-form-item :label="t('common.name')"><el-input v-model="editing.name" /></el-form-item>
         <el-form-item :label="t('guard.jail.source')">
-          <el-radio-group v-model="editing.source">
+          <el-radio-group :model-value="editing.source" @update:model-value="setSource">
             <el-radio-button v-for="s in sources" :key="s" :value="s">{{ t(`guard.source.${s}`) }}</el-radio-button>
           </el-radio-group>
           <div class="form-help block">{{ sourceHelp }}</div>
@@ -262,6 +266,12 @@
           <el-select v-if="editing.source === 'event'" v-model="editing.target" class="w-420">
             <el-option v-for="e in eventTypes" :key="e" :label="t(`guard.event.${eventKey(e)}`)" :value="e" />
           </el-select>
+          <template v-else-if="editing.source === 'web'">
+            <el-select v-model="webListeners" multiple clearable class="w-420" :placeholder="t('guard.jail.allListeners')">
+              <el-option v-for="l in listeners" :key="l.key" :label="listenerLabel(l)" :value="l.key" />
+            </el-select>
+            <div class="form-help block">{{ t('guard.jail.listenersHelp') }}</div>
+          </template>
           <el-input
             v-else
             v-model="editing.target"
@@ -271,18 +281,45 @@
             :placeholder="targetPlaceholder"
           />
         </el-form-item>
-        <el-form-item :label="t('guard.jail.filter')">
-          <el-input v-model="editing.filter" type="textarea" :rows="4" class="mono" :placeholder="editing.source === 'event' ? t('guard.jail.filterEventPlaceholder') : 'Failed password for .* from <HOST>'" />
-          <div class="form-help block">{{ t('guard.jail.filterHelp') }}</div>
+        <el-form-item v-if="editing.source === 'web' && !editing.key" :label="t('guard.jail.webPreset')">
+          <el-select :model-value="editing.preset ?? ''" class="w-420" @update:model-value="applyWebPreset">
+            <el-option :label="t('guard.jail.webPresetNone')" value="" />
+            <el-option v-for="p in webPresets" :key="p.preset" :label="presetName(p)" :value="p.preset!" />
+          </el-select>
+          <div v-if="editing.preset" class="form-help block">{{ t(`guard.presets.${editing.preset}.desc`) }}</div>
         </el-form-item>
-        <el-form-item :label="t('guard.jail.ignore')">
-          <el-input v-model="editing.ignore" type="textarea" :rows="2" class="mono" />
-          <div class="form-help block">{{ t('guard.jail.ignoreHelp') }}</div>
-        </el-form-item>
+        <template v-if="editing.source === 'web'">
+          <el-form-item :label="t('guard.jail.paths')">
+            <el-input v-model="editing.filter" type="textarea" :rows="4" class="mono" :placeholder="t('guard.jail.pathsPlaceholder')" />
+            <div class="form-help block">{{ t('guard.jail.pathsHelp') }}</div>
+          </el-form-item>
+          <el-form-item :label="t('guard.jail.ignorePaths')">
+            <el-input v-model="editing.ignore" type="textarea" :rows="2" class="mono" placeholder="/favicon.ico" />
+            <div class="form-help block">{{ t('guard.jail.ignorePathsHelp') }}</div>
+          </el-form-item>
+          <el-form-item :label="t('guard.jail.anyStatus')">
+            <el-switch v-model="editing.anyStatus" />
+            <div class="form-help block">{{ t('guard.jail.anyStatusHelp') }}</div>
+          </el-form-item>
+          <el-form-item :label="t('guard.jail.unknownHost')">
+            <el-switch v-model="editing.unknownHost" />
+            <div class="form-help block">{{ t('guard.jail.unknownHostHelp') }}</div>
+          </el-form-item>
+        </template>
+        <template v-else>
+          <el-form-item :label="t('guard.jail.filter')">
+            <el-input v-model="editing.filter" type="textarea" :rows="4" class="mono" :placeholder="editing.source === 'event' ? t('guard.jail.filterEventPlaceholder') : 'Failed password for .* from <HOST>'" />
+            <div class="form-help block">{{ t('guard.jail.filterHelp') }}</div>
+          </el-form-item>
+          <el-form-item :label="t('guard.jail.ignore')">
+            <el-input v-model="editing.ignore" type="textarea" :rows="2" class="mono" />
+            <div class="form-help block">{{ t('guard.jail.ignoreHelp') }}</div>
+          </el-form-item>
+        </template>
         <el-form-item :label="t('guard.jail.condition')">
           <div class="cond">
             <DurationInput v-model="editing.findTime" :max="7 * 86400" />
-            <span>{{ t('guard.jail.within') }}</span>
+            <span>{{ editing.source === 'web' ? t('guard.jail.withinWeb') : t('guard.jail.within') }}</span>
             <el-input-number v-model="editing.maxRetry" :min="1" :max="1000" />
             <span>{{ t('guard.jail.timesThenBan') }}</span>
           </div>
@@ -294,16 +331,16 @@
         <el-form-item :label="t('common.enable')"><el-switch v-model="editing.enable" /></el-form-item>
 
         <el-divider content-position="left">{{ t('guard.jail.testTitle') }}</el-divider>
-        <el-form-item :label="t('guard.jail.testLines')">
-          <el-input v-model="testLines" type="textarea" :rows="4" class="mono" :placeholder="t('guard.jail.testPlaceholder')" />
+        <el-form-item :label="editing.source === 'web' ? t('guard.jail.testPaths') : t('guard.jail.testLines')">
+          <el-input v-model="testLines" type="textarea" :rows="4" class="mono" :placeholder="editing.source === 'web' ? t('guard.jail.testPathsPlaceholder') : t('guard.jail.testPlaceholder')" />
           <div class="test-actions">
-            <el-button size="small" :icon="FlaskConical" :loading="testing" :disabled="!testLines.trim() || !editing.filter.trim()" @click="runTest">{{ t('common.test') }}</el-button>
+            <el-button size="small" :icon="FlaskConical" :loading="testing" :disabled="!testLines.trim() || (editing.source !== 'web' && !editing.filter.trim())" @click="runTest">{{ t('common.test') }}</el-button>
             <span v-if="testResults" class="help">{{ t('guard.jail.testSummary', { matched: testResults.filter((r) => r.matched).length, total: testResults.length }) }}</span>
           </div>
           <div v-if="testResults" class="test-results">
             <div v-for="(r, i) in testResults" :key="i" class="test-row" :class="{ hit: r.matched }">
               <el-tag size="small" :type="r.matched ? (r.ignored ? 'info' : 'danger') : 'info'" effect="plain">
-                {{ r.matched ? (r.ignored ? t('guard.jail.testIgnored', { host: r.host }) : r.host) : t('guard.jail.testNoMatch') }}
+                {{ r.matched ? (r.ignored ? t('guard.jail.testIgnored', { host: r.host }) : r.host || t('guard.jail.testHit')) : t('guard.jail.testNoMatch') }}
               </el-tag>
               <span class="mono line">{{ r.line }}</span>
             </div>
@@ -326,6 +363,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Ban, Crosshair, FileCode, Flame, FlaskConical, LayoutTemplate, Pencil, Plus, Radar, RefreshCw, Save, Search, ShieldBan, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
@@ -392,8 +430,17 @@ interface Jail {
   maxRetry: number
   findTime: number
   banTime: number
+  // anyStatus、unknownHost 只用于 Web 路径探测
+  anyStatus?: boolean
+  unknownHost?: boolean
   preset?: string
   remark: string
+}
+
+interface WebListener {
+  key: string
+  name: string
+  port: number
 }
 
 interface JailView extends Jail {
@@ -413,9 +460,11 @@ interface TestResult {
 }
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const { isMobile, labelPosition } = useFormLayout()
 
-const sources = ['file', 'journal', 'command', 'docker', 'event']
+const sources = ['file', 'journal', 'command', 'docker', 'event', 'web']
 const eventTypes = ['auth.failed', 'waf.blocked']
 const defaultTrapPorts = '23,135,1433,1521,3389,5900,6379,11211'
 
@@ -425,6 +474,8 @@ const settings = ref<Settings>()
 const bans = ref<BanEntry[]>([])
 const jails = ref<JailView[]>([])
 const presets = ref<Jail[]>([])
+// listeners 为 Web 服务的监听，供路径探测规则选择
+const listeners = ref<WebListener[]>([])
 const filter = ref('')
 const saving = ref(false)
 const banVisible = ref(false)
@@ -543,6 +594,62 @@ function banTimeText(sec: number) {
   return humanDuration(sec)
 }
 
+// webListeners 把以换行分隔的监听 key 映射为多选框的值，空数组表示全部监听
+const webListeners = computed({
+  get: () => editing.value.target.split('\n').filter(Boolean),
+  set: (v: string[]) => {
+    editing.value.target = v.join('\n')
+  },
+})
+
+const webPresets = computed(() => presets.value.filter((p) => p.source === 'web'))
+
+function listenerLabel(l: WebListener) {
+  return `${l.name || t('web.unnamedListener')} (:${l.port})`
+}
+
+function listenerName(key: string) {
+  const l = listeners.value.find((x) => x.key === key)
+  return l ? listenerLabel(l) : key
+}
+
+function pathLines(j: Jail) {
+  const lines = j.filter.split('\n').filter(Boolean)
+  if (!lines.length) {
+    return [t('guard.jail.allPaths')]
+  }
+  // 诱饵路径较多，卡片上只列前几条
+  return lines.length > 4 ? [...lines.slice(0, 3), t('guard.jail.morePaths', { n: lines.length - 3 })] : lines
+}
+
+function webScopeText(j: Jail) {
+  const status = j.anyStatus ? t('guard.jail.scopeAnyStatus') : t('guard.jail.scopeNotFound')
+  return j.unknownHost ? `${status} · ${t('guard.jail.scopeUnknownHost')}` : status
+}
+
+// setSource 切换来源；涉及事件或 Web 来源时目标的含义不同，清空后重新选择
+function setSource(v: string | number | boolean | undefined) {
+  const next = String(v)
+  const prev = editing.value.source
+  if (prev !== next && [prev, next].some((s) => s === 'web' || s === 'event')) {
+    editing.value.target = next === 'event' ? eventTypes[0] : ''
+    editing.value.preset = undefined
+  }
+  editing.value.source = next
+}
+
+// applyWebPreset 套用 Web 路径探测模板，保留已选的监听
+function applyWebPreset(id: string) {
+  const target = editing.value.target
+  const p = webPresets.value.find((x) => x.preset === id)
+  if (!p) {
+    editing.value = { ...emptyJail(), source: 'web', target, name: editing.value.name, remark: editing.value.remark }
+    return
+  }
+  editing.value = { ...emptyJail(), ...JSON.parse(JSON.stringify(p)), target, name: presetName(p), enable: true, remark: editing.value.remark }
+  testResults.value = undefined
+}
+
 function eventKey(e: string) {
   return e === 'auth.failed' ? 'authFailed' : 'wafBlocked'
 }
@@ -554,6 +661,10 @@ function sourceLabel(source: string) {
 function targetLines(j: Jail) {
   if (j.source === 'event') {
     return [t(`guard.event.${eventKey(j.target)}`)]
+  }
+  if (j.source === 'web') {
+    const keys = j.target.split('\n').filter(Boolean)
+    return keys.length ? keys.map(listenerName) : [t('guard.jail.allListeners')]
   }
   return j.target.split('\n').filter(Boolean)
 }
@@ -583,6 +694,8 @@ const sourceHelp = computed(() => {
       return t('guard.sourceHelp.command')
     case 'docker':
       return t('guard.sourceHelp.docker')
+    case 'web':
+      return t('guard.sourceHelp.web')
     default:
       return t('guard.sourceHelp.event')
   }
@@ -740,7 +853,7 @@ async function removeJail(j: JailView) {
 async function runTest() {
   testing.value = true
   try {
-    testResults.value = await api.post<TestResult[]>('/api/guard/jails/test', { filter: editing.value.filter, ignore: editing.value.ignore, lines: testLines.value })
+    testResults.value = await api.post<TestResult[]>('/api/guard/jails/test', { source: editing.value.source, filter: editing.value.filter, ignore: editing.value.ignore, lines: testLines.value })
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {
@@ -757,12 +870,35 @@ async function showRules() {
   }
 }
 
+async function loadListeners() {
+  try {
+    listeners.value = await api.get<WebListener[]>('/api/webservice/listeners')
+  } catch {
+    // Web 服务未开启时只能选择全部监听
+    listeners.value = []
+  }
+}
+
+// openWebProbe 处理从 Web 服务监听卡片跳转过来的快捷创建：预选该监听并套用诱饵路径模板
+function openWebProbe(key: string) {
+  tab.value = 'jails'
+  openJail()
+  editing.value = { ...editing.value, source: 'web', target: key }
+  applyWebPreset('web-decoy')
+}
+
 onMounted(async () => {
-  await loadAll()
+  await Promise.all([loadAll(), loadListeners()])
   try {
     presets.value = await api.get<Jail[]>('/api/guard/presets')
   } catch {
     presets.value = []
+  }
+  const key = route.query.webProbe
+  if (typeof key === 'string' && key) {
+    // 去掉查询参数，刷新页面时不再重复打开
+    void router.replace({ query: {} })
+    openWebProbe(key)
   }
   polling.start()
 })

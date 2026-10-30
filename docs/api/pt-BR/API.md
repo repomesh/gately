@@ -1031,6 +1031,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 
 | Campo | Tipo |
 | --- | --- |
+| `anyStatus` | boolean |
 | `banTime` | integer |
 | `enable` | boolean |
 | `filter` | string |
@@ -1043,6 +1044,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `remark` | string |
 | `source` | string |
 | `target` | string |
+| `unknownHost` | boolean |
 
 ### guard.Platform
 
@@ -1116,6 +1118,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `filter` | string |
 | `ignore` | string |
 | `lines` | string |
+| `source` | string |
 
 ### ipsource.Source
 

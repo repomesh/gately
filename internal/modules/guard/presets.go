@@ -56,7 +56,43 @@ Invalid TOTP code! Server time: .* IP: <HOST>\s*$`,
 		Preset: "gately-waf", Name: "WAF 拦截", Source: SourceEvent, Target: events.WAFBlocked,
 		MaxRetry: 5, FindTime: 300, BanTime: 86400,
 	},
+	{
+		// 正常访客不会请求这些路径，任何状态码都计数（单页应用会对任意路径返回 200），一次即封
+		Preset: "web-decoy", Name: "Web 诱饵路径", Source: SourceWeb,
+		Filter:    decoyPaths,
+		AnyStatus: true,
+		MaxRetry:  1, FindTime: 600, BanTime: 86400,
+	},
+	{
+		// 扫描器常按 IP 或随机域名访问，这类请求由默认站点处理或直接返回 404
+		Preset: "web-unknown-host", Name: "未知域名扫描", Source: SourceWeb,
+		UnknownHost: true,
+		MaxRetry:    5, FindTime: 60, BanTime: 86400,
+	},
+	{
+		// 页面缺少图标、source map 时浏览器也会产生 404，排除这些常见路径并把次数设得宽松一些
+		Preset: "web-404", Name: "Web 404 探测", Source: SourceWeb,
+		Ignore:   "/favicon.ico\n/apple-touch-icon*\n/robots.txt\n*.map",
+		MaxRetry: 10, FindTime: 60,
+	},
 }
+
+// decoyPaths 是扫描器常探测、正常站点几乎不会有的路径。站点本身是 WordPress、phpMyAdmin 等程序时，
+// 需要删掉对应的行再启用。
+const decoyPaths = `*/.env
+*/.env.*
+*/.git
+*/.git/*
+*/.svn/*
+*/.aws/*
+*/.ssh/*
+*/wp-login.php
+*/xmlrpc.php
+*/phpinfo.php
+*/phpmyadmin*
+*/vendor/phpunit/*
+*/boaform/*
+*/HNAP1*`
 
 // sshdFilter 是 OpenSSH 的失败记录。用户名可被攻击者任意填写（例如包含 “from 8.8.8.8”），
 // 因此每条都锚定到行尾，取最后出现的来源地址，避免借日志注入封禁任意地址。

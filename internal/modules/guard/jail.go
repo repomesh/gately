@@ -29,6 +29,9 @@ const (
 	SourceDocker = "docker"
 	// SourceEvent 统计 Gately 内部事件（管理后台登录失败、WAF 拦截），Target 为事件类型
 	SourceEvent = "event"
+	// SourceWeb 统计 Web 服务的请求（路径探测），Target 为限定的监听 key，每行一个，留空表示全部监听；
+	// Filter、Ignore 为路径规则，见 compilePaths
+	SourceWeb = "web"
 )
 
 // eventSources 是可作为规则来源的内部事件，事件中必须带有来源 IP。
@@ -63,6 +66,10 @@ type Jail struct {
 	FindTime int `json:"findTime"`
 	// BanTime 为封禁时长（秒），0 表示沿用默认时长，-1 表示永久
 	BanTime int `json:"banTime"`
+	// AnyStatus 只用于 Web 路径探测：为 true 时任何状态码都计数，默认只统计 404 与 444
+	AnyStatus bool `json:"anyStatus,omitempty"`
+	// UnknownHost 只用于 Web 路径探测：为 true 时只统计域名未匹配任何站点的请求（默认站点或没有站点）
+	UnknownHost bool `json:"unknownHost,omitempty"`
 	// Preset 为创建时使用的预设 ID，只用于界面展示
 	Preset string `json:"preset,omitempty"`
 	Remark string `json:"remark"`
@@ -134,6 +141,8 @@ func (j *Jail) Validate() error {
 		if !eventSources[j.Target] {
 			return fmt.Errorf("不支持的事件类型 %q", j.Target)
 		}
+	case SourceWeb:
+		return j.validateWeb()
 	default:
 		return fmt.Errorf("未知的日志来源 %q", j.Source)
 	}
@@ -149,6 +158,11 @@ func (j *Jail) Validate() error {
 		return err
 	}
 	j.Ignore = strings.Join(splitLines(j.Ignore), "\n")
+	return j.validateCount()
+}
+
+// validateCount 校验次数、窗口与封禁时长并补全默认值。
+func (j *Jail) validateCount() error {
 	if j.MaxRetry == 0 {
 		j.MaxRetry = defaultMaxRetry
 	}
@@ -167,13 +181,41 @@ func (j *Jail) Validate() error {
 	return nil
 }
 
+// validateWeb 校验 Web 路径探测规则：Target 为监听 key，Filter、Ignore 为路径规则（都可留空）。
+func (j *Jail) validateWeb() error {
+	j.Target = strings.Join(splitLines(j.Target), "\n")
+	for _, l := range splitLines(j.Target) {
+		if strings.ContainsAny(l, " \t") {
+			return fmt.Errorf("监听 %q 无效", l)
+		}
+	}
+	if _, err := compilePaths(j.Filter); err != nil {
+		return err
+	}
+	j.Filter = strings.Join(splitLines(j.Filter), "\n")
+	if _, err := compilePaths(j.Ignore); err != nil {
+		return err
+	}
+	j.Ignore = strings.Join(splitLines(j.Ignore), "\n")
+	return j.validateCount()
+}
+
 // matcher 是编译后的过滤规则。
 type matcher struct {
 	filters []*regexp.Regexp
 	ignores []*regexp.Regexp
+	// web 为 Web 路径探测规则，其他来源为 nil
+	web *webMatcher
 }
 
 func newMatcher(j Jail) (*matcher, error) {
+	if j.Source == SourceWeb {
+		w, err := newWebMatcher(j)
+		if err != nil {
+			return nil, err
+		}
+		return &matcher{web: w}, nil
+	}
 	f, err := compileFilters(j.Filter, true)
 	if err != nil {
 		return nil, err
@@ -263,6 +305,10 @@ func (r *jailRunner) record(a netip.Addr, line string) {
 	r.mu.Unlock()
 	r.stats.bans.Add(1)
 	reason := fmt.Sprintf("%d 秒内失败 %d 次", r.jail.FindTime, len(list))
+	if r.jail.Source == SourceWeb {
+		// 带上最后一次请求，便于判断是否误封；路径由访客控制，截断后再写入
+		reason = fmt.Sprintf("%d 秒内路径探测 %d 次，最近一次：%s", r.jail.FindTime, len(list), clipText(line, 200))
+	}
 	r.m.ban(a, r.jail.BanTime, reason, banlist.SourceJailPrefix+r.jail.Key, r.jail.Name)
 }
 
@@ -327,6 +373,8 @@ func (r *jailRunner) stop() {
 
 // startJailLocked 按配置启动规则（未启用时只保留统计），调用方需持有 m.mu。
 func (m *Module) startJailLocked(j Jail) {
+	// 规则可能由路径探测改为其他来源或停用，无论哪种情况都重建快照
+	defer m.refreshWebLocked()
 	stats := &jailStats{}
 	if old := m.jails[j.Key]; old != nil {
 		stats = old.stats
@@ -348,6 +396,7 @@ func (m *Module) startJailLocked(j Jail) {
 		close(r.done)
 		return
 	}
+
 	go func() {
 		defer close(r.done)
 		r.run(ctx)
@@ -389,8 +438,8 @@ func (r *jailRunner) run(ctx context.Context) {
 			return
 		}
 		followDocker(ctx, follow, r.jail.Target, r.line, func(msg string) { r.setErr("", msg) })
-	case SourceEvent:
-		// 由 Module.onEvent 推送，这里只等待停止
+	case SourceEvent, SourceWeb:
+		// 由 Module.onEvent、Module.onWebHit 推送，这里只等待停止
 		<-ctx.Done()
 	}
 }
@@ -428,4 +477,13 @@ func (m *Module) jailViewLocked(j *Jail) any {
 		}
 	}
 	return v
+}
+
+// clipText 把 s 截断到最多 n 个字符，截断时末尾加 "…"。
+func clipText(s string, n int) string {
+	rs := []rune(s)
+	if len(rs) <= n {
+		return s
+	}
+	return string(rs[:n]) + "…"
 }

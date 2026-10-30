@@ -70,14 +70,16 @@
     "journal": "Journal do systemd",
     "command": "Saída de comando",
     "docker": "Contêiner Docker",
-    "event": "Evento do Gately"
+    "event": "Evento do Gately",
+    "web": "Sondagem de caminhos web"
   },
   "target": {
     "file": "Caminho do arquivo",
     "journal": "Unidade de serviço",
     "command": "Comando",
     "docker": "Contêiner",
-    "event": "Evento"
+    "event": "Evento",
+    "web": "Listeners"
   },
   "event": {
     "authFailed": "Falha de login no painel",
@@ -90,7 +92,8 @@
     "journalMissing": "journalctl não encontrado (em um contêiner ou sistema sem systemd), então esta origem está indisponível.",
     "command": "Executa um comando que imprime logs continuamente e lê a saída, ex.: logread -f no OpenWrt. O comando é reiniciado quando termina.",
     "docker": "Lê o log do contêiner. O módulo Docker precisa conseguir acessar o Docker.",
-    "event": "Conta eventos do próprio Gately que trazem o IP de origem. Não precisa de filtro."
+    "event": "Conta eventos do próprio Gately que trazem o IP de origem. Não precisa de filtro.",
+    "web": "Conta as requisições tratadas pelo serviço web por listener, caminho e código de status, sem ler nenhum log. Seja qual for o listener que disparar, o bloqueio vale para todos os sites e para o firewall do sistema."
   },
   "jail": {
     "intro": "Encontra falhas nos logs. Um IP que atinge o número de falhas dentro da janela de tempo é bloqueado.",
@@ -121,7 +124,30 @@
     "testPlaceholder": "Cole algumas linhas de log para verificar se os filtros extraem o IP",
     "testSummary": "{matched} de {total} linhas corresponderam",
     "testNoMatch": "Sem correspondência",
-    "testIgnored": "{host} (lista de permissões)"
+    "testIgnored": "{host} (lista de permissões)",
+    "allListeners": "Todos os listeners",
+    "listenersHelp": "Deixe vazio para todos os listeners. Seja qual for o listener que disparar, o bloqueio vale para todos os sites e para o firewall do sistema.",
+    "webPreset": "Modelo",
+    "webPresetNone": "Sem modelo",
+    "paths": "Caminhos",
+    "pathsPlaceholder": "*/.env\n/wp-login.php\n~^/api/v[0-9]+/debug",
+    "pathsHelp": "Um por linha; vazio para todos os caminhos. * corresponde a quaisquer caracteres (inclusive /), o caminho inteiro é comparado sem diferenciar maiúsculas. Por exemplo, */.env corresponde a /.env e /api/.env. Linhas iniciadas por ~ são expressões regulares Go.",
+    "ignorePaths": "Caminhos excluídos",
+    "ignorePathsHelp": "Opcional, mesma sintaxe de Caminhos. Requisições correspondentes não são contadas.",
+    "anyStatus": "Qualquer código de status",
+    "anyStatusHelp": "Desligado, só 404 e 444 (conteúdo inexistente ou conexão encerrada) são contados, para não bloquear por engano visitantes comuns nem usuários que compartilham IP de saída. Usuários comuns nunca acessam caminhos isca, então ali pode ligar: aplicativos de página única respondem 200 a qualquer caminho.",
+    "unknownHost": "Só domínios desconhecidos",
+    "unknownHostHelp": "Conta apenas requisições cujo domínio não corresponde a nenhum site, ou seja, tratadas pelo site padrão ou respondidas com 404.",
+    "withinWeb": "de janela,",
+    "webCount": "Contagem",
+    "scopeNotFound": "404 e 444",
+    "scopeAnyStatus": "Qualquer código de status",
+    "scopeUnknownHost": "só domínios desconhecidos",
+    "allPaths": "Todos os caminhos",
+    "morePaths": "mais {n}",
+    "testPaths": "Caminhos de requisição",
+    "testPathsPlaceholder": "Um caminho por linha, como /.env. Só as regras de caminho são testadas",
+    "testHit": "Corresponde"
   },
   "trap": {
     "title": "Portas armadilha",
@@ -195,6 +221,18 @@
     "gately-waf": {
       "name": "Bloqueios do WAF",
       "desc": "Origens bloqueadas repetidamente pelo WAF. Não use em sites atrás de uma CDN que passa o IP real em um cabeçalho, ou os nós da CDN serão bloqueados"
+    },
+    "web-decoy": {
+      "name": "Caminhos isca web",
+      "desc": "Bloqueia na primeira requisição a caminhos que scanners adoram, como /.env, /.git e wp-login.php, com qualquer código de status. Se um site realmente roda WordPress, phpMyAdmin e similares, remova antes as linhas correspondentes"
+    },
+    "web-unknown-host": {
+      "name": "Varredura de domínios desconhecidos",
+      "desc": "Bloqueia após 5 requisições em 1 minuto por IP ou por domínio sem site (tratadas pelo site padrão ou respondidas com 404)"
+    },
+    "web-404": {
+      "name": "Sondagem web 404",
+      "desc": "Bloqueia após 10 requisições a caminhos inexistentes (404 ou 444) em 1 minuto; caminhos comuns como favicon e robots.txt ficam de fora"
     }
   }
 }

@@ -827,6 +827,9 @@
       },
       "guard.Jail": {
         "properties": {
+          "anyStatus": {
+            "type": "boolean"
+          },
           "banTime": {
             "type": "integer"
           },
@@ -862,6 +865,9 @@
           },
           "target": {
             "type": "string"
+          },
+          "unknownHost": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -1006,6 +1012,9 @@
             "type": "string"
           },
           "lines": {
+            "type": "string"
+          },
+          "source": {
             "type": "string"
           }
         },

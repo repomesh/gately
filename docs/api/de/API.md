@@ -1031,6 +1031,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 
 | Feld | Typ |
 | --- | --- |
+| `anyStatus` | boolean |
 | `banTime` | integer |
 | `enable` | boolean |
 | `filter` | string |
@@ -1043,6 +1044,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `remark` | string |
 | `source` | string |
 | `target` | string |
+| `unknownHost` | boolean |
 
 ### guard.Platform
 
@@ -1116,6 +1118,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `filter` | string |
 | `ignore` | string |
 | `lines` | string |
+| `source` | string |
 
 ### ipsource.Source
 

@@ -6,6 +6,7 @@ Prevenção de intrusão no estilo fail2ban: o Gately encontra tentativas de for
 
 - **Regras de logs**: leem arquivos de log, o journal do systemd, a saída de um comando (como `logread -f` no OpenWrt) ou os logs de um contêiner Docker, encontram falhas com expressões regulares e bloqueiam o IP que atinge o número de falhas na janela de tempo. Há modelos para SSH, Dropbear, Nginx, Vaultwarden, Home Assistant, Proxmox VE e outros, e no editor você pode colar linhas de exemplo para testar os filtros;
 - **Eventos do Gately**: falhas de login no painel e bloqueios do WAF também podem alimentar uma regra, sem expressão regular;
+- **Sondagem de caminhos web**: conta diretamente as requisições tratadas pelo serviço web por listener, caminho e código de status, sem ler logs; origens que pedem caminhos isca como `/.env` ou `/.git`, ou que varrem domínios desconhecidos sem parar, são bloqueadas;
 - **Portas armadilha**: armadilhas em portas que este host não usa (por padrão 23, 135, 1433, 3389, 5900, 6379 e outras). Qualquer origem que se conecte é bloqueada;
 - **Detecção de varredura de portas**: a origem que se conecta a portas fechadas deste host mais vezes por minuto que o limite é bloqueada;
 - **Uma única lista de bloqueio**: aqui ficam os bloqueios manuais (incluindo redes CIDR e bloqueios permanentes) e os bloqueios automáticos por falhas de autenticação do serviço web. Os bloqueios são salvos e restaurados após reiniciar;
@@ -54,6 +55,7 @@ Sem isso, os bloqueios continuam valendo para os serviços do Gately. Para ler l
 | Saída de comando | Um comando como `logread -f` | Reiniciado quando termina |
 | Contêiner Docker | Nome do contêiner | Lido pela conexão com o Docker do módulo Docker |
 | Evento do Gately | Falha de login / bloqueio do WAF | Os eventos trazem o IP de origem; não precisa de filtro |
+| Sondagem de caminhos web | Listeners (opcional) e regras de caminho | Conta as requisições do serviço web, veja abaixo |
 
 Os filtros são expressões regulares Go (sintaxe RE2), uma por linha, e `<HOST>` representa o endereço de origem, por exemplo:
 
@@ -62,6 +64,32 @@ Failed password for (?:invalid user )?\S* ?from <HOST>
 ```
 
 Linhas que correspondem a "Ignorar" não são contadas. A janela de tempo, o número de falhas e a duração do bloqueio são definidos por regra; a duração pode ser a padrão, personalizada ou permanente.
+
+## Sondagem de caminhos web
+
+Com a origem "Sondagem de caminhos web", a regra conta diretamente as requisições tratadas pelo serviço web, sem ler logs:
+
+- **Listeners**: um ou mais; vazio para todos;
+- **Caminhos**: um por linha; vazio para todos. `*` corresponde a quaisquer caracteres (inclusive `/`), o caminho inteiro é comparado sem diferenciar maiúsculas. Por exemplo, `*/.env` corresponde a `/.env` e `/api/.env`. Linhas iniciadas por `~` são expressões regulares Go. Variantes como `//.env` ou `/a/../.env` também correspondem pelo caminho normalizado;
+- **Caminhos excluídos**: mesma sintaxe; requisições correspondentes não são contadas;
+- **O que conta**: por padrão só 404 e 444 (conteúdo inexistente, ou conexão encerrada por um site "Fechar conexão"), para não bloquear por engano visitantes comuns nem usuários que compartilham IP de saída. Com "Qualquer código de status" toda resposta conta, o que serve para caminhos isca, já que aplicativos de página única respondem 200 a qualquer caminho;
+- **Só domínios desconhecidos**: conta apenas requisições cujo domínio não corresponde a nenhum site, ou seja, tratadas pelo site padrão ou, sem ele, respondidas com 404 pelo listener.
+
+Há três modelos:
+
+| Modelo | Condição | Observações |
+| --- | --- | --- |
+| Caminhos isca web | `/.env`, `/.git`, `wp-login.php`, `phpinfo.php`, `phpmyadmin` e outros, qualquer código de status, 1 vez | Bloqueia por 1 dia. Se um site realmente roda WordPress, phpMyAdmin e similares, remova antes as linhas correspondentes |
+| Varredura de domínios desconhecidos | Só domínios desconhecidos, 5 vezes em 1 minuto | Bloqueia por 1 dia. Combina com um site padrão "Fechar conexão": o scanner é bloqueado após alguns 444 e, com a sincronização do firewall, as conexões seguintes são descartadas |
+| Sondagem web 404 | Todos os caminhos, 10 vezes em 1 minuto | Caminhos que os navegadores pedem sozinhos, como favicon, robots.txt e arquivos `.map`, ficam de fora |
+
+"Bloquear sondagem" no cartão de um listener do serviço web abre esta página com esse listener selecionado e o modelo de iscas aplicado; a regra é guardada e aplicada pela proteção contra intrusões. Ao editar uma regra, você pode colar caminhos de requisição para testar as regras de caminho.
+
+::: warning Alcance do bloqueio
+Seja qual for o listener que disparar, o bloqueio vai para a mesma lista e vale para todos os listeners, sites e demais serviços do Gately; com a sincronização do firewall ligada, o firewall do sistema também descarta todo o tráfego desse endereço.
+:::
+
+O endereço de origem é o mesmo do log de acesso e só é restaurado pelo protocolo PROXY. Em sites atrás de uma CDN que repassa o IP real num cabeçalho, seria bloqueado o nó da CDN; não use a sondagem de caminhos nesses listeners. Se o Gately estiver atrás de outro proxy reverso no mesmo host, a origem é um endereço de loopback: com "Ignorar endereços da LAN" ele nunca é bloqueado, e a regra não tem efeito.
 
 ## Escolhas da detecção de varredura
 

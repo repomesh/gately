@@ -1031,6 +1031,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 欄位 | 類型 |
 | --- | --- |
+| `anyStatus` | boolean |
 | `banTime` | integer |
 | `enable` | boolean |
 | `filter` | string |
@@ -1043,6 +1044,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `source` | string |
 | `target` | string |
+| `unknownHost` | boolean |
 
 ### guard.Platform
 
@@ -1116,6 +1118,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `filter` | string |
 | `ignore` | string |
 | `lines` | string |
+| `source` | string |
 
 ### ipsource.Source
 

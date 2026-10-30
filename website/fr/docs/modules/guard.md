@@ -6,6 +6,7 @@ Prévention d'intrusion à la fail2ban : Gately repère les attaques par force b
 
 - **Règles de journaux** : lisent des fichiers journaux, le journal systemd, la sortie d'une commande (comme `logread -f` sur OpenWrt) ou les journaux d'un conteneur Docker, repèrent les échecs avec des expressions régulières et bannissent l'IP qui atteint le nombre d'échecs dans la fenêtre de temps. Des modèles sont fournis pour SSH, Dropbear, Nginx, Vaultwarden, Home Assistant, Proxmox VE et d'autres, et l'éditeur permet de coller des lignes d'exemple pour tester les filtres ;
 - **Événements Gately** : les échecs de connexion à la console et les blocages du WAF peuvent aussi alimenter une règle, sans expression régulière ;
+- **Sondage de chemins web** : compte directement les requêtes traitées par le service web par écouteur, chemin et code d’état, sans lire de journal ; les sources qui demandent des chemins leurres comme `/.env` ou `/.git`, ou qui scannent sans cesse des domaines inconnus, sont bannies ;
 - **Ports pièges** : pièges sur des ports que cet hôte n'utilise pas (23, 135, 1433, 3389, 5900, 6379 et d'autres par défaut). Toute source qui s'y connecte est bannie ;
 - **Détection de scan de ports** : une source qui se connecte à des ports fermés de cet hôte plus souvent que le seuil par minute est bannie ;
 - **Une seule liste de bannissement** : les bannissements manuels (réseaux CIDR et bannissements permanents compris) et ceux déclenchés par les échecs d'authentification du service web sont gérés ici. Les bannissements sont enregistrés et restaurés après un redémarrage ;
@@ -54,6 +55,7 @@ Sans cela, les bannissements s'appliquent toujours aux services de Gately. Pour 
 | Sortie de commande | Une commande comme `logread -f` | Relancée si elle s'arrête |
 | Conteneur Docker | Nom du conteneur | Lu via la connexion Docker du module Docker |
 | Événement Gately | Échec de connexion / blocage WAF | Les événements contiennent l'IP source, aucun filtre n'est nécessaire |
+| Sondage de chemins web | Écouteurs (facultatif) et règles de chemin | Compte les requêtes du service web, voir plus bas |
 
 Les filtres sont des expressions régulières Go (syntaxe RE2), une par ligne, où `<HOST>` représente l'adresse source, par exemple :
 
@@ -62,6 +64,32 @@ Failed password for (?:invalid user )?\S* ?from <HOST>
 ```
 
 Les lignes correspondant à une « Exclusion » ne sont pas comptées. La fenêtre de temps, le nombre d'échecs et la durée du bannissement se règlent par règle ; la durée peut être celle par défaut, personnalisée ou permanente.
+
+## Sondage de chemins web
+
+Avec la source « Sondage de chemins web », la règle compte directement les requêtes traitées par le service web, sans lire de journal :
+
+- **Écouteurs** : un ou plusieurs ; vide pour tous ;
+- **Chemins** : un par ligne ; vide pour tous. `*` correspond à n’importe quels caractères (y compris `/`), le chemin entier doit correspondre, sans tenir compte de la casse. Par exemple `*/.env` correspond à `/.env` et `/api/.env`. Les lignes commençant par `~` sont des expressions régulières Go. Des variantes comme `//.env` ou `/a/../.env` correspondent aussi via le chemin normalisé ;
+- **Chemins exclus** : même syntaxe ; les requêtes correspondantes ne sont pas comptées ;
+- **Ce qui compte** : par défaut seuls 404 et 444 (contenu inexistant, ou connexion fermée par un site « Fermer la connexion »), pour ne pas bannir par erreur les visiteurs normaux ni les utilisateurs partageant une IP de sortie. Avec « Tout code d’état », chaque réponse compte, ce qui convient aux chemins leurres, car les applications monopage renvoient 200 pour n’importe quel chemin ;
+- **Domaines inconnus uniquement** : ne compte que les requêtes dont le domaine ne correspond à aucun site, c’est-à-dire traitées par le site par défaut ou, à défaut, répondues par 404 par l’écouteur.
+
+Trois modèles sont fournis :
+
+| Modèle | Condition | Remarques |
+| --- | --- | --- |
+| Chemins leurres web | `/.env`, `/.git`, `wp-login.php`, `phpinfo.php`, `phpmyadmin` et d’autres, tout code d’état, 1 fois | Bannit 1 jour. Si un site exécute réellement WordPress, phpMyAdmin ou autre, supprimez d’abord les lignes correspondantes |
+| Scans de domaines inconnus | Domaines inconnus uniquement, 5 fois en 1 minute | Bannit 1 jour. À associer à un site par défaut « Fermer la connexion » : le scanner est banni après quelques 444 et, avec la synchronisation du pare-feu, les connexions suivantes sont rejetées |
+| Sondage web 404 | Tous les chemins, 10 fois en 1 minute | Les chemins que les navigateurs demandent d’eux-mêmes, comme favicon, robots.txt et les fichiers `.map`, sont exclus |
+
+« Bannir les sondages » sur la carte d’un écouteur du service web ouvre cette page avec cet écouteur sélectionné et le modèle de leurres appliqué ; la règle est stockée et appliquée par la protection contre les intrusions. En modifiant une règle, vous pouvez coller des chemins de requête pour tester les règles de chemin.
+
+::: warning Portée du bannissement
+Quel que soit l’écouteur déclencheur, le bannissement entre dans la même liste et s’applique à tous les écouteurs, sites et autres services de Gately ; avec la synchronisation du pare-feu, le pare-feu du système rejette aussi tout le trafic de cette adresse.
+:::
+
+L’adresse source est la même que dans le journal d’accès et n’est restaurée que par le protocole PROXY. Pour les sites derrière un CDN qui transmet l’IP réelle dans un en-tête, c’est le nœud du CDN qui serait banni : n’utilisez pas le sondage de chemins sur ces écouteurs. Si Gately est derrière un autre proxy inverse sur la même machine, la source est une adresse de bouclage : avec « Ignorer les adresses du LAN », elle n’est jamais bannie, et la règle reste sans effet.
 
 ## Compromis de la détection de scan
 

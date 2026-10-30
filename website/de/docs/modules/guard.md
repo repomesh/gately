@@ -6,6 +6,7 @@ Einbruchschutz im Stil von fail2ban: Gately erkennt Brute-Force-Versuche in Prot
 
 - **Protokollregeln**: lesen Protokolldateien, das systemd-Journal, Befehlsausgaben (etwa `logread -f` unter OpenWrt) oder Docker-Container-Protokolle, finden Fehlschläge per regulärem Ausdruck und sperren eine IP, die die Anzahl im Zeitfenster erreicht. Vorlagen gibt es für SSH, Dropbear, Nginx, Vaultwarden, Home Assistant, Proxmox VE und weitere; im Editor lassen sich Beispielzeilen einfügen, um die Filter zu testen;
 - **Gately-Ereignisse**: fehlgeschlagene Anmeldungen an der Oberfläche und WAF-Blockierungen können ebenfalls eine Regel speisen, ganz ohne regulären Ausdruck;
+- **Web-Pfadsondierung**: zählt direkt die vom Webdienst verarbeiteten Anfragen nach Listener, Pfad und Statuscode, ganz ohne Protokolle; Quellen, die Köderpfade wie `/.env` oder `/.git` abfragen oder immer wieder unbekannte Domains scannen, werden gesperrt;
 - **Köderports**: Köder auf Ports, die dieser Host nicht nutzt (standardmäßig 23, 135, 1433, 3389, 5900, 6379 und weitere). Jede Quelle, die sich verbindet, wird gesperrt;
 - **Portscan-Erkennung**: Eine Quelle, die sich öfter als der Schwellenwert pro Minute zu geschlossenen Ports dieses Hosts verbindet, wird gesperrt;
 - **Eine Sperrliste**: Manuelle Sperren (auch CIDR-Netze und dauerhafte Sperren) und die automatischen Sperren des Webdienstes nach fehlgeschlagener Authentifizierung werden hier verwaltet. Sperren werden gespeichert und nach einem Neustart wiederhergestellt;
@@ -54,6 +55,7 @@ Ohne diese Berechtigung gelten Sperren weiterhin für Gatelys eigene Dienste. Um
 | Befehlsausgabe | Ein Befehl wie `logread -f` | Wird nach dem Beenden neu gestartet |
 | Docker-Container | Containername | Gelesen über die Docker-Verbindung des Docker-Moduls |
 | Gately-Ereignis | Fehlgeschlagene Anmeldung / WAF-Blockierung | Ereignisse enthalten die Quell-IP, kein Filter nötig |
+| Web-Pfadsondierung | Listener (optional) und Pfadregeln | Zählt Anfragen des Webdienstes, siehe unten |
 
 Filter sind reguläre Ausdrücke in Go (RE2-Syntax), einer pro Zeile; `<HOST>` steht für die Quelladresse, zum Beispiel:
 
@@ -62,6 +64,32 @@ Failed password for (?:invalid user )?\S* ?from <HOST>
 ```
 
 Zeilen, die einer „Ausnahme“ entsprechen, werden nicht gezählt. Zeitfenster, Anzahl der Fehlschläge und Sperrdauer werden pro Regel eingestellt; die Dauer kann Standard, benutzerdefiniert oder dauerhaft sein.
+
+## Web-Pfadsondierung
+
+Mit der Quelle „Web-Pfadsondierung“ zählt die Regel direkt die vom Webdienst verarbeiteten Anfragen, ohne Protokolle zu lesen:
+
+- **Listener**: einer oder mehrere; leer für alle;
+- **Pfade**: einer pro Zeile; leer für alle. `*` passt auf beliebige Zeichen (auch `/`), verglichen wird der ganze Pfad ohne Beachtung der Groß-/Kleinschreibung. Beispiel: `*/.env` passt auf `/.env` und `/api/.env`. Zeilen mit `~` am Anfang sind reguläre Ausdrücke in Go-Syntax. Varianten wie `//.env` oder `/a/../.env` treffen über den normalisierten Pfad ebenfalls;
+- **Ausgenommene Pfade**: gleiche Syntax; passende Anfragen werden nicht gezählt;
+- **Was zählt**: standardmäßig nur 404 und 444 (nicht vorhandene Inhalte oder von einer Site „Verbindung schließen“ getrennt), damit normale Besucher und Nutzer mit gemeinsamer Ausgangs-IP nicht versehentlich gesperrt werden. Mit „Jeder Statuscode“ zählt jede Antwort – passend für Köderpfade, denn Single-Page-Apps liefern für jeden Pfad 200;
+- **Nur unbekannte Domains**: zählt nur Anfragen, deren Domain zu keiner Site passt, also solche, die die Standardsite verarbeitet oder die der Listener ohne Standardsite mit 404 beantwortet.
+
+Drei Vorlagen sind enthalten:
+
+| Vorlage | Bedingung | Hinweise |
+| --- | --- | --- |
+| Web-Köderpfade | `/.env`, `/.git`, `wp-login.php`, `phpinfo.php`, `phpmyadmin` u. a., jeder Statuscode, 1-mal | Sperrt 1 Tag. Läuft auf einer Site tatsächlich WordPress, phpMyAdmin o. Ä., zuerst die passenden Zeilen entfernen |
+| Scans unbekannter Domains | Nur unbekannte Domains, 5-mal in 1 Minute | Sperrt 1 Tag. Passt zu einer Standardsite „Verbindung schließen“: Ein Scanner wird nach einigen 444 gesperrt, mit Firewall-Synchronisation werden spätere Verbindungen verworfen |
+| Web-404-Sondierung | Alle Pfade, 10-mal in 1 Minute | Pfade, die Browser von selbst abrufen, etwa favicon, robots.txt und `.map`-Dateien, sind ausgenommen |
+
+„Sondierung sperren“ auf der Karte eines Listeners im Webdienst öffnet diese Seite mit diesem Listener und der Köder-Vorlage; gespeichert und durchgesetzt wird die Regel vom Einbruchschutz. Beim Bearbeiten einer Regel lassen sich Anfragepfade einfügen, um die Pfadregeln zu testen.
+
+::: warning Wirkung der Sperre
+Egal welcher Listener auslöst: Die Sperre landet in derselben Sperrliste und gilt für alle Listener, Sites und übrigen Dienste von Gately; mit Firewall-Synchronisation verwirft auch die Systemfirewall den gesamten Verkehr dieser Adresse.
+:::
+
+Die Quelladresse ist dieselbe wie im Zugriffsprotokoll und wird nur über das PROXY-Protokoll wiederhergestellt. Bei Sites hinter einem CDN, das die echte IP in einem Header übergibt, würde der CDN-Knoten gesperrt – auf solchen Listenern keine Pfadsondierung verwenden. Sitzt Gately hinter einem anderen Reverse Proxy auf demselben Host, ist die Quelle eine Loopback-Adresse: Mit „LAN-Adressen ignorieren“ wird sie nie gesperrt, und die Regel bleibt wirkungslos.
 
 ## Abwägungen bei der Portscan-Erkennung
 

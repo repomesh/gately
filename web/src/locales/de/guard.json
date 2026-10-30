@@ -70,14 +70,16 @@
     "journal": "systemd-Journal",
     "command": "Befehlsausgabe",
     "docker": "Docker-Container",
-    "event": "Gately-Ereignis"
+    "event": "Gately-Ereignis",
+    "web": "Web-Pfadsondierung"
   },
   "target": {
     "file": "Dateipfad",
     "journal": "Diensteinheit",
     "command": "Befehl",
     "docker": "Container",
-    "event": "Ereignis"
+    "event": "Ereignis",
+    "web": "Listener"
   },
   "event": {
     "authFailed": "Fehlgeschlagene Anmeldung an der Oberfläche",
@@ -90,7 +92,8 @@
     "journalMissing": "journalctl wurde nicht gefunden (in einem Container oder auf einem System ohne systemd), daher ist diese Quelle nicht verfügbar.",
     "command": "Führt einen Befehl aus, der fortlaufend Protokollzeilen ausgibt, und liest seine Ausgabe, z. B. logread -f unter OpenWrt. Der Befehl wird nach dem Beenden neu gestartet.",
     "docker": "Liest das Protokoll des Containers. Das Docker-Modul muss Docker erreichen können.",
-    "event": "Zählt Gatelys eigene Ereignisse, die die Quell-IP enthalten. Kein Filter nötig."
+    "event": "Zählt Gatelys eigene Ereignisse, die die Quell-IP enthalten. Kein Filter nötig.",
+    "web": "Zählt die vom Webdienst verarbeiteten Anfragen nach Listener, Pfad und Statuscode, ganz ohne Protokolle zu lesen. Egal welcher Listener auslöst: Die Sperre gilt für alle Sites und die Systemfirewall."
   },
   "jail": {
     "intro": "Findet Fehlschläge in Protokollen. Eine IP, die die Anzahl im Zeitfenster erreicht, wird gesperrt.",
@@ -121,7 +124,30 @@
     "testPlaceholder": "Fügen Sie einige Protokollzeilen ein, um zu prüfen, ob die Filter die IP finden",
     "testSummary": "{matched} von {total} Zeilen passen",
     "testNoMatch": "Kein Treffer",
-    "testIgnored": "{host} (Whitelist)"
+    "testIgnored": "{host} (Whitelist)",
+    "allListeners": "Alle Listener",
+    "listenersHelp": "Leer lassen für alle Listener. Egal welcher Listener auslöst: Die Sperre gilt für alle Sites und die Systemfirewall.",
+    "webPreset": "Vorlage",
+    "webPresetNone": "Keine Vorlage",
+    "paths": "Pfade",
+    "pathsPlaceholder": "*/.env\n/wp-login.php\n~^/api/v[0-9]+/debug",
+    "pathsHelp": "Einer pro Zeile; leer für alle Pfade. * passt auf beliebige Zeichen (auch /), verglichen wird der ganze Pfad ohne Beachtung der Groß-/Kleinschreibung. Beispiel: */.env passt auf /.env und /api/.env. Zeilen mit ~ am Anfang sind reguläre Ausdrücke in Go-Syntax.",
+    "ignorePaths": "Ausgenommene Pfade",
+    "ignorePathsHelp": "Optional, gleiche Syntax wie Pfade. Passende Anfragen werden nicht gezählt.",
+    "anyStatus": "Jeder Statuscode",
+    "anyStatusHelp": "Ausgeschaltet werden nur 404 und 444 (nicht vorhandene Inhalte oder getrennte Verbindung) gezählt, damit normale Besucher und Nutzer mit gemeinsamer Ausgangs-IP nicht versehentlich gesperrt werden. Köderpfade rufen normale Nutzer nie auf, dort kann es eingeschaltet werden: Single-Page-Apps liefern für jeden Pfad 200.",
+    "unknownHost": "Nur unbekannte Domains",
+    "unknownHostHelp": "Zählt nur Anfragen, deren Domain zu keiner Site passt, also solche, die die Standardsite verarbeitet oder die mit 404 beantwortet werden.",
+    "withinWeb": "Fenster,",
+    "webCount": "Gezählt",
+    "scopeNotFound": "404 und 444",
+    "scopeAnyStatus": "Jeder Statuscode",
+    "scopeUnknownHost": "nur unbekannte Domains",
+    "allPaths": "Alle Pfade",
+    "morePaths": "{n} weitere",
+    "testPaths": "Anfragepfade",
+    "testPathsPlaceholder": "Ein Pfad pro Zeile, etwa /.env. Getestet werden nur die Pfadregeln",
+    "testHit": "Treffer"
   },
   "trap": {
     "title": "Köderports",
@@ -195,6 +221,18 @@
     "gately-waf": {
       "name": "WAF-Blockierungen",
       "desc": "Quellen, die die WAF wiederholt blockiert hat. Nicht für Sites hinter einem CDN verwenden, das die echte IP per Header übergibt, sonst werden die CDN-Knoten gesperrt"
+    },
+    "web-decoy": {
+      "name": "Web-Köderpfade",
+      "desc": "Sperrt schon bei der ersten Anfrage an Pfade, die Scanner gern abfragen, etwa /.env, /.git oder wp-login.php – unabhängig vom Statuscode. Läuft auf einer Site tatsächlich WordPress, phpMyAdmin o. Ä., zuerst die passenden Zeilen entfernen"
+    },
+    "web-unknown-host": {
+      "name": "Scans unbekannter Domains",
+      "desc": "Sperrt nach 5 Anfragen innerhalb 1 Minute per IP oder über eine Domain ohne Site (von der Standardsite verarbeitet oder mit 404 beantwortet)"
+    },
+    "web-404": {
+      "name": "Web-404-Sondierung",
+      "desc": "Sperrt nach 10 Anfragen an nicht vorhandene Pfade (404 oder 444) innerhalb 1 Minute; gängige Pfade wie favicon und robots.txt sind ausgenommen"
     }
   }
 }

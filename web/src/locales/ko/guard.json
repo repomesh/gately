@@ -70,14 +70,16 @@
     "journal": "systemd 저널",
     "command": "명령 출력",
     "docker": "Docker 컨테이너",
-    "event": "Gately 이벤트"
+    "event": "Gately 이벤트",
+    "web": "웹 경로 탐색"
   },
   "target": {
     "file": "파일 경로",
     "journal": "서비스 유닛",
     "command": "명령",
     "docker": "컨테이너 이름",
-    "event": "이벤트"
+    "event": "이벤트",
+    "web": "리스너"
   },
   "event": {
     "authFailed": "관리 콘솔 로그인 실패",
@@ -90,7 +92,8 @@
     "journalMissing": "journalctl을 찾을 수 없어(컨테이너 안이거나 systemd를 쓰지 않는 시스템) 이 출처를 사용할 수 없습니다.",
     "command": "로그를 계속 출력하는 명령을 실행해 출력을 읽습니다(예: OpenWrt의 logread -f). 명령이 종료되면 자동으로 다시 시작합니다.",
     "docker": "지정한 컨테이너의 로그를 읽습니다. Docker 관리 모듈이 Docker에 연결할 수 있어야 합니다.",
-    "event": "출처 IP가 포함된 Gately 자체 이벤트를 집계합니다. 필터가 필요 없습니다."
+    "event": "출처 IP가 포함된 Gately 자체 이벤트를 집계합니다. 필터가 필요 없습니다.",
+    "web": "웹 서비스가 처리한 요청을 리스너, 경로, 상태 코드별로 셉니다. 로그를 읽을 필요가 없습니다. 어느 리스너에서 발동하든 차단은 모든 사이트와 시스템 방화벽에 적용됩니다."
   },
   "jail": {
     "intro": "로그에서 실패 기록을 찾아, 집계 기간 내에 횟수에 도달한 IP를 차단합니다.",
@@ -121,7 +124,30 @@
     "testPlaceholder": "로그 몇 줄을 붙여 넣어 필터가 IP를 추출하는지 확인하세요",
     "testSummary": "{total}줄 중 {matched}줄 일치",
     "testNoMatch": "일치 없음",
-    "testIgnored": "{host}(화이트리스트)"
+    "testIgnored": "{host}(화이트리스트)",
+    "allListeners": "모든 리스너",
+    "listenersHelp": "비워 두면 모든 리스너입니다. 어느 리스너에서 발동하든 차단은 모든 사이트와 시스템 방화벽에 적용됩니다.",
+    "webPreset": "템플릿",
+    "webPresetNone": "템플릿 사용 안 함",
+    "paths": "경로 규칙",
+    "pathsPlaceholder": "*/.env\n/wp-login.php\n~^/api/v[0-9]+/debug",
+    "pathsHelp": "한 줄에 하나, 비워 두면 모든 경로입니다. *는 /를 포함한 임의의 문자와 일치하며 경로 전체를 대소문자 구분 없이 비교합니다. 예를 들어 */.env는 /.env와 /api/.env에 일치합니다. ~로 시작하는 줄은 Go 정규식입니다.",
+    "ignorePaths": "제외 경로",
+    "ignorePathsHelp": "선택 사항이며 경로 규칙과 같은 문법입니다. 일치하는 요청은 세지 않습니다.",
+    "anyStatus": "모든 상태 코드",
+    "anyStatusHelp": "끄면 404와 444(없는 내용 접근 또는 연결 끊김)만 세므로 일반 방문자나 출구 IP를 공유하는 사용자가 잘못 차단되지 않습니다. 미끼 경로는 일반 사용자가 접근하지 않으므로 켜도 됩니다. 단일 페이지 앱은 어떤 경로에도 200을 반환하기 때문입니다.",
+    "unknownHost": "알 수 없는 도메인만",
+    "unknownHostHelp": "도메인이 어떤 사이트와도 일치하지 않는 요청, 즉 기본 사이트가 처리하거나 404로 응답한 요청만 셉니다.",
+    "withinWeb": "안에",
+    "webCount": "집계 대상",
+    "scopeNotFound": "404와 444",
+    "scopeAnyStatus": "모든 상태 코드",
+    "scopeUnknownHost": "알 수 없는 도메인만",
+    "allPaths": "모든 경로",
+    "morePaths": "외 {n}개",
+    "testPaths": "요청 경로",
+    "testPathsPlaceholder": "한 줄에 경로 하나(예: /.env). 경로 규칙만 테스트합니다",
+    "testHit": "일치"
   },
   "trap": {
     "title": "미끼 포트",
@@ -195,6 +221,18 @@
     "gately-waf": {
       "name": "WAF 차단",
       "desc": "WAF에 반복적으로 차단된 출처. 실제 IP를 헤더로 전달하는 CDN 뒤의 사이트에는 쓰지 마세요. CDN 노드가 차단됩니다"
+    },
+    "web-decoy": {
+      "name": "웹 미끼 경로",
+      "desc": "/.env, /.git, wp-login.php 등 스캐너가 자주 탐색하는 경로에 한 번 접근하면 바로 차단하며 상태 코드는 따지지 않습니다. 사이트가 실제로 WordPress, phpMyAdmin 등이라면 해당 줄을 먼저 지우세요"
+    },
+    "web-unknown-host": {
+      "name": "알 수 없는 도메인 스캔",
+      "desc": "IP나 설정되지 않은 도메인으로 접근(기본 사이트가 처리하거나 404 응답)이 1분 안에 5회면 차단"
+    },
+    "web-404": {
+      "name": "웹 404 탐색",
+      "desc": "존재하지 않는 경로 접근(404 또는 444)이 1분 안에 10회면 차단, favicon, robots.txt 등 흔한 경로는 제외됨"
     }
   }
 }

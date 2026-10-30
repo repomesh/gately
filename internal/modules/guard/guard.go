@@ -26,6 +26,7 @@ import (
 	"github.com/wangwanjie/gately/internal/fsperm"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
+	"github.com/wangwanjie/gately/internal/webprobe"
 )
 
 // ID 是模块标识。
@@ -271,9 +272,11 @@ type Module struct {
 	// local 为本机网卡所在的 IPv6 网段，定期刷新（受 m.mu 保护）
 	local []netip.Prefix
 	jails map[string]*jailRunner
-	fw    *firewall
-	trap  *userTrap
-	unsub []func()
+	// webJails 为启用中的 Web 路径探测规则快照，每个请求都会读取，不能经过 m.mu
+	webJails atomic.Pointer[[]*jailRunner]
+	fw       *firewall
+	trap     *userTrap
+	unsub    []func()
 
 	// saveTimer 延迟保存封禁表，合并短时间内的多次变化；fileMu 保证同一时间只有一次写文件
 	saveMu    sync.Mutex
@@ -389,6 +392,8 @@ func (m *Module) Start(ctx context.Context) error {
 	m.loadBans()
 	m.unsub = append(m.unsub, banlist.Default.Subscribe(m.onBanChange))
 	m.unsub = append(m.unsub, events.Subscribe(m.onEvent))
+	webprobe.SetHandler(m.onWebHit)
+	m.unsub = append(m.unsub, func() { webprobe.SetHandler(nil) })
 	m.fw.start(m.ctx, s, m.local, m.importKernelBans, m.onFirewallActive)
 	m.applyTrapLocked()
 	for _, j := range m.cfg.Jails {
@@ -414,6 +419,7 @@ func (m *Module) Stop() error {
 		j.stop()
 		delete(m.jails, k)
 	}
+	m.refreshWebLocked()
 	if m.trap != nil {
 		m.trap.stop()
 		m.trap = nil

@@ -70,14 +70,16 @@
     "journal": "Diario de systemd",
     "command": "Salida de un comando",
     "docker": "Contenedor Docker",
-    "event": "Evento de Gately"
+    "event": "Evento de Gately",
+    "web": "Sondeo de rutas web"
   },
   "target": {
     "file": "Ruta del archivo",
     "journal": "Unidad de servicio",
     "command": "Comando",
     "docker": "Contenedor",
-    "event": "Evento"
+    "event": "Evento",
+    "web": "Escuchas"
   },
   "event": {
     "authFailed": "Inicio de sesión fallido en el panel",
@@ -90,7 +92,8 @@
     "journalMissing": "No se encuentra journalctl (dentro de un contenedor o en un sistema sin systemd), así que este origen no está disponible.",
     "command": "Ejecuta un comando que imprime registros de forma continua y lee su salida, p. ej. logread -f en OpenWrt. El comando se reinicia si termina.",
     "docker": "Lee el registro del contenedor. El módulo Docker debe poder conectarse a Docker.",
-    "event": "Cuenta eventos propios de Gately que incluyen la IP de origen. No hace falta filtro."
+    "event": "Cuenta eventos propios de Gately que incluyen la IP de origen. No hace falta filtro.",
+    "web": "Cuenta las solicitudes que atiende el servicio web por escucha, ruta y código de estado, sin leer ningún registro. Sea cual sea la escucha que lo active, el bloqueo se aplica a todos los sitios y al cortafuegos del sistema."
   },
   "jail": {
     "intro": "Busca fallos en los registros. Una IP que alcanza el número de fallos dentro de la ventana de tiempo queda bloqueada.",
@@ -121,7 +124,30 @@
     "testPlaceholder": "Pega algunas líneas de registro para comprobar que los filtros extraen la IP",
     "testSummary": "{matched} de {total} líneas coinciden",
     "testNoMatch": "Sin coincidencia",
-    "testIgnored": "{host} (lista blanca)"
+    "testIgnored": "{host} (lista blanca)",
+    "allListeners": "Todas las escuchas",
+    "listenersHelp": "Déjelo vacío para todas las escuchas. Sea cual sea la escucha que lo active, el bloqueo se aplica a todos los sitios y al cortafuegos del sistema.",
+    "webPreset": "Plantilla",
+    "webPresetNone": "Sin plantilla",
+    "paths": "Rutas",
+    "pathsPlaceholder": "*/.env\n/wp-login.php\n~^/api/v[0-9]+/debug",
+    "pathsHelp": "Una por línea; vacío para todas las rutas. * coincide con cualquier carácter (incluido /), se compara la ruta completa sin distinguir mayúsculas. Por ejemplo, */.env coincide con /.env y /api/.env. Las líneas que empiezan por ~ son expresiones regulares de Go.",
+    "ignorePaths": "Rutas excluidas",
+    "ignorePathsHelp": "Opcional, misma sintaxis que Rutas. Las solicitudes que coincidan no se cuentan.",
+    "anyStatus": "Cualquier código de estado",
+    "anyStatusHelp": "Desactivado, solo se cuentan 404 y 444 (contenido inexistente o conexión cerrada), así no se bloquea por error a visitantes normales ni a usuarios que comparten IP de salida. Los usuarios normales nunca visitan rutas señuelo, así que ahí puede activarse: las aplicaciones de una sola página devuelven 200 para cualquier ruta.",
+    "unknownHost": "Solo dominios desconocidos",
+    "unknownHostHelp": "Cuenta solo las solicitudes cuyo dominio no coincide con ningún sitio, es decir, las atendidas por el sitio predeterminado o respondidas con 404.",
+    "withinWeb": "de ventana,",
+    "webCount": "Cuenta",
+    "scopeNotFound": "404 y 444",
+    "scopeAnyStatus": "Cualquier código de estado",
+    "scopeUnknownHost": "solo dominios desconocidos",
+    "allPaths": "Todas las rutas",
+    "morePaths": "{n} más",
+    "testPaths": "Rutas de solicitud",
+    "testPathsPlaceholder": "Una ruta por línea, como /.env. Solo se prueban las reglas de ruta",
+    "testHit": "Coincide"
   },
   "trap": {
     "title": "Puertos trampa",
@@ -195,6 +221,18 @@
     "gately-waf": {
       "name": "Bloqueos del WAF",
       "desc": "Orígenes bloqueados repetidamente por el WAF. No lo uses en sitios detrás de una CDN que pasa la IP real en una cabecera, o se bloquearán los nodos de la CDN"
+    },
+    "web-decoy": {
+      "name": "Rutas señuelo web",
+      "desc": "Bloquea en la primera solicitud a rutas que los escáneres buscan, como /.env, /.git o wp-login.php, con cualquier código de estado. Si un sitio usa realmente WordPress, phpMyAdmin u otros similares, elimine antes las líneas correspondientes"
+    },
+    "web-unknown-host": {
+      "name": "Escaneo de dominios desconocidos",
+      "desc": "Bloquea tras 5 solicitudes en 1 minuto por IP o por un dominio sin sitio (atendidas por el sitio predeterminado o respondidas con 404)"
+    },
+    "web-404": {
+      "name": "Sondeo web 404",
+      "desc": "Bloquea tras 10 solicitudes a rutas inexistentes (404 o 444) en 1 minuto; se excluyen rutas habituales como favicon y robots.txt"
     }
   }
 }

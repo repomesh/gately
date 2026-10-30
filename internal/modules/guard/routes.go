@@ -53,6 +53,8 @@ type banRequest struct {
 }
 
 type testRequest struct {
+	// Source 为规则来源，为 web 时 Filter、Ignore 按路径规则解析，Lines 为待测试的请求路径
+	Source string `json:"source,omitempty"`
 	Filter string `json:"filter"`
 	Ignore string `json:"ignore"`
 	// Lines 为待测试的日志内容，每行一条
@@ -118,12 +120,17 @@ func (m *Module) jailRemovedLocked(key string) {
 		r.stop()
 		delete(m.jails, key)
 	}
+	m.refreshWebLocked()
 }
 
 func (m *Module) handleTest(w http.ResponseWriter, r *http.Request) {
 	var req testRequest
 	if err := httpx.ReadJSON(r, &req); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	if req.Source == SourceWeb {
+		m.testWeb(w, req)
 		return
 	}
 	mt, err := newMatcher(Jail{Filter: req.Filter, Ignore: req.Ignore})
@@ -287,4 +294,22 @@ func (m *Module) handleRules(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.OK(w, map[string]string{"rules": out})
+}
+
+// testWeb 用请求路径测试路径规则，只比较路径，不考虑监听、状态码与域名条件。
+func (m *Module) testWeb(w http.ResponseWriter, req testRequest) {
+	wm, err := newWebMatcher(Jail{Filter: req.Filter, Ignore: req.Ignore})
+	if err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	lines := splitLines(req.Lines)
+	if len(lines) > 1000 {
+		lines = lines[:1000]
+	}
+	out := make([]TestResult, 0, len(lines))
+	for _, l := range lines {
+		out = append(out, TestResult{Line: l, Matched: wm.pathMatched(l)})
+	}
+	httpx.OK(w, out)
 }

@@ -70,14 +70,16 @@
     "journal": "systemd 日誌",
     "command": "命令輸出",
     "docker": "Docker 容器",
-    "event": "Gately 事件"
+    "event": "Gately 事件",
+    "web": "Web 路徑探測"
   },
   "target": {
     "file": "檔案路徑",
     "journal": "服務單元",
     "command": "命令",
     "docker": "容器名稱",
-    "event": "事件"
+    "event": "事件",
+    "web": "監聽"
   },
   "event": {
     "authFailed": "管理後台登入失敗",
@@ -90,7 +92,8 @@
     "journalMissing": "本機找不到 journalctl（在容器中或未使用 systemd 的系統），此來源無法使用。",
     "command": "執行一條持續輸出日誌的命令並讀取其輸出，例如 OpenWrt 的 logread -f；命令結束後自動重新啟動。",
     "docker": "讀取指定容器的日誌，需要 Docker 管理模組能連線到 Docker。",
-    "event": "統計 Gately 自身的事件，事件中帶有來源 IP，不需要填寫過濾規則。"
+    "event": "統計 Gately 自身的事件，事件中帶有來源 IP，不需要填寫過濾規則。",
+    "web": "統計 Web 服務處理的請求，依監聽、路徑與狀態碼計數，不需要讀取日誌。無論哪個監聽觸發，封鎖都對全部站點與系統防火牆生效。"
   },
   "jail": {
     "intro": "從日誌中辨識失敗記錄，同一 IP 在統計視窗內達到次數即被封鎖。",
@@ -121,7 +124,30 @@
     "testPlaceholder": "貼上幾行日誌，測試過濾規則能否取出 IP",
     "testSummary": "{total} 行中相符 {matched} 行",
     "testNoMatch": "不相符",
-    "testIgnored": "{host}（白名單）"
+    "testIgnored": "{host}（白名單）",
+    "allListeners": "全部監聽",
+    "listenersHelp": "留空表示全部監聽。無論哪個監聽觸發，封鎖都對全部站點與系統防火牆生效。",
+    "webPreset": "範本",
+    "webPresetNone": "不使用範本",
+    "paths": "路徑規則",
+    "pathsPlaceholder": "*/.env\n/wp-login.php\n~^/api/v[0-9]+/debug",
+    "pathsHelp": "每行一條，留空表示全部路徑。* 匹配任意字元（含 /），整條路徑匹配，不區分大小寫，例如 */.env 匹配 /.env 與 /api/.env；以 ~ 開頭為 Go 正規表示式。",
+    "ignorePaths": "排除路徑",
+    "ignorePathsHelp": "選填，寫法同路徑規則；命中的請求不計數。",
+    "anyStatus": "任意狀態碼",
+    "anyStatusHelp": "關閉時只統計 404 與 444（存取了不存在的內容或被中斷連線），正常存取的使用者和共用出口 IP 的使用者不會被誤封。誘餌路徑正常使用者不會存取，可以開啟：單頁應用對任意路徑都回傳 200。",
+    "unknownHost": "只統計未知網域",
+    "unknownHostHelp": "只統計網域沒有匹配任何站點的請求，即由預設站點處理或直接回傳 404 的請求。",
+    "withinWeb": "內命中",
+    "webCount": "統計",
+    "scopeNotFound": "404 與 444",
+    "scopeAnyStatus": "任意狀態碼",
+    "scopeUnknownHost": "僅未知網域",
+    "allPaths": "全部路徑",
+    "morePaths": "另外 {n} 條",
+    "testPaths": "請求路徑",
+    "testPathsPlaceholder": "每行一個路徑，例如 /.env；只測試路徑規則",
+    "testHit": "命中"
   },
   "trap": {
     "title": "誘餌連接埠",
@@ -195,6 +221,18 @@
     "gately-waf": {
       "name": "WAF 攔截",
       "desc": "被 WAF 多次攔截的來源。站點經 CDN 回源（以請求標頭傳遞真實 IP）時不要使用，否則封鎖的會是 CDN 節點"
+    },
+    "web-decoy": {
+      "name": "Web 誘餌路徑",
+      "desc": "存取 /.env、/.git、wp-login.php 等掃描器常探測的路徑一次即封鎖，任何狀態碼都計數。站點本身是 WordPress、phpMyAdmin 等程式時先刪掉對應的行"
+    },
+    "web-unknown-host": {
+      "name": "未知網域掃描",
+      "desc": "以 IP 或未設定的網域存取（由預設站點處理或直接回傳 404），1 分鐘內 5 次即封鎖"
+    },
+    "web-404": {
+      "name": "Web 404 探測",
+      "desc": "1 分鐘內 10 次存取不存在的路徑（404 或 444）即封鎖，已排除 favicon、robots.txt 等常見路徑"
     }
   }
 }

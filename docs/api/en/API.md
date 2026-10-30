@@ -1031,6 +1031,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 
 | Field | Type |
 | --- | --- |
+| `anyStatus` | boolean |
 | `banTime` | integer |
 | `enable` | boolean |
 | `filter` | string |
@@ -1043,6 +1044,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `remark` | string |
 | `source` | string |
 | `target` | string |
+| `unknownHost` | boolean |
 
 ### guard.Platform
 
@@ -1116,6 +1118,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `filter` | string |
 | `ignore` | string |
 | `lines` | string |
+| `source` | string |
 
 ### ipsource.Source
 

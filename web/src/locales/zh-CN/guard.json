@@ -70,14 +70,16 @@
     "journal": "systemd 日志",
     "command": "命令输出",
     "docker": "Docker 容器",
-    "event": "Gately 事件"
+    "event": "Gately 事件",
+    "web": "Web 路径探测"
   },
   "target": {
     "file": "文件路径",
     "journal": "服务单元",
     "command": "命令",
     "docker": "容器名",
-    "event": "事件"
+    "event": "事件",
+    "web": "监听"
   },
   "event": {
     "authFailed": "管理后台登录失败",
@@ -90,7 +92,8 @@
     "journalMissing": "本机找不到 journalctl（容器中或未使用 systemd 的系统），该来源不可用。",
     "command": "运行一条持续输出日志的命令并读取其输出，例如 OpenWrt 的 logread -f；命令退出后自动重启。",
     "docker": "读取指定容器的日志，需要 Docker 管理模块能连接 Docker。",
-    "event": "统计 Gately 自身的事件，事件中带有来源 IP，不需要填写过滤规则。"
+    "event": "统计 Gately 自身的事件，事件中带有来源 IP，不需要填写过滤规则。",
+    "web": "统计 Web 服务处理的请求，按监听、路径与状态码计数，不需要读取日志。无论哪个监听触发，封禁都对全部站点与系统防火墙生效。"
   },
   "jail": {
     "intro": "从日志中识别失败记录，同一 IP 在统计窗口内达到次数即被封禁。",
@@ -121,7 +124,30 @@
     "testPlaceholder": "粘贴几行日志，测试过滤规则能否取出 IP",
     "testSummary": "{total} 行中匹配 {matched} 行",
     "testNoMatch": "不匹配",
-    "testIgnored": "{host}（白名单）"
+    "testIgnored": "{host}（白名单）",
+    "allListeners": "全部监听",
+    "listenersHelp": "留空表示全部监听。无论哪个监听触发，封禁都对全部站点与系统防火墙生效。",
+    "webPreset": "模板",
+    "webPresetNone": "不使用模板",
+    "paths": "路径规则",
+    "pathsPlaceholder": "*/.env\n/wp-login.php\n~^/api/v[0-9]+/debug",
+    "pathsHelp": "每行一条，留空表示全部路径。* 匹配任意字符（含 /），整条路径匹配，不区分大小写，例如 */.env 匹配 /.env 与 /api/.env；以 ~ 开头为 Go 正则。",
+    "ignorePaths": "排除路径",
+    "ignorePathsHelp": "可选，写法同路径规则；命中的请求不计数。",
+    "anyStatus": "任意状态码",
+    "anyStatusHelp": "关闭时只统计 404 与 444（访问了不存在的内容或被断开连接），正常访问的用户和共用出口 IP 的用户不会被误封。诱饵路径正常用户不会访问，可以开启：单页应用对任意路径都返回 200。",
+    "unknownHost": "只统计未知域名",
+    "unknownHostHelp": "只统计域名没有匹配任何站点的请求，即由默认站点处理或直接返回 404 的请求。",
+    "withinWeb": "内命中",
+    "webCount": "统计",
+    "scopeNotFound": "404 与 444",
+    "scopeAnyStatus": "任意状态码",
+    "scopeUnknownHost": "仅未知域名",
+    "allPaths": "全部路径",
+    "morePaths": "另外 {n} 条",
+    "testPaths": "请求路径",
+    "testPathsPlaceholder": "每行一个路径，例如 /.env；只测试路径规则",
+    "testHit": "命中"
   },
   "trap": {
     "title": "诱饵端口",
@@ -195,6 +221,18 @@
     "gately-waf": {
       "name": "WAF 拦截",
       "desc": "被 WAF 多次拦截的来源。站点经 CDN 回源（按请求头传递真实 IP）时不要使用，否则封禁的会是 CDN 节点"
+    },
+    "web-decoy": {
+      "name": "Web 诱饵路径",
+      "desc": "访问 /.env、/.git、wp-login.php 等扫描器常探测的路径一次即封禁，任何状态码都计数。站点本身是 WordPress、phpMyAdmin 等程序时先删掉对应的行"
+    },
+    "web-unknown-host": {
+      "name": "未知域名扫描",
+      "desc": "按 IP 或未配置的域名访问（由默认站点处理或直接返回 404），1 分钟内 5 次即封禁"
+    },
+    "web-404": {
+      "name": "Web 404 探测",
+      "desc": "1 分钟内 10 次访问不存在的路径（404 或 444）即封禁，已排除 favicon、robots.txt 等常见路径"
     }
   }
 }

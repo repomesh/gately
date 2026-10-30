@@ -70,14 +70,16 @@
     "journal": "Journal systemd",
     "command": "Sortie de commande",
     "docker": "Conteneur Docker",
-    "event": "Événement Gately"
+    "event": "Événement Gately",
+    "web": "Sondage de chemins web"
   },
   "target": {
     "file": "Chemin du fichier",
     "journal": "Unité de service",
     "command": "Commande",
     "docker": "Conteneur",
-    "event": "Événement"
+    "event": "Événement",
+    "web": "Écouteurs"
   },
   "event": {
     "authFailed": "Échec de connexion à la console",
@@ -90,7 +92,8 @@
     "journalMissing": "journalctl est introuvable (dans un conteneur ou sur un système sans systemd), cette source est donc indisponible.",
     "command": "Exécute une commande qui affiche des journaux en continu et lit sa sortie, par ex. logread -f sur OpenWrt. La commande est relancée si elle s'arrête.",
     "docker": "Lit le journal du conteneur. Le module Docker doit pouvoir joindre Docker.",
-    "event": "Compte les événements de Gately qui contiennent l'IP source. Aucun filtre n'est nécessaire."
+    "event": "Compte les événements de Gately qui contiennent l'IP source. Aucun filtre n'est nécessaire.",
+    "web": "Compte les requêtes traitées par le service web par écouteur, chemin et code d’état, sans lire de journal. Quel que soit l’écouteur déclencheur, le bannissement s’applique à tous les sites et au pare-feu du système."
   },
   "jail": {
     "intro": "Repère les échecs dans les journaux. Une IP qui atteint le nombre d'échecs dans la fenêtre de temps est bannie.",
@@ -121,7 +124,30 @@
     "testPlaceholder": "Collez quelques lignes de journal pour vérifier que les filtres extraient l'IP",
     "testSummary": "{matched} lignes sur {total} correspondent",
     "testNoMatch": "Aucune correspondance",
-    "testIgnored": "{host} (liste blanche)"
+    "testIgnored": "{host} (liste blanche)",
+    "allListeners": "Tous les écouteurs",
+    "listenersHelp": "Laissez vide pour tous les écouteurs. Quel que soit l’écouteur déclencheur, le bannissement s’applique à tous les sites et au pare-feu du système.",
+    "webPreset": "Modèle",
+    "webPresetNone": "Aucun modèle",
+    "paths": "Chemins",
+    "pathsPlaceholder": "*/.env\n/wp-login.php\n~^/api/v[0-9]+/debug",
+    "pathsHelp": "Un par ligne ; vide pour tous les chemins. * correspond à n’importe quels caractères (y compris /), le chemin entier doit correspondre, sans tenir compte de la casse. Par exemple */.env correspond à /.env et /api/.env. Les lignes commençant par ~ sont des expressions régulières Go.",
+    "ignorePaths": "Chemins exclus",
+    "ignorePathsHelp": "Facultatif, même syntaxe que Chemins. Les requêtes correspondantes ne sont pas comptées.",
+    "anyStatus": "Tout code d’état",
+    "anyStatusHelp": "Désactivé, seuls 404 et 444 (contenu inexistant ou connexion fermée) sont comptés, pour ne pas bannir par erreur les visiteurs normaux ni les utilisateurs partageant une IP de sortie. Les utilisateurs normaux ne visitent jamais les chemins leurres, on peut donc l’activer pour eux : les applications monopage renvoient 200 pour n’importe quel chemin.",
+    "unknownHost": "Domaines inconnus uniquement",
+    "unknownHostHelp": "Ne compte que les requêtes dont le domaine ne correspond à aucun site, c’est-à-dire traitées par le site par défaut ou répondues par 404.",
+    "withinWeb": "de fenêtre,",
+    "webCount": "Comptage",
+    "scopeNotFound": "404 et 444",
+    "scopeAnyStatus": "Tout code d’état",
+    "scopeUnknownHost": "domaines inconnus uniquement",
+    "allPaths": "Tous les chemins",
+    "morePaths": "{n} de plus",
+    "testPaths": "Chemins de requête",
+    "testPathsPlaceholder": "Un chemin par ligne, comme /.env. Seules les règles de chemin sont testées",
+    "testHit": "Correspond"
   },
   "trap": {
     "title": "Ports pièges",
@@ -195,6 +221,18 @@
     "gately-waf": {
       "name": "Blocages du WAF",
       "desc": "Sources bloquées à plusieurs reprises par le WAF. Ne l'utilisez pas pour des sites derrière un CDN qui transmet l'IP réelle dans un en-tête, sinon ce sont les nœuds du CDN qui seront bannis"
+    },
+    "web-decoy": {
+      "name": "Chemins leurres web",
+      "desc": "Bannit dès la première requête vers des chemins prisés des scanners, comme /.env, /.git ou wp-login.php, quel que soit le code d’état. Si un site exécute réellement WordPress, phpMyAdmin ou autre, supprimez d’abord les lignes correspondantes"
+    },
+    "web-unknown-host": {
+      "name": "Scans de domaines inconnus",
+      "desc": "Bannit après 5 requêtes en 1 minute par IP ou par un domaine sans site (traitées par le site par défaut ou répondues par 404)"
+    },
+    "web-404": {
+      "name": "Sondage web 404",
+      "desc": "Bannit après 10 requêtes vers des chemins inexistants (404 ou 444) en 1 minute ; les chemins courants comme favicon et robots.txt sont exclus"
     }
   }
 }

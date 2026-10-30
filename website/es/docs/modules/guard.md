@@ -6,6 +6,7 @@ Prevención de intrusiones al estilo de fail2ban: Gately detecta ataques de fuer
 
 - **Reglas de registros**: leen archivos de registro, el diario de systemd, la salida de un comando (como `logread -f` en OpenWrt) o los registros de un contenedor Docker, buscan fallos con expresiones regulares y bloquean la IP que alcanza el número de fallos en la ventana de tiempo. Incluye plantillas para SSH, Dropbear, Nginx, Vaultwarden, Home Assistant, Proxmox VE y otros, y en el editor puedes pegar líneas de ejemplo para probar los filtros;
 - **Eventos de Gately**: los inicios de sesión fallidos en el panel y los bloqueos del WAF también pueden alimentar una regla, sin expresiones regulares;
+- **Sondeo de rutas web**: cuenta directamente las solicitudes que atiende el servicio web por escucha, ruta y código de estado, sin leer registros; se bloquean los orígenes que piden rutas señuelo como `/.env` o `/.git`, o que escanean una y otra vez dominios desconocidos;
 - **Puertos trampa**: trampas en puertos que este equipo no usa (por defecto 23, 135, 1433, 3389, 5900, 6379 y otros). Cualquier origen que se conecte queda bloqueado;
 - **Detección de escaneos**: se bloquea el origen que se conecta a puertos cerrados de este equipo más veces por minuto que el umbral;
 - **Una sola lista de bloqueos**: aquí se gestionan los bloqueos manuales (incluidas redes CIDR y bloqueos permanentes) y los bloqueos automáticos por fallos de autenticación del servicio web. Los bloqueos se guardan y se restauran tras reiniciar;
@@ -54,6 +55,7 @@ Sin ello, los bloqueos siguen aplicándose a los servicios de Gately. Para leer 
 | Salida de un comando | Un comando como `logread -f` | Se reinicia si termina |
 | Contenedor Docker | Nombre del contenedor | Se lee a través de la conexión a Docker del módulo Docker |
 | Evento de Gately | Inicio de sesión fallido / bloqueo del WAF | Los eventos incluyen la IP de origen; no hace falta filtro |
+| Sondeo de rutas web | Escuchas (opcional) y reglas de ruta | Cuenta las solicitudes del servicio web, ver más abajo |
 
 Los filtros son expresiones regulares de Go (sintaxis RE2), una por línea, y `<HOST>` representa la dirección de origen, por ejemplo:
 
@@ -62,6 +64,32 @@ Failed password for (?:invalid user )?\S* ?from <HOST>
 ```
 
 Las líneas que coinciden con «Excluir» no se cuentan. La ventana de tiempo, el número de fallos y la duración del bloqueo se configuran por regla; la duración puede ser la predeterminada, personalizada o permanente.
+
+## Sondeo de rutas web
+
+Con el origen «Sondeo de rutas web», la regla cuenta directamente las solicitudes que atiende el servicio web, sin leer registros:
+
+- **Escuchas**: elija una o varias; vacío para todas;
+- **Rutas**: una por línea; vacío para todas. `*` coincide con cualquier carácter (incluido `/`), se compara la ruta completa sin distinguir mayúsculas. Por ejemplo, `*/.env` coincide con `/.env` y `/api/.env`. Las líneas que empiezan por `~` son expresiones regulares de Go. Variantes como `//.env` o `/a/../.env` también coinciden mediante la ruta normalizada;
+- **Rutas excluidas**: misma sintaxis; las solicitudes que coincidan no se cuentan;
+- **Qué se cuenta**: por defecto solo 404 y 444 (contenido inexistente, o conexión cerrada por un sitio «Cerrar conexión»), así no se bloquea por error a visitantes normales ni a usuarios que comparten IP de salida. Con «Cualquier código de estado» cuenta toda respuesta, lo que conviene a las rutas señuelo porque las aplicaciones de una sola página devuelven 200 para cualquier ruta;
+- **Solo dominios desconocidos**: cuenta solo las solicitudes cuyo dominio no coincide con ningún sitio, es decir, las atendidas por el sitio predeterminado o, si no lo hay, respondidas con 404 por la escucha.
+
+Se incluyen tres plantillas:
+
+| Plantilla | Condición | Notas |
+| --- | --- | --- |
+| Rutas señuelo web | `/.env`, `/.git`, `wp-login.php`, `phpinfo.php`, `phpmyadmin` y otras, cualquier código de estado, 1 vez | Bloquea 1 día. Si un sitio usa realmente WordPress, phpMyAdmin u otros similares, elimine antes las líneas correspondientes |
+| Escaneo de dominios desconocidos | Solo dominios desconocidos, 5 veces en 1 minuto | Bloquea 1 día. Combina con un sitio predeterminado «Cerrar conexión»: el escáner queda bloqueado tras unos pocos 444 y, con la sincronización del cortafuegos, las conexiones posteriores se descartan |
+| Sondeo web 404 | Todas las rutas, 10 veces en 1 minuto | Se excluyen las rutas que los navegadores piden por sí solos, como favicon, robots.txt y archivos `.map` |
+
+«Bloqueo de sondeos» en la tarjeta de una escucha del servicio web abre esta página con esa escucha elegida y la plantilla de señuelos aplicada; la regla se guarda y se aplica en la protección contra intrusiones. Al editar una regla puede pegar rutas de solicitud para probar las reglas de ruta.
+
+::: warning Alcance del bloqueo
+Sea cual sea la escucha que lo active, el bloqueo entra en la misma lista y se aplica a todas las escuchas, sitios y demás servicios de Gately; con la sincronización del cortafuegos activa, el cortafuegos del sistema también descarta todo el tráfico de esa dirección.
+:::
+
+La dirección de origen es la misma del registro de acceso y solo se restaura mediante el protocolo PROXY. En sitios detrás de una CDN que pasa la IP real en una cabecera, se bloquearía el nodo de la CDN, así que no use el sondeo de rutas en esas escuchas. Si Gately está detrás de otro proxy inverso en el mismo equipo, el origen es una dirección de bucle local: con «Ignorar direcciones de la LAN» nunca se bloquea, y la regla no tiene efecto.
 
 ## Compromisos de la detección de escaneos
 
