@@ -200,6 +200,27 @@ func TestSettingsValidate(t *testing.T) {
 			t.Errorf("白名单判断 %s 不符", addr)
 		}
 	}
+	// 诱饵端口与扫描检测的封禁时长可选永久（-1）与沿用默认（0）（issue #41）
+	for _, sec := range []int{-1, 0, 60, maxBanSeconds} {
+		ok := defaultSettings()
+		ok.Trap.BanSeconds, ok.Scan.BanSeconds = sec, sec
+		if err := ok.Validate(); err != nil {
+			t.Errorf("封禁时长 %d 应合法: %v", sec, err)
+		}
+	}
+	for _, sec := range []int{-2, 59, maxBanSeconds + 1} {
+		for _, scan := range []bool{false, true} {
+			b := defaultSettings()
+			if scan {
+				b.Scan.BanSeconds = sec
+			} else {
+				b.Trap.BanSeconds = sec
+			}
+			if b.Validate() == nil {
+				t.Errorf("封禁时长 %d（扫描检测 %v）应报错", sec, scan)
+			}
+		}
+	}
 	bad := defaultSettings()
 	bad.IgnoreList = []string{"x"}
 	if bad.Validate() == nil {

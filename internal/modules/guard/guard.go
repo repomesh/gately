@@ -131,8 +131,9 @@ func (s *Settings) Validate() error {
 		list = []string{}
 	}
 	s.IgnoreList = list
+	// 0 表示沿用默认时长，-1 表示永久封禁（见 banOptions），其余取值限定在 1 分钟到 365 天
 	for _, sec := range []int{s.Trap.BanSeconds, s.Scan.BanSeconds} {
-		if sec != 0 && (sec < 60 || sec > maxBanSeconds) {
+		if sec != 0 && sec != -1 && (sec < 60 || sec > maxBanSeconds) {
 			return errors.New("封禁时长应在 1 分钟到 365 天之间")
 		}
 	}
