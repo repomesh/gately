@@ -446,6 +446,29 @@ func RoleFromContext(ctx context.Context) string {
 	return r
 }
 
+type scopeKey struct{}
+
+// WithScopeCheck 把 API 令牌的权限判定函数写入上下文，供 Allowed 使用。
+func WithScopeCheck(ctx context.Context, check func(need string) bool) context.Context {
+	return context.WithValue(ctx, scopeKey{}, check)
+}
+
+// Allowed 判断当前请求的身份是否具备权限 need（格式同 API 令牌权限，如 "docker:write"），
+// 用于在同一接口内按权限决定是否返回敏感字段。API 令牌按自身权限判定；
+// 登录会话中管理员具备全部权限、只读账号只具备读权限；上下文中没有身份时一律视为无权限。
+func Allowed(ctx context.Context, need string) bool {
+	if check, ok := ctx.Value(scopeKey{}).(func(string) bool); ok {
+		return check(need)
+	}
+	switch RoleFromContext(ctx) {
+	case RoleAdmin:
+		return true
+	case RoleReadonly:
+		return strings.HasSuffix(need, ":read")
+	}
+	return false
+}
+
 // WithUser 把用户名写入上下文（API 令牌等其他认证方式使用）。
 func WithUser(ctx context.Context, user string) context.Context {
 	return context.WithValue(ctx, ctxKey{}, user)

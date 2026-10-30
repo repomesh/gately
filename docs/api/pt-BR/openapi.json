@@ -8336,7 +8336,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Permissão necessária: `docker:read`.",
+        "description": "Sem a permissão docker:write, os valores das variáveis de ambiente, Command, Entrypoint e os argumentos de inicialização aparecem como o marcador ********; o texto puro é obtido pelo endpoint secrets.\n\nPermissão necessária: `docker:read`.",
         "parameters": [
           {
             "in": "path",
@@ -9357,6 +9357,67 @@
           }
         ],
         "summary": "Renomear contêiner",
+        "tags": [
+          "Gerenciamento do Docker"
+        ],
+        "x-required-scope": "docker:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/docker/containers/{id}/secrets": {
+      "get": {
+        "description": "Permissão necessária: `docker:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver em texto puro as variáveis de ambiente e o comando de inicialização do contêiner",
         "tags": [
           "Gerenciamento do Docker"
         ],

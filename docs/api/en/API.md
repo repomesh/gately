@@ -430,6 +430,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | POST | `/api/docker/containers/upgrade-batch` | `docker:write` | Upgrade containers in bulk |
 | POST | `/api/docker/images/upgrade-check` | `docker:write` | Check whether an image has a new version |
 | GET | `/api/docker/containers/{id}` | `docker:read` | View container details |
+| GET | `/api/docker/containers/{id}/secrets` | `docker:write` | View container environment variables and start command in plain text |
 | DELETE | `/api/docker/containers/{id}` | `docker:write` | Delete a container |
 | POST | `/api/docker/containers/{id}/edit` | `docker:write` | Modify container configuration and recreate it |
 | POST | `/api/docker/containers/{id}/rename` | `docker:write` | Rename a container |

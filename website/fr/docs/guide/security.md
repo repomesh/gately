@@ -12,7 +12,7 @@ Gately fonctionne à la frontière du réseau et manipule des clés de fournisse
 ## Protection des données
 
 - La configuration est du JSON en clair avec les droits 0600, ce qui permet de l'auditer et de revenir en arrière.
-- Les champs sensibles sont masqués dans les réponses de l'API. Le bouton en forme d'œil de l'interface récupère sur demande le texte en clair enregistré et exige la permission d'écriture. Les mots de passe des utilisateurs web stockés sous forme de hash bcrypt, les secrets client OIDC et les clés privées ne sont jamais renvoyés ; les utilisateurs partagés avec vérification en deux étapes peuvent afficher à nouveau leur QR code.
+- Les champs sensibles sont masqués dans les réponses de l'API. Le bouton en forme d'œil de l'interface récupère sur demande le texte en clair enregistré et exige la permission d'écriture. Les mots de passe des utilisateurs web stockés sous forme de hash bcrypt, les secrets client OIDC et les clés privées ne sont jamais renvoyés ; les utilisateurs partagés avec vérification en deux étapes peuvent afficher à nouveau leur QR code. Les variables d'environnement, les commandes de démarrage et les lignes de commande des processus des conteneurs Docker sont traitées de la même façon : sans permission d'écriture Docker, elles s'affichent sous la forme `********`.
 - Le jeton cloudflared est transmis par variable d'environnement et n'apparaît pas dans la liste des processus ; les jetons et clés frp et Tailscale sont stockés avec les droits 0600.
 
 ## Authentification et contrôle d'accès

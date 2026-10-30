@@ -27,6 +27,7 @@ func (m *Module) registerContainerRoutes(add func(pattern string, h http.Handler
 	add("POST /containers/upgrade-batch", m.handleUpgradeBatch)
 	add("POST /images/upgrade-check", m.handleCheckAll)
 	add("GET /containers/{id}", m.handleDetail)
+	add("GET /containers/{id}/secrets", m.handleDetailSecrets)
 	add("DELETE /containers/{id}", m.handleDelete)
 	add("POST /containers/{id}/edit", m.handleEdit)
 	add("POST /containers/{id}/rename", m.handleRename)
@@ -445,9 +446,23 @@ func imageDefaultsOf(ctx context.Context, c *Client, imageID string) *imageDefau
 }
 
 func (m *Module) handleDetail(w http.ResponseWriter, r *http.Request) {
-	c, ok := m.clientOrFail(w)
+	d, ok := m.loadDetail(w, r)
 	if !ok {
 		return
+	}
+	// 环境变量与启动命令常带有密码、令牌，没有 Docker 写权限（只读账号、只读令牌）时脱敏，
+	// 明文通过按写权限鉴权的 /containers/{id}/secrets 获取
+	if !canViewSecrets(r) {
+		maskDetailSecrets(&d)
+	}
+	httpx.OK(w, d)
+}
+
+// loadDetail 读取容器详情，失败时直接写出错误响应并返回 false。
+func (m *Module) loadDetail(w http.ResponseWriter, r *http.Request) (ContainerDetail, bool) {
+	c, ok := m.clientOrFail(w)
+	if !ok {
+		return ContainerDetail{}, false
 	}
 	id := r.PathValue("id")
 	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
@@ -455,7 +470,7 @@ func (m *Module) handleDetail(w http.ResponseWriter, r *http.Request) {
 	info, err := c.Inspect(ctx, id)
 	if err != nil {
 		writeCtrErr(w, err)
-		return
+		return ContainerDetail{}, false
 	}
 	var imageID string
 	decodeField(info, "Image", &imageID)
@@ -471,7 +486,7 @@ func (m *Module) handleDetail(w http.ResponseWriter, r *http.Request) {
 			status = list[0].Status
 		}
 	}
-	httpx.OK(w, detailFromInspect(info, img, status))
+	return detailFromInspect(info, img, status), true
 }
 
 // ---------- 创建与编辑 ----------
@@ -599,6 +614,8 @@ func (m *Module) handleEdit(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadGateway, "%v", err)
 		return
 	}
+	// 编辑表单回填的是脱敏详情时，仍为占位符的环境变量与命令沿用旧容器的值
+	restoreMaskedSpec(&spec, info)
 	extra, err := applySpec(spec, body, info)
 	if err != nil {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
@@ -1000,6 +1017,10 @@ func (m *Module) handleProcesses(w http.ResponseWriter, r *http.Request) {
 	}
 	if raw.Processes == nil {
 		raw.Processes = [][]string{}
+	}
+	// 进程命令行与容器启动参数一样可能带有密钥，没有 Docker 写权限时只保留可执行文件
+	if !canViewSecrets(r) {
+		maskProcessCommands(raw.Titles, raw.Processes)
 	}
 	httpx.OK(w, map[string]any{"titles": raw.Titles, "processes": raw.Processes})
 }

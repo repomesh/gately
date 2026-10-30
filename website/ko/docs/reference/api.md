@@ -56,7 +56,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 - 경로 `/api/<모듈>/...`에는 `<모듈>` 도메인의 권한이 필요하며 GET과 HEAD에는 `read`, 그 외 메서드에는 `write`가 필요합니다.
 - 모듈 로그 `GET /api/<모듈>/logs`는 읽기 전용이고 로그 비우기(DELETE)는 쓰기 작업입니다.
-- 다음 GET 엔드포인트는 민감한 내용을 반환하거나 상호작용 채널을 만들기 때문에 `write`로 처리합니다. 경로에 `ws`(WebSocket 터미널), `exec`, `download`, `export`, `read`, `config`, `preview-archive`, `secrets` 세그먼트가 포함된 엔드포인트이며 예를 들어 인증서 다운로드, 컨테이너 안 명령 실행과 파일 읽기가 있습니다. 마스킹된 비밀번호와 키는 해당 리소스의 `.../secrets` 엔드포인트로 평문을 가져올 수 있습니다. 쓰기 권한이 필요하며 읽기 전용 계정과 읽기 전용 토큰으로 호출하면 403을 반환합니다.
+- 다음 GET 엔드포인트는 민감한 내용을 반환하거나 상호작용 채널을 만들기 때문에 `write`로 처리합니다. 경로에 `ws`(WebSocket 터미널), `exec`, `download`, `export`, `read`, `config`, `preview-archive`, `secrets` 세그먼트가 포함된 엔드포인트이며 예를 들어 인증서 다운로드, 컨테이너 안 명령 실행과 파일 읽기가 있습니다. 마스킹된 비밀번호와 키는 해당 리소스의 `.../secrets` 엔드포인트로 평문을 가져올 수 있습니다. 쓰기 권한이 필요하며 읽기 전용 계정과 읽기 전용 토큰으로 호출하면 403을 반환합니다. 컨테이너 상세 `/api/docker/containers/{id}`는 `docker:read`만 필요하며, `docker:write`가 없으면 그 안의 환경 변수 값과 시작 명령이 마스킹됩니다. 평문은 `/api/docker/containers/{id}/secrets`에서 가져옵니다.
 - 기존 엔드포인트 `PUT /api/webdav/shared-users`, `PUT /api/ftp/shared-users`, `PUT /api/smb/shared-users`는 세 서비스가 함께 쓰는 하나의 공유 사용자 목록을 수정하므로 `webdav:write`, `ftp:write`, `smb:write`가 모두 필요합니다. 새 엔드포인트 `/api/fileusers`는 `fileusers` 도메인의 권한을 사용합니다.
 - `GET /api/session`과 `GET /api/openapi.json`은 유효한 토큰이면 무엇이든 받아들입니다.
 

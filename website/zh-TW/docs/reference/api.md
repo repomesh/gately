@@ -56,7 +56,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 - 路徑 `/api/<模組>/...` 需要 `<模組>` 域的權限，GET 與 HEAD 要求 `read`，其餘方法要求 `write`。
 - 模組日誌 `GET /api/<模組>/logs` 屬於唯讀，清空日誌（DELETE）屬於寫入操作。
-- 下列 GET 介面會回傳敏感內容或建立互動通道，按 `write` 處理：路徑中含有 `ws`（WebSocket 終端機）、`exec`、`download`、`export`、`read`、`config`、`preview-archive`、`secrets` 段的介面，例如憑證下載、容器內執行命令與檔案讀取。被遮蔽的密碼、金鑰可透過對應資源的 `.../secrets` 介面取回明文，需要寫入權限，唯讀帳號和唯讀權杖呼叫時回傳 403。
+- 下列 GET 介面會回傳敏感內容或建立互動通道，按 `write` 處理：路徑中含有 `ws`（WebSocket 終端機）、`exec`、`download`、`export`、`read`、`config`、`preview-archive`、`secrets` 段的介面，例如憑證下載、容器內執行命令與檔案讀取。被遮蔽的密碼、金鑰可透過對應資源的 `.../secrets` 介面取回明文，需要寫入權限，唯讀帳號和唯讀權杖呼叫時回傳 403。容器詳情 `/api/docker/containers/{id}` 只需 `docker:read`，其中的環境變數值與啟動指令在沒有 `docker:write` 時遮蔽，明文透過 `/api/docker/containers/{id}/secrets` 取得。
 - 舊介面 `PUT /api/webdav/shared-users`、`PUT /api/ftp/shared-users`、`PUT /api/smb/shared-users` 修改的是三個服務共用的同一份共用使用者，需要同時具備 `webdav:write`、`ftp:write`、`smb:write`；新介面 `/api/fileusers` 使用 `fileusers` 域的權限。
 - `GET /api/session` 與 `GET /api/openapi.json` 接受任意有效權杖。
 

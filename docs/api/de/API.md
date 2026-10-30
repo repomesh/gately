@@ -430,6 +430,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | POST | `/api/docker/containers/upgrade-batch` | `docker:write` | Container gesammelt aktualisieren |
 | POST | `/api/docker/images/upgrade-check` | `docker:write` | Prüfen, ob für ein Image eine neue Version vorliegt |
 | GET | `/api/docker/containers/{id}` | `docker:read` | Container-Details anzeigen |
+| GET | `/api/docker/containers/{id}/secrets` | `docker:write` | Umgebungsvariablen und Startbefehl eines Containers im Klartext anzeigen |
 | DELETE | `/api/docker/containers/{id}` | `docker:write` | Container löschen |
 | POST | `/api/docker/containers/{id}/edit` | `docker:write` | Container-Konfiguration ändern und neu erstellen |
 | POST | `/api/docker/containers/{id}/rename` | `docker:write` | Container umbenennen |

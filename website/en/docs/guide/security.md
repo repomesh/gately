@@ -12,7 +12,7 @@ Gately runs on the network edge and handles DNS provider keys, certificate priva
 ## Data protection
 
 - Configuration is plain JSON with file mode 0600, so it can be audited and rolled back.
-- Sensitive fields are masked in API output. The eye button in the UI fetches the saved plain text on request and needs write permission. Web user passwords stored as bcrypt hashes, OIDC client secrets and private keys are never returned; shared users with two-factor sign-in can show their QR code again.
+- Sensitive fields are masked in API output. The eye button in the UI fetches the saved plain text on request and needs write permission. Web user passwords stored as bcrypt hashes, OIDC client secrets and private keys are never returned; shared users with two-factor sign-in can show their QR code again. Docker container environment variables, start commands and process command lines are handled the same way: without Docker write permission they are shown as `********`.
 - The cloudflared token is passed through an environment variable and does not appear in the process list; frp and Tailscale tokens and keys are stored with 0600 permissions.
 
 ## Authentication and access control

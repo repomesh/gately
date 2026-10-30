@@ -8336,7 +8336,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "所需权限：`docker:read`。",
+        "description": "没有 docker:write 权限时，环境变量的值、Command、Entrypoint 与启动参数显示为占位符 ********，明文通过 secrets 接口获取。\n\n所需权限：`docker:read`。",
         "parameters": [
           {
             "in": "path",
@@ -9357,6 +9357,67 @@
           }
         ],
         "summary": "重命名容器",
+        "tags": [
+          "Docker 管理"
+        ],
+        "x-required-scope": "docker:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/docker/containers/{id}/secrets": {
+      "get": {
+        "description": "所需权限：`docker:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看容器环境变量与启动命令明文",
         "tags": [
           "Docker 管理"
         ],

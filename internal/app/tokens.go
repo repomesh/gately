@@ -106,7 +106,13 @@ func (a *App) requireAuth(next http.Handler) http.Handler {
 					}
 					return
 				}
-				next.ServeHTTP(w, r.WithContext(auth.WithUser(r.Context(), "api-token:"+t.Name)))
+				ctx := auth.WithUser(r.Context(), "api-token:"+t.Name)
+				// 接口内部按权限决定是否返回敏感字段时（如容器环境变量），按令牌自身权限判定
+				scopes := t.Scopes
+				ctx = auth.WithScopeCheck(ctx, func(need string) bool {
+					return apitoken.Match(scopes, need)
+				})
+				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
 			// 不是有效的 API 令牌时，继续按登录会话令牌校验（Bearer 头同样可携带会话令牌）

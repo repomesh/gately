@@ -24,6 +24,7 @@
 | --- | --- | --- |
 | GET | `/containers` | 列表（含已停止） |
 | GET | `/containers/{id}` | 详情，见下 `ContainerDetail` |
+| GET | `/containers/{id}/secrets` | 环境变量、Command、Entrypoint 与启动参数的明文 `{env,command,entrypoint,args}`，需要写权限 |
 | POST | `/containers` | 创建，body 见 `ContainerSpec`；`pull:true` 时镜像不存在先拉取；`autoStart` 创建后启动；返回 `{id}` |
 | POST | `/containers/{id}/edit` | 按 `ContainerSpec` 重建容器（同升级的回滚流程），返回 `{id}` |
 | POST | `/containers/{id}/{action}` | action ∈ start stop restart pause unpause kill |
@@ -32,7 +33,7 @@
 | POST | `/containers/{id}/commit` | `{repo,tag,comment,pause?:bool}` → `{id}` |
 | GET | `/containers/{id}/logs?tail=300&timestamps=1` | `{logs}`（已有，增加 timestamps 参数，默认 1） |
 | GET | `/containers/{id}/stats` | 单次采样 `{cpuPercent,memUsage,memLimit,memPercent,netRx,netTx,blockRead,blockWrite,pids}` |
-| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}` |
+| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}`；没有写权限时 CMD 列只保留可执行文件，参数显示为 `********` |
 | GET | `/containers/{id}/exec` | WebSocket，查询参数 `cmd`（默认 `/bin/sh`，可含空格分隔参数）、`cols`、`rows`、`user`。协议与 Web 终端一致：客户端发文本 JSON `{"t":"i","d":"输入"}` / `{"t":"r","c":cols,"r":rows}`，服务端发二进制输出；错误提示发文本 `{"d":"..."}`。容器未运行时拒绝 |
 | POST | `/containers/check-all` | 逐个检查所有运行中容器的镜像更新（任务），返回 `{task}`；结果写入各容器 `update` 字段 |
 | POST | `/containers/{id}/check` `/upgrade` | 已有，保持不变 |
@@ -85,6 +86,8 @@
 ```
 
 `GET /containers/{id}` 返回 `ContainerDetail`：`ContainerSpec` 的全部字段（用于编辑回填，未能还原的配置项保留原值，编辑重建时以原配置为基础只覆盖 spec 里的字段），外加 `id`、`state`、`status`、`created`、`started`、`imageId`、`path`、`args`、`mounts:[{type,name,source,destination,rw}]`、`networkDetails:[{name,ip,gateway,mac,aliases}]`、`exitCode`、`restartCount`、`healthStatus`、`composeProject`、`composeService`。
+
+没有 Docker 写权限的身份（只读账号、只有 `docker:read` 的 API 令牌）看到的详情中，`env` 只保留变量名，非空的值显示为 `********`；`command`、`entrypoint` 与 `args` 整体显示为 `********`，`path` 保留。明文通过 `GET /containers/{id}/secrets` 获取（需要写权限）。编辑时提交的 `env`、`command`、`entrypoint` 仍为占位符时沿用原容器的值。
 
 ## 镜像
 

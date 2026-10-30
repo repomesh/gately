@@ -24,6 +24,7 @@
 | --- | --- | --- |
 | GET | `/containers` | Список (включая остановленные контейнеры) |
 | GET | `/containers/{id}` | Сведения; см. `ContainerDetail` ниже |
+| GET | `/containers/{id}/secrets` | Переменные окружения, Command, Entrypoint и аргументы запуска в открытом виде `{env,command,entrypoint,args}`; требуется право записи |
 | POST | `/containers` | Создание; тело описано в `ContainerSpec`. При `pull:true` отсутствующий образ сначала скачивается; `autoStart` запускает контейнер после создания; возвращает `{id}` |
 | POST | `/containers/{id}/edit` | Пересоздать контейнер по `ContainerSpec` (тот же сценарий отката, что и при обновлении); возвращает `{id}` |
 | POST | `/containers/{id}/{action}` | action ∈ start stop restart pause unpause kill |
@@ -32,7 +33,7 @@
 | POST | `/containers/{id}/commit` | `{repo,tag,comment,pause?:bool}` → `{id}` |
 | GET | `/containers/{id}/logs?tail=300&timestamps=1` | `{logs}` (существующий; добавлен параметр timestamps, по умолчанию 1) |
 | GET | `/containers/{id}/stats` | Одна выборка `{cpuPercent,memUsage,memLimit,memPercent,netRx,netTx,blockRead,blockWrite,pids}` |
-| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}` |
+| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}`; без права записи в столбце CMD остаётся только исполняемый файл, а аргументы показываются как `********` |
 | GET | `/containers/{id}/exec` | WebSocket. Параметры запроса: `cmd` (по умолчанию `/bin/sh`; может содержать аргументы через пробел), `cols`, `rows`, `user`. Протокол такой же, как у веб-терминала: клиент отправляет текстовый JSON `{"t":"i","d":"ввод"}` / `{"t":"r","c":cols,"r":rows}`, сервер отправляет вывод в двоичных кадрах; сообщения об ошибках отправляются текстом `{"d":"..."}`. Если контейнер не запущен, запрос отклоняется |
 | POST | `/containers/check-all` | По очереди проверить обновления образов всех запущенных контейнеров (задача); возвращает `{task}`; результаты записываются в поле `update` каждого контейнера |
 | POST | `/containers/{id}/check` `/upgrade` | Существующие; без изменений |
@@ -85,6 +86,8 @@
 ```
 
 `GET /containers/{id}` возвращает `ContainerDetail`: все поля `ContainerSpec` (для заполнения формы редактирования; параметры, которые не удаётся восстановить, сохраняют исходные значения, а при редактировании контейнер пересоздаётся из исходной конфигурации с заменой только тех полей, что есть в spec), а также `id`, `state`, `status`, `created`, `started`, `imageId`, `path`, `args`, `mounts:[{type,name,source,destination,rw}]`, `networkDetails:[{name,ip,gateway,mac,aliases}]`, `exitCode`, `restartCount`, `healthStatus`, `composeProject` и `composeService`.
+
+Для учётных записей без права записи Docker (учётные записи только для чтения, API-токены только с `docker:read`) в сведениях `env` сохраняет имена переменных, а непустые значения показываются как `********`; `command`, `entrypoint` и `args` показываются целиком как `********`, `path` сохраняется. Открытый текст возвращает `GET /containers/{id}/secrets` (требуется право записи). Если при редактировании `env`, `command` или `entrypoint` переданы с заполнителем, сохраняются значения исходного контейнера.
 
 ## Образы
 

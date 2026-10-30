@@ -430,6 +430,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/containers/upgrade-batch` | `docker:write` | 批次升級容器 |
 | POST | `/api/docker/images/upgrade-check` | `docker:write` | 檢查映像檔是否有新版本 |
 | GET | `/api/docker/containers/{id}` | `docker:read` | 檢視容器詳情 |
+| GET | `/api/docker/containers/{id}/secrets` | `docker:write` | 檢視容器環境變數與啟動指令明文 |
 | DELETE | `/api/docker/containers/{id}` | `docker:write` | 刪除容器 |
 | POST | `/api/docker/containers/{id}/edit` | `docker:write` | 修改容器設定並重建 |
 | POST | `/api/docker/containers/{id}/rename` | `docker:write` | 重新命名容器 |

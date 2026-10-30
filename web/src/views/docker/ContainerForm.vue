@@ -268,7 +268,14 @@ async function onOpen() {
   }
   loadingDetail.value = true
   try {
-    const d = await api.get<ContainerDetail & { env: string[]; labels: Record<string, string> }>(`/api/docker/containers/${props.editId}`)
+    // 没有写权限时详情中的环境变量与命令是脱敏占位符，编辑需取回明文回填（.../secrets 按写权限鉴权）
+    const [d, sec] = await Promise.all([
+      api.get<ContainerDetail & { env: string[]; labels: Record<string, string> }>(`/api/docker/containers/${props.editId}`),
+      api.get<{ env: string[]; command: string; entrypoint: string }>(`/api/docker/containers/${props.editId}/secrets`),
+    ])
+    d.env = sec.env ?? []
+    d.command = sec.command ?? ''
+    d.entrypoint = sec.entrypoint ?? ''
     const base = blank()
     for (const k of Object.keys(base) as (keyof FormSpec)[]) {
       const v = (d as unknown as Record<string, unknown>)[k]

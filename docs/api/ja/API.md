@@ -430,6 +430,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/containers/upgrade-batch` | `docker:write` | コンテナを一括アップグレード |
 | POST | `/api/docker/images/upgrade-check` | `docker:write` | イメージに新しいバージョンがあるか確認 |
 | GET | `/api/docker/containers/{id}` | `docker:read` | コンテナの詳細を表示 |
+| GET | `/api/docker/containers/{id}/secrets` | `docker:write` | コンテナの環境変数と起動コマンドを平文で表示 |
 | DELETE | `/api/docker/containers/{id}` | `docker:write` | コンテナを削除 |
 | POST | `/api/docker/containers/{id}/edit` | `docker:write` | コンテナ設定を変更して再作成 |
 | POST | `/api/docker/containers/{id}/rename` | `docker:write` | コンテナの名前を変更 |

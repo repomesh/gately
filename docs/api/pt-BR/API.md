@@ -430,6 +430,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | POST | `/api/docker/containers/upgrade-batch` | `docker:write` | Atualizar contêineres em lote |
 | POST | `/api/docker/images/upgrade-check` | `docker:write` | Verificar se há nova versão da imagem |
 | GET | `/api/docker/containers/{id}` | `docker:read` | Ver detalhes do contêiner |
+| GET | `/api/docker/containers/{id}/secrets` | `docker:write` | Ver em texto puro as variáveis de ambiente e o comando de inicialização do contêiner |
 | DELETE | `/api/docker/containers/{id}` | `docker:write` | Excluir contêiner |
 | POST | `/api/docker/containers/{id}/edit` | `docker:write` | Modificar a configuração do contêiner e recriá-lo |
 | POST | `/api/docker/containers/{id}/rename` | `docker:write` | Renomear contêiner |

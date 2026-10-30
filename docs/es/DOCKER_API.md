@@ -24,6 +24,7 @@ Las operaciones largas (descargar, subir o compilar imágenes, compose up, etc.)
 | --- | --- | --- |
 | GET | `/containers` | Lista (incluidos los contenedores detenidos) |
 | GET | `/containers/{id}` | Detalles; consulta `ContainerDetail` más abajo |
+| GET | `/containers/{id}/secrets` | Variables de entorno, Command, Entrypoint y argumentos de inicio en texto plano `{env,command,entrypoint,args}`; requiere permiso de escritura |
 | POST | `/containers` | Crea; consulta `ContainerSpec` para el cuerpo. Con `pull:true`, la imagen se descarga primero si falta; `autoStart` inicia el contenedor tras crearlo; devuelve `{id}` |
 | POST | `/containers/{id}/edit` | Recrea el contenedor a partir de un `ContainerSpec` (mismo flujo de reversión que la actualización); devuelve `{id}` |
 | POST | `/containers/{id}/{action}` | action ∈ start stop restart pause unpause kill |
@@ -32,7 +33,7 @@ Las operaciones largas (descargar, subir o compilar imágenes, compose up, etc.)
 | POST | `/containers/{id}/commit` | `{repo,tag,comment,pause?:bool}` → `{id}` |
 | GET | `/containers/{id}/logs?tail=300&timestamps=1` | `{logs}` (ya existente; añade el parámetro timestamps, por defecto 1) |
 | GET | `/containers/{id}/stats` | Una sola muestra `{cpuPercent,memUsage,memLimit,memPercent,netRx,netTx,blockRead,blockWrite,pids}` |
-| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}` |
+| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}`; sin permiso de escritura, la columna CMD conserva solo el ejecutable y muestra los argumentos como `********` |
 | GET | `/containers/{id}/exec` | WebSocket. Parámetros de consulta: `cmd` (por defecto `/bin/sh`; puede contener argumentos separados por espacios), `cols`, `rows`, `user`. El protocolo es el mismo que el del terminal web: el cliente envía JSON de texto `{"t":"i","d":"input"}` / `{"t":"r","c":cols,"r":rows}` y el servidor envía la salida en binario; los mensajes de error se envían como texto `{"d":"..."}`. Se rechaza si el contenedor no está en ejecución |
 | POST | `/containers/check-all` | Comprueba una a una si hay actualizaciones de imagen para cada contenedor en ejecución (una tarea); devuelve `{task}`; los resultados se escriben en el campo `update` de cada contenedor |
 | POST | `/containers/{id}/check` `/upgrade` | Ya existentes; sin cambios |
@@ -85,6 +86,8 @@ Todas las rutas son rutas absolutas dentro del contenedor, implementadas mediant
 ```
 
 `GET /containers/{id}` devuelve `ContainerDetail`: todos los campos de `ContainerSpec` (se usan para rellenar el formulario de edición; los ajustes que no se pueden reconstruir conservan sus valores originales y, al editar, el contenedor se recrea a partir de la configuración original sobrescribiendo solo los campos presentes en la especificación), más `id`, `state`, `status`, `created`, `started`, `imageId`, `path`, `args`, `mounts:[{type,name,source,destination,rw}]`, `networkDetails:[{name,ip,gateway,mac,aliases}]`, `exitCode`, `restartCount`, `healthStatus`, `composeProject` y `composeService`.
+
+Para identidades sin permiso de escritura de Docker (cuentas de solo lectura, tokens de API con solo `docker:read`), `env` en los detalles conserva los nombres de las variables y muestra los valores no vacíos como `********`; `command`, `entrypoint` y `args` se muestran completos como `********`, y `path` se conserva. El texto plano se obtiene con `GET /containers/{id}/secrets` (requiere permiso de escritura). Si una edición envía `env`, `command` o `entrypoint` que siguen siendo el marcador, se conservan los valores del contenedor original.
 
 ## Imágenes
 

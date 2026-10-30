@@ -430,6 +430,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | POST | `/api/docker/containers/upgrade-batch` | `docker:write` | Mettre à niveau des conteneurs en masse |
 | POST | `/api/docker/images/upgrade-check` | `docker:write` | Vérifier si une image a une nouvelle version |
 | GET | `/api/docker/containers/{id}` | `docker:read` | Consulter les détails d'un conteneur |
+| GET | `/api/docker/containers/{id}/secrets` | `docker:write` | Afficher en clair les variables d'environnement et la commande de démarrage d'un conteneur |
 | DELETE | `/api/docker/containers/{id}` | `docker:write` | Supprimer un conteneur |
 | POST | `/api/docker/containers/{id}/edit` | `docker:write` | Modifier la configuration du conteneur et le recréer |
 | POST | `/api/docker/containers/{id}/rename` | `docker:write` | Renommer un conteneur |

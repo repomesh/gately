@@ -24,6 +24,7 @@
 | --- | --- | --- |
 | GET | `/containers` | 一覧（停止中のコンテナを含む） |
 | GET | `/containers/{id}` | 詳細。後述の `ContainerDetail` を参照 |
+| GET | `/containers/{id}/secrets` | 環境変数、Command、Entrypoint、起動引数の平文 `{env,command,entrypoint,args}`。書き込み権限が必要 |
 | POST | `/containers` | 作成。ボディは `ContainerSpec` を参照。`pull:true` の場合、イメージがなければ先に pull します。`autoStart` で作成後にコンテナを起動します。`{id}` を返します |
 | POST | `/containers/{id}/edit` | `ContainerSpec` からコンテナを再作成します（アップグレードと同じロールバックの流れ）。`{id}` を返します |
 | POST | `/containers/{id}/{action}` | action ∈ start stop restart pause unpause kill |
@@ -32,7 +33,7 @@
 | POST | `/containers/{id}/commit` | `{repo,tag,comment,pause?:bool}` → `{id}` |
 | GET | `/containers/{id}/logs?tail=300&timestamps=1` | `{logs}`（既存。timestamps パラメーターを追加、既定値は 1） |
 | GET | `/containers/{id}/stats` | 1 回分のサンプル `{cpuPercent,memUsage,memLimit,memPercent,netRx,netTx,blockRead,blockWrite,pids}` |
-| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}` |
+| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}`。書き込み権限がない場合、CMD 列は実行ファイルのみ残し、引数は `********` で表示 |
 | GET | `/containers/{id}/exec` | WebSocket。クエリパラメーター：`cmd`（既定は `/bin/sh`。スペース区切りの引数を含められます）、`cols`、`rows`、`user`。プロトコルは Web ターミナルと同じで、クライアントはテキストの JSON `{"t":"i","d":"input"}` / `{"t":"r","c":cols,"r":rows}` を送り、サーバーはバイナリで出力を送ります。エラーメッセージはテキスト `{"d":"..."}` で送られます。コンテナが実行中でなければ拒否されます |
 | POST | `/containers/check-all` | 実行中のすべてのコンテナについて、イメージの更新を 1 つずつ確認します（タスク）。`{task}` を返し、結果は各コンテナの `update` フィールドに書き込まれます |
 | POST | `/containers/{id}/check` `/upgrade` | 既存。変更なし |
@@ -85,6 +86,8 @@
 ```
 
 `GET /containers/{id}` は `ContainerDetail` を返します。内容は `ContainerSpec` の全フィールド（編集フォームの初期値に使います。復元できない設定は元の値を維持し、編集時は元の設定をもとに、spec に含まれるフィールドだけを上書きしてコンテナを再作成します）に、`id`、`state`、`status`、`created`、`started`、`imageId`、`path`、`args`、`mounts:[{type,name,source,destination,rw}]`、`networkDetails:[{name,ip,gateway,mac,aliases}]`、`exitCode`、`restartCount`、`healthStatus`、`composeProject`、`composeService` を加えたものです。
+
+Docker の書き込み権限を持たない ID（読み取り専用アカウント、`docker:read` のみの API トークン）が取得する詳細では、`env` は変数名を残し、空でない値を `********` で表示します。`command`、`entrypoint`、`args` は全体を `********` で表示し、`path` はそのまま残します。平文は `GET /containers/{id}/secrets`（書き込み権限が必要）で取得します。編集時に送信した `env`、`command`、`entrypoint` がプレースホルダーのままの場合は、元のコンテナの値を引き継ぎます。
 
 ## イメージ
 

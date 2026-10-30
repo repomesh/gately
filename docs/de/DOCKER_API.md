@@ -24,6 +24,7 @@ Lang laufende Vorgänge (Images ziehen/pushen/bauen, compose up usw.) liefern `{
 | --- | --- | --- |
 | GET | `/containers` | Liste (einschließlich gestoppter Container) |
 | GET | `/containers/{id}` | Details; siehe `ContainerDetail` unten |
+| GET | `/containers/{id}/secrets` | Umgebungsvariablen, Command, Entrypoint und Startargumente im Klartext `{env,command,entrypoint,args}`; erfordert Schreibberechtigung |
 | POST | `/containers` | Erstellen; Body siehe `ContainerSpec`. Mit `pull:true` wird das Image zuerst gezogen, falls es fehlt; `autoStart` startet den Container nach dem Erstellen; liefert `{id}` |
 | POST | `/containers/{id}/edit` | Den Container aus einer `ContainerSpec` neu erstellen (gleicher Rollback-Ablauf wie beim Upgrade); liefert `{id}` |
 | POST | `/containers/{id}/{action}` | action ∈ start stop restart pause unpause kill |
@@ -32,7 +33,7 @@ Lang laufende Vorgänge (Images ziehen/pushen/bauen, compose up usw.) liefern `{
 | POST | `/containers/{id}/commit` | `{repo,tag,comment,pause?:bool}` → `{id}` |
 | GET | `/containers/{id}/logs?tail=300&timestamps=1` | `{logs}` (bestehend; neu ist der Parameter timestamps, Standard 1) |
 | GET | `/containers/{id}/stats` | Einzelne Messung `{cpuPercent,memUsage,memLimit,memPercent,netRx,netTx,blockRead,blockWrite,pids}` |
-| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}` |
+| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}`; ohne Schreibberechtigung behält die CMD-Spalte nur die ausführbare Datei und zeigt die Argumente als `********` |
 | GET | `/containers/{id}/exec` | WebSocket. Query-Parameter: `cmd` (Standard `/bin/sh`; darf durch Leerzeichen getrennte Argumente enthalten), `cols`, `rows`, `user`. Das Protokoll entspricht dem Web-Terminal: Der Client sendet Text-JSON `{"t":"i","d":"Eingabe"}` / `{"t":"r","c":cols,"r":rows}`, der Server sendet binäre Ausgabe; Fehlermeldungen kommen als Text `{"d":"..."}`. Wird abgelehnt, wenn der Container nicht läuft |
 | POST | `/containers/check-all` | Alle laufenden Container nacheinander auf Image-Updates prüfen (eine Aufgabe); liefert `{task}`; die Ergebnisse landen im Feld `update` des jeweiligen Containers |
 | POST | `/containers/{id}/check` `/upgrade` | Bestehend; unverändert |
@@ -85,6 +86,8 @@ Alle Pfade sind absolute Pfade im Container und werden über die Archiv-API der 
 ```
 
 `GET /containers/{id}` liefert `ContainerDetail`: alle Felder von `ContainerSpec` (zum Vorbefüllen des Bearbeitungsformulars; Einstellungen, die sich nicht rekonstruieren lassen, behalten ihre ursprünglichen Werte, und beim Bearbeiten wird der Container aus der ursprünglichen Konfiguration neu erstellt, wobei nur die in der Spec vorhandenen Felder überschrieben werden), dazu `id`, `state`, `status`, `created`, `started`, `imageId`, `path`, `args`, `mounts:[{type,name,source,destination,rw}]`, `networkDetails:[{name,ip,gateway,mac,aliases}]`, `exitCode`, `restartCount`, `healthStatus`, `composeProject` und `composeService`.
+
+Für Identitäten ohne Docker-Schreibberechtigung (schreibgeschützte Konten, API-Tokens mit nur `docker:read`) behält `env` in den Details die Variablennamen und zeigt nicht leere Werte als `********`; `command`, `entrypoint` und `args` werden vollständig als `********` angezeigt, `path` bleibt erhalten. Den Klartext liefert `GET /containers/{id}/secrets` (erfordert Schreibberechtigung). Übermittelt eine Bearbeitung `env`, `command` oder `entrypoint` noch als Platzhalter, werden die Werte des ursprünglichen Containers beibehalten.
 
 ## Images
 

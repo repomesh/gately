@@ -24,6 +24,7 @@
 | --- | --- | --- |
 | GET | `/containers` | 목록(중지된 컨테이너 포함) |
 | GET | `/containers/{id}` | 상세, 아래 `ContainerDetail` 참고 |
+| GET | `/containers/{id}/secrets` | 환경 변수, Command, Entrypoint, 시작 인수의 평문 `{env,command,entrypoint,args}`, 쓰기 권한 필요 |
 | POST | `/containers` | 생성. 본문은 `ContainerSpec` 참고. `pull:true`이면 이미지가 없을 때 먼저 풀하고, `autoStart`이면 생성 후 시작합니다. `{id}`를 반환합니다 |
 | POST | `/containers/{id}/edit` | `ContainerSpec`으로 컨테이너를 재생성합니다(업그레이드와 같은 롤백 흐름). `{id}`를 반환합니다 |
 | POST | `/containers/{id}/{action}` | action ∈ start stop restart pause unpause kill |
@@ -32,7 +33,7 @@
 | POST | `/containers/{id}/commit` | `{repo,tag,comment,pause?:bool}` → `{id}` |
 | GET | `/containers/{id}/logs?tail=300&timestamps=1` | `{logs}`(기존, timestamps 매개변수 추가, 기본값 1) |
 | GET | `/containers/{id}/stats` | 1회 샘플 `{cpuPercent,memUsage,memLimit,memPercent,netRx,netTx,blockRead,blockWrite,pids}` |
-| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}` |
+| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}`. 쓰기 권한이 없으면 CMD 열은 실행 파일만 남기고 인수는 `********`로 표시 |
 | GET | `/containers/{id}/exec` | WebSocket. 쿼리 매개변수는 `cmd`(기본값 `/bin/sh`, 공백으로 구분한 인수 포함 가능), `cols`, `rows`, `user`입니다. 프로토콜은 웹 터미널과 같습니다. 클라이언트는 텍스트 JSON `{"t":"i","d":"입력"}` / `{"t":"r","c":cols,"r":rows}`를 보내고, 서버는 바이너리 출력을 보냅니다. 오류 메시지는 텍스트 `{"d":"..."}`로 보냅니다. 컨테이너가 실행 중이 아니면 거부합니다 |
 | POST | `/containers/check-all` | 실행 중인 모든 컨테이너의 이미지 업데이트를 하나씩 확인합니다(작업). `{task}`를 반환하며 결과는 각 컨테이너의 `update` 필드에 기록됩니다 |
 | POST | `/containers/{id}/check` `/upgrade` | 기존과 동일 |
@@ -85,6 +86,8 @@
 ```
 
 `GET /containers/{id}`는 `ContainerDetail`을 반환합니다. `ContainerSpec`의 모든 필드(편집 폼을 미리 채우는 데 사용합니다. 복원할 수 없는 설정은 원래 값을 유지하며, 편집 시에는 원래 설정을 바탕으로 spec에 있는 필드만 덮어써 컨테이너를 재생성합니다)에 더해 `id`, `state`, `status`, `created`, `started`, `imageId`, `path`, `args`, `mounts:[{type,name,source,destination,rw}]`, `networkDetails:[{name,ip,gateway,mac,aliases}]`, `exitCode`, `restartCount`, `healthStatus`, `composeProject`, `composeService`가 포함됩니다.
+
+Docker 쓰기 권한이 없는 신원(읽기 전용 계정, `docker:read`만 있는 API 토큰)이 받는 상세에서 `env`는 변수 이름만 남기고 비어 있지 않은 값은 `********`로 표시합니다. `command`, `entrypoint`, `args`는 전체를 `********`로 표시하고 `path`는 그대로 둡니다. 평문은 `GET /containers/{id}/secrets`(쓰기 권한 필요)로 가져옵니다. 편집 시 제출한 `env`, `command`, `entrypoint`가 여전히 자리표시자이면 원래 컨테이너의 값을 유지합니다.
 
 ## 이미지
 

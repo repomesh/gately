@@ -12,7 +12,7 @@ Gately läuft am Netzwerkrand und verwaltet DNS-Anbieter-Schlüssel, private Zer
 ## Datenschutz
 
 - Die Konfiguration ist einfaches JSON mit Dateirechten 0600 und lässt sich daher prüfen und zurückrollen.
-- Sensible Felder werden in der API-Ausgabe maskiert. Die Augen-Schaltfläche in der Oberfläche ruft den gespeicherten Klartext bei Bedarf ab und erfordert Schreibrechte. Als bcrypt-Hash gespeicherte Passwörter von Web-Benutzern, OIDC-Client-Secrets und private Schlüssel werden nie zurückgegeben; gemeinsame Benutzer mit Zwei-Faktor-Anmeldung können ihren QR-Code erneut anzeigen.
+- Sensible Felder werden in der API-Ausgabe maskiert. Die Augen-Schaltfläche in der Oberfläche ruft den gespeicherten Klartext bei Bedarf ab und erfordert Schreibrechte. Als bcrypt-Hash gespeicherte Passwörter von Web-Benutzern, OIDC-Client-Secrets und private Schlüssel werden nie zurückgegeben; gemeinsame Benutzer mit Zwei-Faktor-Anmeldung können ihren QR-Code erneut anzeigen. Umgebungsvariablen, Startbefehle und Prozess-Befehlszeilen von Docker-Containern werden genauso behandelt: Ohne Docker-Schreibberechtigung werden sie als `********` angezeigt.
 - Das cloudflared-Token wird über eine Umgebungsvariable übergeben und erscheint nicht in der Prozessliste; Token und Schlüssel von frp und Tailscale werden mit Rechten 0600 gespeichert.
 
 ## Authentifizierung und Zugriffskontrolle

@@ -430,6 +430,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | POST | `/api/docker/containers/upgrade-batch` | `docker:write` | Actualizar contenedores por lotes |
 | POST | `/api/docker/images/upgrade-check` | `docker:write` | Comprobar si la imagen tiene una versión nueva |
 | GET | `/api/docker/containers/{id}` | `docker:read` | Ver los detalles del contenedor |
+| GET | `/api/docker/containers/{id}/secrets` | `docker:write` | Ver en texto plano las variables de entorno y el comando de inicio del contenedor |
 | DELETE | `/api/docker/containers/{id}` | `docker:write` | Eliminar un contenedor |
 | POST | `/api/docker/containers/{id}/edit` | `docker:write` | Modificar la configuración del contenedor y recrearlo |
 | POST | `/api/docker/containers/{id}/rename` | `docker:write` | Renombrar un contenedor |

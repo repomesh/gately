@@ -430,6 +430,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/containers/upgrade-batch` | `docker:write` | Пакетное обновление контейнеров |
 | POST | `/api/docker/images/upgrade-check` | `docker:write` | Проверить, есть ли новая версия образа |
 | GET | `/api/docker/containers/{id}` | `docker:read` | Просмотр сведений о контейнере |
+| GET | `/api/docker/containers/{id}/secrets` | `docker:write` | Просмотр переменных окружения и команды запуска контейнера в открытом виде |
 | DELETE | `/api/docker/containers/{id}` | `docker:write` | Удалить контейнер |
 | POST | `/api/docker/containers/{id}/edit` | `docker:write` | Изменить конфигурацию контейнера и пересоздать его |
 | POST | `/api/docker/containers/{id}/rename` | `docker:write` | Переименовать контейнер |

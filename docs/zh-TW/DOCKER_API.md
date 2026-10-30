@@ -24,6 +24,7 @@
 | --- | --- | --- |
 | GET | `/containers` | 清單（含已停止） |
 | GET | `/containers/{id}` | 詳情，見下方 `ContainerDetail` |
+| GET | `/containers/{id}/secrets` | 環境變數、Command、Entrypoint 與啟動參數的明文 `{env,command,entrypoint,args}`，需要寫入權限 |
 | POST | `/containers` | 建立，body 見 `ContainerSpec`；`pull:true` 時映像檔不存在會先拉取；`autoStart` 建立後啟動；回傳 `{id}` |
 | POST | `/containers/{id}/edit` | 依 `ContainerSpec` 重建容器（與升級相同的回復流程），回傳 `{id}` |
 | POST | `/containers/{id}/{action}` | action ∈ start stop restart pause unpause kill |
@@ -32,7 +33,7 @@
 | POST | `/containers/{id}/commit` | `{repo,tag,comment,pause?:bool}` → `{id}` |
 | GET | `/containers/{id}/logs?tail=300&timestamps=1` | `{logs}`（既有，增加 timestamps 參數，預設 1） |
 | GET | `/containers/{id}/stats` | 單次取樣 `{cpuPercent,memUsage,memLimit,memPercent,netRx,netTx,blockRead,blockWrite,pids}` |
-| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}` |
+| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}`；沒有寫入權限時 CMD 欄只保留可執行檔，參數顯示為 `********` |
 | GET | `/containers/{id}/exec` | WebSocket，查詢參數 `cmd`（預設 `/bin/sh`，可含以空格分隔的參數）、`cols`、`rows`、`user`。協定與 Web 終端機一致：用戶端送出文字 JSON `{"t":"i","d":"輸入"}` / `{"t":"r","c":cols,"r":rows}`，伺服器端送出二進位輸出；錯誤提示以文字 `{"d":"..."}` 送出。容器未執行時拒絕 |
 | POST | `/containers/check-all` | 逐一檢查所有執行中容器的映像檔更新（任務），回傳 `{task}`；結果寫入各容器的 `update` 欄位 |
 | POST | `/containers/{id}/check` `/upgrade` | 既有，保持不變 |
@@ -85,6 +86,8 @@
 ```
 
 `GET /containers/{id}` 回傳 `ContainerDetail`：`ContainerSpec` 的全部欄位（用於編輯時回填；無法還原的設定項保留原值，編輯重建時以原設定為基礎，只覆寫 spec 裡的欄位），另加 `id`、`state`、`status`、`created`、`started`、`imageId`、`path`、`args`、`mounts:[{type,name,source,destination,rw}]`、`networkDetails:[{name,ip,gateway,mac,aliases}]`、`exitCode`、`restartCount`、`healthStatus`、`composeProject`、`composeService`。
+
+沒有 Docker 寫入權限的身分（唯讀帳號、只有 `docker:read` 的 API 權杖）看到的詳情中，`env` 只保留變數名稱，非空的值顯示為 `********`；`command`、`entrypoint` 與 `args` 整體顯示為 `********`，`path` 保留。明文透過 `GET /containers/{id}/secrets` 取得（需要寫入權限）。編輯時送出的 `env`、`command`、`entrypoint` 仍為預留位置時沿用原容器的值。
 
 ## 映像檔
 

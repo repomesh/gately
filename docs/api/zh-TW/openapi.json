@@ -8336,7 +8336,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "所需權限：`docker:read`。",
+        "description": "沒有 docker:write 權限時，環境變數的值、Command、Entrypoint 與啟動參數顯示為預留位置 ********，明文透過 secrets 介面取得。\n\n所需權限：`docker:read`。",
         "parameters": [
           {
             "in": "path",
@@ -9357,6 +9357,67 @@
           }
         ],
         "summary": "重新命名容器",
+        "tags": [
+          "Docker 管理"
+        ],
+        "x-required-scope": "docker:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/docker/containers/{id}/secrets": {
+      "get": {
+        "description": "所需權限：`docker:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "檢視容器環境變數與啟動指令明文",
         "tags": [
           "Docker 管理"
         ],

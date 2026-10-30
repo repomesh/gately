@@ -12,7 +12,7 @@ Gately funciona en el borde de la red y maneja claves de proveedores DNS, claves
 ## Protección de los datos
 
 - La configuración es JSON plano con permisos 0600, por lo que se puede auditar y revertir.
-- Los campos sensibles se enmascaran en las respuestas de la API. El botón del ojo de la interfaz obtiene bajo demanda el texto plano guardado y requiere permiso de escritura. Las contraseñas de usuarios web guardadas como hash bcrypt, los secretos de cliente OIDC y las claves privadas nunca se devuelven; los usuarios compartidos con verificación en dos pasos pueden volver a mostrar su código QR.
+- Los campos sensibles se enmascaran en las respuestas de la API. El botón del ojo de la interfaz obtiene bajo demanda el texto plano guardado y requiere permiso de escritura. Las contraseñas de usuarios web guardadas como hash bcrypt, los secretos de cliente OIDC y las claves privadas nunca se devuelven; los usuarios compartidos con verificación en dos pasos pueden volver a mostrar su código QR. Las variables de entorno, los comandos de inicio y las líneas de comando de los procesos de los contenedores Docker se tratan igual: sin permiso de escritura de Docker se muestran como `********`.
 - El token de cloudflared se pasa mediante una variable de entorno y no aparece en la lista de procesos; los tokens y claves de frp y Tailscale se guardan con permisos 0600.
 
 ## Autenticación y control de acceso

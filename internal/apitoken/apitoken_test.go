@@ -39,6 +39,9 @@ func TestRequiredAndMatch(t *testing.T) {
 		{"GET", "/api/webterminal/connections/abc/ws", "webterminal:write"},
 		{"GET", "/api/docker/containers/abc/files/read", "docker:write"},
 		{"GET", "/api/docker/containers/abc/logs", "docker:read"},
+		// 容器详情只需读权限（敏感字段在接口内按权限脱敏），明文接口需要写权限
+		{"GET", "/api/docker/containers/abc", "docker:read"},
+		{"GET", "/api/docker/containers/abc/secrets", "docker:write"},
 		// 查看密钥明文需要写权限
 		{"GET", "/api/frp/clients/abc/secrets", "frp:write"},
 		{"GET", "/api/tailscale/secrets", "tailscale:write"},

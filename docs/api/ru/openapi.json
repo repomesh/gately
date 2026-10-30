@@ -8336,7 +8336,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Требуемое разрешение: `docker:read`.",
+        "description": "Без разрешения docker:write значения переменных окружения, Command, Entrypoint и аргументы запуска показываются как заполнитель ********; открытый текст возвращает эндпоинт secrets.\n\nТребуемое разрешение: `docker:read`.",
         "parameters": [
           {
             "in": "path",
@@ -9357,6 +9357,67 @@
           }
         ],
         "summary": "Переименовать контейнер",
+        "tags": [
+          "Управление Docker"
+        ],
+        "x-required-scope": "docker:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/docker/containers/{id}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `docker:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Просмотр переменных окружения и команды запуска контейнера в открытом виде",
         "tags": [
           "Управление Docker"
         ],

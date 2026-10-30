@@ -8336,7 +8336,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Permiso necesario: `docker:read`.",
+        "description": "Sin el permiso docker:write, los valores de las variables de entorno, Command, Entrypoint y los argumentos de inicio se muestran como el marcador ********; el texto plano se obtiene del endpoint secrets.\n\nPermiso necesario: `docker:read`.",
         "parameters": [
           {
             "in": "path",
@@ -9357,6 +9357,67 @@
           }
         ],
         "summary": "Renombrar un contenedor",
+        "tags": [
+          "Administración de Docker"
+        ],
+        "x-required-scope": "docker:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/docker/containers/{id}/secrets": {
+      "get": {
+        "description": "Permiso necesario: `docker:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver en texto plano las variables de entorno y el comando de inicio del contenedor",
         "tags": [
           "Administración de Docker"
         ],

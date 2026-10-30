@@ -918,8 +918,9 @@ func TestContainerDetailAndListAPI(t *testing.T) {
 	if d["status"] != "Up 2 hours" || d["command"] != "" || d["healthStatus"] != "healthy" || d["composeService"] != "web" {
 		t.Errorf("详情字段错误: %v", d)
 	}
-	if env := d["env"].([]any); len(env) != 1 || env[0] != "A=1" {
-		t.Errorf("env 应去掉镜像默认值: %v", env)
+	// 请求上下文中没有身份，按无写权限处理，环境变量值脱敏（明文与鉴权见 container_secrets_test.go）
+	if env := d["env"].([]any); len(env) != 1 || env[0] != "A=********" {
+		t.Errorf("env 应去掉镜像默认值并脱敏: %v", env)
 	}
 
 	rec = api("GET", "/containers", "", nil)

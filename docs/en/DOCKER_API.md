@@ -24,6 +24,7 @@ Long-running operations (pulling/pushing/building images, compose up, and so on)
 | --- | --- | --- |
 | GET | `/containers` | List (including stopped containers) |
 | GET | `/containers/{id}` | Details; see `ContainerDetail` below |
+| GET | `/containers/{id}/secrets` | Plain-text environment variables, Command, Entrypoint and start arguments `{env,command,entrypoint,args}`; requires write permission |
 | POST | `/containers` | Create; see `ContainerSpec` for the body. With `pull:true`, the image is pulled first if missing; `autoStart` starts the container after creation; returns `{id}` |
 | POST | `/containers/{id}/edit` | Recreate the container from a `ContainerSpec` (same rollback flow as upgrade); returns `{id}` |
 | POST | `/containers/{id}/{action}` | action ∈ start stop restart pause unpause kill |
@@ -32,7 +33,7 @@ Long-running operations (pulling/pushing/building images, compose up, and so on)
 | POST | `/containers/{id}/commit` | `{repo,tag,comment,pause?:bool}` → `{id}` |
 | GET | `/containers/{id}/logs?tail=300&timestamps=1` | `{logs}` (existing; adds the timestamps parameter, default 1) |
 | GET | `/containers/{id}/stats` | Single sample `{cpuPercent,memUsage,memLimit,memPercent,netRx,netTx,blockRead,blockWrite,pids}` |
-| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}` |
+| GET | `/containers/{id}/processes` | `{titles:string[],processes:string[][]}`; without write permission the CMD column keeps only the executable and shows the arguments as `********` |
 | GET | `/containers/{id}/exec` | WebSocket. Query parameters: `cmd` (default `/bin/sh`; may contain space-separated arguments), `cols`, `rows`, `user`. The protocol matches the Web Terminal: the client sends text JSON `{"t":"i","d":"input"}` / `{"t":"r","c":cols,"r":rows}`, and the server sends binary output; error messages are sent as text `{"d":"..."}`. Rejected if the container is not running |
 | POST | `/containers/check-all` | Check every running container for image updates one by one (a task); returns `{task}`; results are written to each container's `update` field |
 | POST | `/containers/{id}/check` `/upgrade` | Existing; unchanged |
@@ -85,6 +86,8 @@ All paths are absolute paths inside the container, implemented through the Engin
 ```
 
 `GET /containers/{id}` returns `ContainerDetail`: all fields of `ContainerSpec` (used to prefill the edit form; settings that cannot be reconstructed keep their original values, and when editing, the container is recreated from the original configuration with only the fields present in the spec overridden), plus `id`, `state`, `status`, `created`, `started`, `imageId`, `path`, `args`, `mounts:[{type,name,source,destination,rw}]`, `networkDetails:[{name,ip,gateway,mac,aliases}]`, `exitCode`, `restartCount`, `healthStatus`, `composeProject`, and `composeService`.
+
+For identities without Docker write permission (read-only accounts, API tokens with only `docker:read`), `env` in the details keeps the variable names and shows non-empty values as `********`; `command`, `entrypoint` and `args` are shown as `********` as a whole, while `path` is kept. Fetch the plain text from `GET /containers/{id}/secrets` (requires write permission). When an edit submits `env`, `command` or `entrypoint` values that are still the placeholder, the original container's values are kept.
 
 ## Images
 
