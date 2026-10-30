@@ -254,6 +254,8 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | Ativar ou desativar Lista de IP assinada |
 | PUT | `/api/webservice/iplists-order` | `webservice:write` | Reordenar Lista de IP assinada |
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Atualizar agora uma lista de IP assinada |
+| GET | `/api/webservice/users` | `webservice:read` | Ler usuários compartilhados e provedor de identidade OIDC |
+| PUT | `/api/webservice/users` | `webservice:write` | Salvar usuários compartilhados e provedor de identidade OIDC, configurar sites em lote |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | Importar configuração do nginx |
 | GET | `/api/webservice/settings` | `webservice:read` | Ler configurações globais do serviço web |
 | GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | Ver segredos TOTP dos usuários compartilhados em texto puro (por nome de usuário) |
@@ -1660,6 +1662,14 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `waf` | string |
 | `webAuth` | boolean |
 
+### webservice.SiteSharedUsers
+
+| Campo | Tipo |
+| --- | --- |
+| `listener` | string |
+| `sharedUsers` | boolean |
+| `site` | string |
+
 ### webservice.SiteStatsView
 
 | Campo | Tipo |
@@ -1694,6 +1704,47 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | --- | --- |
 | `targets` | Array de string |
 | `users` | Array de string |
+
+### webservice.UserSite
+
+| Campo | Tipo |
+| --- | --- |
+| `basicAuth` | boolean |
+| `default` | boolean |
+| `domains` | Array de string |
+| `enable` | boolean |
+| `forwardAuth` | boolean |
+| `listener` | string |
+| `listenerEnable` | boolean |
+| `listenerName` | string |
+| `name` | string |
+| `otherAuth` | boolean |
+| `port` | integer |
+| `sharedUsers` | boolean |
+| `site` | string |
+| `tls` | boolean |
+| `type` | string |
+| `webAuth` | boolean |
+
+### webservice.UsersRequest
+
+| Campo | Tipo |
+| --- | --- |
+| `authUsers` | Array de `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | Array de `webservice.SiteSharedUsers` |
+| `ssoDomain` | string |
+
+### webservice.UsersView
+
+| Campo | Tipo |
+| --- | --- |
+| `authUsers` | Array de `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | Array de `webservice.UserSite` |
+| `ssoDomain` | string |
 
 ### webservice.banRequest
 

@@ -16,7 +16,7 @@ Beides lässt sich gleichzeitig nutzen: Derselbe gemeinsame Benutzer kann die We
 
 ## Vorbereitung
 
-1. Legen Sie unter „Web-Dienst → Globale Einstellungen → Gemeinsame Benutzer“ Benutzer an. OIDC akzeptiert nur gemeinsame Benutzer; die eigenen Benutzer einer Site und Identitäten aus der Anmeldung über Drittanbieter können nicht für OIDC verwendet werden.
+1. Legen Sie auf der Seite „Web → Auth-Benutzer“ gemeinsame Benutzer an. OIDC akzeptiert nur gemeinsame Benutzer; die eigenen Benutzer einer Site und Identitäten aus der Anmeldung über Drittanbieter können nicht für OIDC verwendet werden.
 2. Tragen Sie bei Bedarf für jeden Benutzer E-Mail, Anzeigename und Gruppen ein:
    - E-Mail: wird der Anwendung als Claim `email` übergeben und als verifiziert markiert; Gitea und andere Anwendungen legen darüber Konten an oder verknüpfen sie;
    - Anzeigename: wird als Claim `name` übergeben; ist er leer, wird der Benutzername verwendet;
@@ -27,7 +27,7 @@ Verwendet die Aussteller-URL `https`, werden GET-Anfragen an die OIDC-Pfade übe
 
 ## Aktivieren
 
-Unter „Web-Dienst → Globale Einstellungen → OIDC-Identitätsanbieter“:
+In der Karte „OIDC-Identitätsanbieter“ auf der Seite „Web → Auth-Benutzer“:
 
 | Feld | Beschreibung |
 | --- | --- |

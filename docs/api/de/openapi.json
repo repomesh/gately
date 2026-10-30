@@ -2413,6 +2413,20 @@
         },
         "type": "object"
       },
+      "webservice.SiteSharedUsers": {
+        "properties": {
+          "listener": {
+            "type": "string"
+          },
+          "sharedUsers": {
+            "type": "boolean"
+          },
+          "site": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "webservice.SiteStatsView": {
         "properties": {
           "bytesOut": {
@@ -2495,6 +2509,114 @@
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.UserSite": {
+        "properties": {
+          "basicAuth": {
+            "type": "boolean"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "domains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "forwardAuth": {
+            "type": "boolean"
+          },
+          "listener": {
+            "type": "string"
+          },
+          "listenerEnable": {
+            "type": "boolean"
+          },
+          "listenerName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "otherAuth": {
+            "type": "boolean"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "sharedUsers": {
+            "type": "boolean"
+          },
+          "site": {
+            "type": "string"
+          },
+          "tls": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          },
+          "webAuth": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.UsersRequest": {
+        "properties": {
+          "authUsers": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.AuthUser"
+            },
+            "type": "array"
+          },
+          "oidc": {
+            "$ref": "#/components/schemas/webservice.OIDCSettings"
+          },
+          "selfServicePassword": {
+            "type": "boolean"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.SiteSharedUsers"
+            },
+            "type": "array"
+          },
+          "ssoDomain": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.UsersView": {
+        "properties": {
+          "authUsers": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.AuthUser"
+            },
+            "type": "array"
+          },
+          "oidc": {
+            "$ref": "#/components/schemas/webservice.OIDCSettings"
+          },
+          "selfServicePassword": {
+            "type": "boolean"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.UserSite"
+            },
+            "type": "array"
+          },
+          "ssoDomain": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -28564,6 +28686,129 @@
           }
         ],
         "summary": "Neuen TOTP-Schlüssel für einen gemeinsamen Benutzer erzeugen (nicht gespeichert; wirksam nach dem Speichern)",
+        "tags": [
+          "Web-Dienst"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/users": {
+      "get": {
+        "description": "Liefert die gemeinsamen Benutzer (Passwörter und TOTP-Geheimnisse maskiert), `ssoDomain`, `selfServicePassword`, die Einstellungen des OIDC-Identitätsanbieters (Client-Geheimnisse maskiert) sowie `sites`, die Sites, die gemeinsame Benutzer verwenden können: `listener` und `site` identifizieren die Site, `sharedUsers` gibt an, ob sie gemeinsame Benutzer verwendet, `otherAuth`, dass sie zusätzlich lokale Benutzer oder Identitäten aus Drittanbieter-Anmeldungen hat, und `forwardAuth`, dass sie Forward-Auth verwendet. Sites, die die Verbindung trennen, und deaktivierte Standard-Sites werden nicht aufgeführt.\n\nErforderliche Berechtigung: `webservice:read`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.UsersView"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Gemeinsame Benutzer und OIDC-Identitätsanbieter lesen",
+        "tags": [
+          "Web-Dienst"
+        ],
+        "x-required-scope": "webservice:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "请求体 `{\"authUsers\": [], \"ssoDomain\": \"\", \"selfServicePassword\": false, \"oidc\": {}, \"sites\": [{\"listener\": \"l1\", \"site\": \"s1\", \"sharedUsers\": true}]}`，字段含义同Globale Einstellungen，只这几项，Globale Einstellungen的其他项保持不变；脱敏占位符表示保留原密码或密钥。`sites` 只需列出要的站点：启用时站点若未开启认证会同时开启网页认证；站点只通过共享用户认证时不能在这里取消（取消后将无需登录），使用转发认证的站点不能启用。任一项校验失败时不保存任何。\n\nErforderliche Berechtigung: `webservice:write`. ändern ändern ändern",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.UsersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.UsersView"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Gemeinsame Benutzer und OIDC-Identitätsanbieter speichern, Sites gesammelt einstellen",
         "tags": [
           "Web-Dienst"
         ],

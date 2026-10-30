@@ -52,6 +52,10 @@
       "title": "SSL Certificates",
       "desc": "Automatic ACME issuance and renewal"
     },
+    "webusers": {
+      "title": "Auth users",
+      "desc": "Shared users and the OIDC identity provider of the Web service"
+    },
     "storage": {
       "title": "Storage Mounts",
       "desc": "Mount local directories, remote WebDAV or SMB shares and manage files online"

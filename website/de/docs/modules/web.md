@@ -144,13 +144,13 @@ So funktioniert es:
 
 Legen Sie Konten einmal an und nutzen Sie sie auf mehreren Sites, optional mit TOTP-Zwei-Faktor-Prüfung. Das deckt ab, wofür viele Authelia betreiben.
 
-Unter „Globale Einstellungen → Gemeinsame Benutzer“:
+Auf der Seite „Web → Auth-Benutzer“ in der Seitenleiste (der Dialog mit den globalen Einstellungen des Webdienstes zeigt nur eine Übersicht und einen Link):
 
 - Fügen Sie Benutzer mit Benutzername und Passwort hinzu. Passwörter werden als bcrypt-Hashes gespeichert und nie von der API zurückgegeben. Für TOTP klicken Sie auf „TOTP aktivieren“, scannen den QR-Code mit einer Authenticator-App (Google Authenticator, 1Password usw.) und speichern. Ein neu erzeugter Schlüssel macht den alten ungültig;
 - Optional E-Mail, Anzeigename und Gruppen angeben; [OIDC-Single-Sign-on](/de/docs/modules/oidc) gibt sie als Claims `email`, `name` und `groups` an Anwendungen weiter, und die erlaubten Benutzer eines OIDC-Clients können mit `group:Name` gruppenweise freigeben;
 - SSO-Domain, etwa `example.com`: Nach der Anmeldung auf einer beliebigen Site unter dieser Domain oder ihren Subdomains brauchen die anderen Sites dort keine weitere Anmeldung. Dafür dient ein Cookie auf der übergeordneten Domain (`gately_sso`, 7 Tage gültig), das nie an Backends weitergereicht wird. Leer lassen, um sich auf jeder Site einzeln anzumelden.
 
-Aktivieren Sie bei einer Site neben der Web- oder Basic-Authentifizierung „Gemeinsame Benutzer verwenden“. Die eigenen Benutzer der Site funktionieren weiterhin.
+Aktivieren Sie bei einer Site neben der Web- oder Basic-Authentifizierung „Gemeinsame Benutzer verwenden“. Die eigenen Benutzer der Site funktionieren weiterhin. Sites lassen sich auch gesammelt in der Site-Liste der Seite Auth-Benutzer auswählen, nach Listener gruppiert und filterbar: Wird eine Site ohne Authentifizierung ausgewählt, wird auch Web-Auth eingeschaltet; eine Site, die nur über gemeinsame Benutzer authentifiziert, lässt sich dort nicht abwählen, damit sie nie versehentlich öffentlich wird (soll sie öffentlich sein, schalten Sie die Authentifizierung in den Site-Einstellungen aus); Sites mit Forward-Auth können keine gemeinsamen Benutzer verwenden. Änderungen an Benutzern, OIDC und Sites auf der Seite werden gemeinsam übernommen, wenn Sie unten auf Speichern klicken; schlägt eine Prüfung fehl, wird nichts gespeichert, und beim Verlassen der Seite mit ungespeicherten Änderungen erscheint zuerst eine Rückfrage.
 
 Verhalten:
 
@@ -163,7 +163,7 @@ Damit Gitea, OpenList, Grafana und andere Anwendungen wissen, welcher Benutzer a
 
 ### Passwort selbst ändern {#self-service-password}
 
-Aktivieren Sie unter Globale Einstellungen → Gemeinsame Benutzer die Option Passwort selbst ändern, dann können gemeinsame Benutzer ihr Passwort ohne Administrator ändern:
+Aktivieren Sie auf der Seite Auth-Benutzer die Option Passwort selbst ändern, dann können gemeinsame Benutzer ihr Passwort ohne Administrator ändern:
 
 - Rufen Sie auf einer Site mit „Gemeinsame Benutzer verwenden“ `https://site-domain/__gately_auth/password` auf; die Anmeldeseite zeigt ebenfalls einen Link Passwort ändern. Benutzer des [OIDC-Single-Sign-on](/de/docs/modules/oidc) verwenden `/__gately_oidc/password` auf der Aussteller-Domain;
 - Benutzername, aktuelles Passwort und zweimal das neue Passwort eingeben (8–128 Zeichen, anders als das aktuelle); Benutzer mit TOTP geben zusätzlich einen Bestätigungscode ein;

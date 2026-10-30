@@ -254,6 +254,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | 購読 IP リスト の有効/無効を切り替え |
 | PUT | `/api/webservice/iplists-order` | `webservice:write` | 購読 IP リスト の並び順を変更 |
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | 購読 IP リストを今すぐ更新 |
+| GET | `/api/webservice/users` | `webservice:read` | 共有ユーザーと OIDC ID プロバイダーを取得 |
+| PUT | `/api/webservice/users` | `webservice:write` | 共有ユーザーと OIDC ID プロバイダーを保存し、サイトを一括設定 |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | nginx 設定をインポート |
 | GET | `/api/webservice/settings` | `webservice:read` | Web サービスのグローバル設定を読み取り |
 | GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | 共有ユーザーの TOTP シークレットを平文で表示（ユーザー名で索引） |
@@ -1660,6 +1662,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `waf` | string |
 | `webAuth` | boolean |
 
+### webservice.SiteSharedUsers
+
+| フィールド | 型 |
+| --- | --- |
+| `listener` | string |
+| `sharedUsers` | boolean |
+| `site` | string |
+
 ### webservice.SiteStatsView
 
 | フィールド | 型 |
@@ -1694,6 +1704,47 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- |
 | `targets` | 配列 of string |
 | `users` | 配列 of string |
+
+### webservice.UserSite
+
+| フィールド | 型 |
+| --- | --- |
+| `basicAuth` | boolean |
+| `default` | boolean |
+| `domains` | 配列 of string |
+| `enable` | boolean |
+| `forwardAuth` | boolean |
+| `listener` | string |
+| `listenerEnable` | boolean |
+| `listenerName` | string |
+| `name` | string |
+| `otherAuth` | boolean |
+| `port` | integer |
+| `sharedUsers` | boolean |
+| `site` | string |
+| `tls` | boolean |
+| `type` | string |
+| `webAuth` | boolean |
+
+### webservice.UsersRequest
+
+| フィールド | 型 |
+| --- | --- |
+| `authUsers` | 配列 of `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | 配列 of `webservice.SiteSharedUsers` |
+| `ssoDomain` | string |
+
+### webservice.UsersView
+
+| フィールド | 型 |
+| --- | --- |
+| `authUsers` | 配列 of `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | 配列 of `webservice.UserSite` |
+| `ssoDomain` | string |
 
 ### webservice.banRequest
 

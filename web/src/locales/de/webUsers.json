@@ -1,0 +1,27 @@
+{
+  "title": "Auth-Benutzer",
+  "desc": "Gemeinsame Benutzer und OIDC-Identitätsanbieter des Webdienstes: Web- und Basic-Auth der Sites sowie per OIDC angemeldete Apps verwenden diese Konten",
+  "usersDesc": "Gilt nach dem Speichern sofort für alle Sites und OIDC-Apps",
+  "sites": {
+    "title": "Sites mit gemeinsamen Benutzern",
+    "count": "{on} von {total} ausgewählt",
+    "help": "Ausgewählte Sites akzeptieren gemeinsame Benutzer bei Web- und Basic-Auth, zusätzlich zu ihren eigenen Benutzern; wird eine Site ohne Authentifizierung ausgewählt, wird auch Web-Auth eingeschaltet. Ob sich jemand bei einer OIDC-App anmelden kann, legt die Erlaubnisliste des jeweiligen Clients unten fest.",
+    "search": "Nach Site-Name, Domain oder Listener filtern",
+    "checkVisible": "Angezeigte auswählen",
+    "uncheckVisible": "Angezeigte abwählen",
+    "disabled": "Deaktiviert",
+    "defaultSite": "Standard-Site",
+    "forwardAuth": "Forward-Auth",
+    "webAuth": "Web-Auth",
+    "basicAuth": "Basic-Auth",
+    "noAuth": "Keine Authentifizierung",
+    "willEnableAuth": "Web-Auth wird beim Speichern eingeschaltet",
+    "lockForward": "Sites mit Forward-Auth können keine gemeinsamen Benutzer verwenden",
+    "lockOnly": "Diese Site authentifiziert nur über gemeinsame Benutzer und wäre nach dem Abwählen öffentlich; um sie öffentlich zu machen, schalten Sie die Authentifizierung in den Site-Einstellungen aus",
+    "none": "Noch keine Sites, die Authentifizierung nutzen können",
+    "noMatch": "Keine passenden Sites"
+  },
+  "leaveTitle": "Ungespeicherte Änderungen",
+  "leaveConfirm": "Diese Seite hat ungespeicherte Änderungen, die beim Verlassen verloren gehen.",
+  "leave": "Verwerfen und verlassen"
+}

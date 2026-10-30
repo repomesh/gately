@@ -254,6 +254,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | 啟用或停用訂閱 IP 清單 |
 | PUT | `/api/webservice/iplists-order` | `webservice:write` | 調整訂閱 IP 清單排序 |
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | 立即重新整理訂閱 IP 清單 |
+| GET | `/api/webservice/users` | `webservice:read` | 讀取共用使用者與 OIDC 身分提供者 |
+| PUT | `/api/webservice/users` | `webservice:write` | 儲存共用使用者與 OIDC 身分提供者，批次設定站點 |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | 匯入 nginx 設定 |
 | GET | `/api/webservice/settings` | `webservice:read` | 讀取 Web 服務全域設定 |
 | GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | 查看共用使用者的 TOTP 金鑰明文（依使用者名稱索引） |
@@ -1660,6 +1662,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `waf` | string |
 | `webAuth` | boolean |
 
+### webservice.SiteSharedUsers
+
+| 欄位 | 類型 |
+| --- | --- |
+| `listener` | string |
+| `sharedUsers` | boolean |
+| `site` | string |
+
 ### webservice.SiteStatsView
 
 | 欄位 | 類型 |
@@ -1694,6 +1704,47 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- |
 | `targets` | 陣列 of string |
 | `users` | 陣列 of string |
+
+### webservice.UserSite
+
+| 欄位 | 類型 |
+| --- | --- |
+| `basicAuth` | boolean |
+| `default` | boolean |
+| `domains` | 陣列 of string |
+| `enable` | boolean |
+| `forwardAuth` | boolean |
+| `listener` | string |
+| `listenerEnable` | boolean |
+| `listenerName` | string |
+| `name` | string |
+| `otherAuth` | boolean |
+| `port` | integer |
+| `sharedUsers` | boolean |
+| `site` | string |
+| `tls` | boolean |
+| `type` | string |
+| `webAuth` | boolean |
+
+### webservice.UsersRequest
+
+| 欄位 | 類型 |
+| --- | --- |
+| `authUsers` | 陣列 of `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | 陣列 of `webservice.SiteSharedUsers` |
+| `ssoDomain` | string |
+
+### webservice.UsersView
+
+| 欄位 | 類型 |
+| --- | --- |
+| `authUsers` | 陣列 of `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | 陣列 of `webservice.UserSite` |
+| `ssoDomain` | string |
 
 ### webservice.banRequest
 

@@ -263,6 +263,7 @@ func (m *Module) Routes(r module.Router) {
 	}
 	listeners.Register(r, "/listeners")
 	m.registerIPLists(r)
+	m.registerUsers(r)
 	r.HandleFunc("POST /import/nginx", m.handleImportNginx)
 	r.HandleFunc("GET /settings", func(w http.ResponseWriter, req *http.Request) {
 		m.mu.Lock()
@@ -372,20 +373,12 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	s.TrustedProxies = cleanList(s.TrustedProxies)
-	users, err := normalizeAuthUsers(s.AuthUsers, old.AuthUsers)
-	if err != nil {
+	us := UsersSettings{AuthUsers: s.AuthUsers, SSODomain: s.SSODomain, SelfServicePassword: s.SelfServicePassword, OIDC: s.OIDC}
+	if err := normalizeUsersSettings(&us, old); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
 	}
-	s.AuthUsers = users
-	if s.SSODomain, err = validateSSODomain(s.SSODomain); err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	if err := normalizeOIDC(&s.OIDC, old.OIDC); err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
+	s.AuthUsers, s.SSODomain, s.OIDC = us.AuthUsers, us.SSODomain, us.OIDC
 	if s.AutoBanSeconds < 0 || time.Duration(s.AutoBanSeconds)*time.Second > maxBanDuration {
 		httpx.Error(w, http.StatusBadRequest, "自动封禁时长需在 0 到 30 天之间")
 		return
@@ -398,11 +391,7 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	m.applyOAuthLocked()
-	m.auth.shared.set(s.AuthUsers, s.SSODomain)
-	m.auth.selfAuth.Store(s.SelfServicePassword)
-	if err := m.auth.oidc.set(s.OIDC); err != nil {
-		m.logs.Add(logbuf.LevelWarn, "", "OIDC 身份提供方未启动: "+err.Error())
-	}
+	m.applyUsersLocked(s)
 	// 可信代理在监听层校验 PROXY 协议来源，变化时接收 PROXY 协议的监听器需要重新监听；
 	// 其余设置只需热替换站点表，避免断开正经由这些监听器访问的管理界面（包括本次保存请求）
 	trustedChanged := !slices.Equal(old.TrustedProxies, s.TrustedProxies)

@@ -1,0 +1,27 @@
+{
+  "title": "Usuarios de autenticación",
+  "desc": "Usuarios compartidos y proveedor de identidad OIDC del servicio web: la autenticación web y básica de los sitios y las apps que inician sesión mediante OIDC usan estas cuentas",
+  "usersDesc": "Se aplica a todos los sitios y apps OIDC al guardar",
+  "sites": {
+    "title": "Sitios que usan usuarios compartidos",
+    "count": "{on} de {total} seleccionados",
+    "help": "Los sitios seleccionados aceptan usuarios compartidos en la autenticación web y básica, junto a sus propios usuarios; al seleccionar un sitio sin autenticación también se activa la autenticación web. Si una app OIDC puede iniciar sesión lo decide la lista de permitidos de cada cliente, más abajo.",
+    "search": "Filtrar por nombre de sitio, dominio o escucha",
+    "checkVisible": "Seleccionar los mostrados",
+    "uncheckVisible": "Desmarcar los mostrados",
+    "disabled": "Desactivado",
+    "defaultSite": "Sitio predeterminado",
+    "forwardAuth": "Autenticación delegada",
+    "webAuth": "Autenticación web",
+    "basicAuth": "Autenticación básica",
+    "noAuth": "Sin autenticación",
+    "willEnableAuth": "Se activará la autenticación web al guardar",
+    "lockForward": "Los sitios con autenticación delegada no pueden usar usuarios compartidos",
+    "lockOnly": "Este sitio solo se autentica con usuarios compartidos y quedaría público al desmarcarlo; para hacerlo público, desactive la autenticación en la configuración del sitio",
+    "none": "Aún no hay sitios que puedan usar autenticación",
+    "noMatch": "No hay sitios que coincidan"
+  },
+  "leaveTitle": "Cambios sin guardar",
+  "leaveConfirm": "Esta página tiene cambios sin guardar que se perderán si sale.",
+  "leave": "Descartar y salir"
+}

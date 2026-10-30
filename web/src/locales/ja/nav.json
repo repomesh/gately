@@ -52,6 +52,10 @@
       "title": "SSL 証明書",
       "desc": "ACME による自動取得と更新"
     },
+    "webusers": {
+      "title": "認証ユーザー",
+      "desc": "Web サービスの共有ユーザーと OIDC ID プロバイダー"
+    },
     "storage": {
       "title": "ストレージマウント",
       "desc": "ローカルディレクトリ、リモート WebDAV、SMB 共有をマウントしてオンラインで管理"

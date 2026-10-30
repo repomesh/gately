@@ -144,13 +144,13 @@ Fonctionnement :
 
 Définissez les comptes une seule fois et utilisez-les sur plusieurs sites, avec une vérification en deux étapes TOTP facultative. Cela couvre ce pour quoi beaucoup de gens font tourner Authelia.
 
-Dans « Paramètres globaux → Utilisateurs partagés » :
+Sur la page « Web → Utilisateurs d'auth » de la barre latérale (la boîte de dialogue des paramètres globaux du service web n'affiche qu'un résumé et un lien) :
 
 - Ajoutez des utilisateurs avec un nom d'utilisateur et un mot de passe. Les mots de passe sont stockés sous forme de hash bcrypt et ne sont jamais renvoyés par l'API. Pour ajouter le TOTP, cliquez sur « Activer le TOTP », scannez le QR code avec une application d'authentification (Google Authenticator, 1Password, etc.) puis enregistrez. Régénérer la clé invalide l'ancienne ;
 - Indiquez éventuellement une adresse e-mail, un nom affiché et des groupes ; l'[authentification unique OIDC](/fr/docs/modules/oidc) les transmet aux applications sous forme de revendications `email`, `name` et `groups`, et les utilisateurs autorisés d'un client OIDC peuvent accorder l'accès par groupe avec `group:nom` ;
 - Domaine SSO, comme `example.com` : après connexion sur n'importe quel site de ce domaine ou de ses sous-domaines, les autres sites n'exigent plus de connexion. Il repose sur un cookie de domaine parent (`gately_sso`, valable 7 jours) qui n'est jamais transmis aux backends. Laissez vide pour vous connecter séparément sur chaque site.
 
-Sur un site, cochez « Utiliser les utilisateurs partagés » à côté de l'authentification web ou Basic. Les utilisateurs propres au site continuent de fonctionner.
+Sur un site, cochez « Utiliser les utilisateurs partagés » à côté de l'authentification web ou Basic. Les utilisateurs propres au site continuent de fonctionner. Vous pouvez aussi cocher des sites en masse dans la liste des sites de la page Utilisateurs d'auth, regroupée par écoute et filtrable : cocher un site sans authentification active aussi l'auth Web ; un site qui ne s'authentifie qu'avec les utilisateurs partagés ne peut pas être décoché ici, pour qu'il ne devienne jamais public par erreur (pour le rendre public, désactivez l'authentification dans les paramètres du site) ; les sites en authentification déléguée ne peuvent pas utiliser les utilisateurs partagés. Les modifications des utilisateurs, d'OIDC et des sites sur la page s'appliquent ensemble quand vous cliquez sur Enregistrer en bas ; si l'une d'elles échoue à la validation, rien n'est enregistré, et quitter la page avec des modifications non enregistrées demande d'abord une confirmation.
 
 Comportement :
 
@@ -163,7 +163,7 @@ Pour que Gitea, OpenList, Grafana et les autres applications sachent quel utilis
 
 ### Changement de mot de passe en libre-service {#self-service-password}
 
-Activez Changement de mot de passe en libre-service dans Paramètres globaux → Utilisateurs partagés : les utilisateurs partagés peuvent alors changer leur mot de passe sans passer par l'administrateur.
+Activez Changement de mot de passe en libre-service sur la page Utilisateurs d'auth : les utilisateurs partagés peuvent alors changer leur mot de passe sans passer par l'administrateur.
 
 - Rendez-vous sur `https://domaine-du-site/__gately_auth/password` sur un site où Utiliser les utilisateurs partagés est activé ; la page de connexion affiche aussi un lien Changer le mot de passe. Les utilisateurs de l'[authentification unique OIDC](/fr/docs/modules/oidc) peuvent utiliser `/__gately_oidc/password` sur le domaine émetteur ;
 - Saisissez le nom d'utilisateur, le mot de passe actuel et deux fois le nouveau (8 à 128 caractères, différent de l'actuel) ; les utilisateurs avec TOTP saisissent aussi un code de vérification ;

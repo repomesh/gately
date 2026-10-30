@@ -254,6 +254,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | 구독 IP 목록 사용 설정/해제 |
 | PUT | `/api/webservice/iplists-order` | `webservice:write` | 구독 IP 목록 순서 변경 |
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | 구독 IP 목록 지금 새로고침 |
+| GET | `/api/webservice/users` | `webservice:read` | 공유 사용자와 OIDC ID 공급자 조회 |
+| PUT | `/api/webservice/users` | `webservice:write` | 공유 사용자와 OIDC ID 공급자 저장, 사이트 일괄 설정 |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | nginx 설정 가져오기 |
 | GET | `/api/webservice/settings` | `webservice:read` | Web 서비스 전역 설정 읽기 |
 | GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | 공유 사용자의 TOTP 비밀 키 평문 보기(사용자 이름으로 색인) |
@@ -1660,6 +1662,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `waf` | string |
 | `webAuth` | boolean |
 
+### webservice.SiteSharedUsers
+
+| 필드 | 타입 |
+| --- | --- |
+| `listener` | string |
+| `sharedUsers` | boolean |
+| `site` | string |
+
 ### webservice.SiteStatsView
 
 | 필드 | 타입 |
@@ -1694,6 +1704,47 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- |
 | `targets` | Array of string |
 | `users` | Array of string |
+
+### webservice.UserSite
+
+| 필드 | 타입 |
+| --- | --- |
+| `basicAuth` | boolean |
+| `default` | boolean |
+| `domains` | Array of string |
+| `enable` | boolean |
+| `forwardAuth` | boolean |
+| `listener` | string |
+| `listenerEnable` | boolean |
+| `listenerName` | string |
+| `name` | string |
+| `otherAuth` | boolean |
+| `port` | integer |
+| `sharedUsers` | boolean |
+| `site` | string |
+| `tls` | boolean |
+| `type` | string |
+| `webAuth` | boolean |
+
+### webservice.UsersRequest
+
+| 필드 | 타입 |
+| --- | --- |
+| `authUsers` | Array of `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | Array of `webservice.SiteSharedUsers` |
+| `ssoDomain` | string |
+
+### webservice.UsersView
+
+| 필드 | 타입 |
+| --- | --- |
+| `authUsers` | Array of `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | Array of `webservice.UserSite` |
+| `ssoDomain` | string |
 
 ### webservice.banRequest
 

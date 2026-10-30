@@ -52,6 +52,10 @@
       "title": "SSL-Zertifikate",
       "desc": "Automatische ACME-Ausstellung und -Erneuerung"
     },
+    "webusers": {
+      "title": "Auth-Benutzer",
+      "desc": "Gemeinsame Benutzer und OIDC-Identitätsanbieter des Webdienstes"
+    },
     "storage": {
       "title": "Speicher-Einbindungen",
       "desc": "Lokale Verzeichnisse, entferntes WebDAV oder SMB-Freigaben einbinden und Dateien online verwalten"

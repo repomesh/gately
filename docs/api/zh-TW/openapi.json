@@ -2413,6 +2413,20 @@
         },
         "type": "object"
       },
+      "webservice.SiteSharedUsers": {
+        "properties": {
+          "listener": {
+            "type": "string"
+          },
+          "sharedUsers": {
+            "type": "boolean"
+          },
+          "site": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "webservice.SiteStatsView": {
         "properties": {
           "bytesOut": {
@@ -2495,6 +2509,114 @@
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.UserSite": {
+        "properties": {
+          "basicAuth": {
+            "type": "boolean"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "domains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "forwardAuth": {
+            "type": "boolean"
+          },
+          "listener": {
+            "type": "string"
+          },
+          "listenerEnable": {
+            "type": "boolean"
+          },
+          "listenerName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "otherAuth": {
+            "type": "boolean"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "sharedUsers": {
+            "type": "boolean"
+          },
+          "site": {
+            "type": "string"
+          },
+          "tls": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          },
+          "webAuth": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.UsersRequest": {
+        "properties": {
+          "authUsers": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.AuthUser"
+            },
+            "type": "array"
+          },
+          "oidc": {
+            "$ref": "#/components/schemas/webservice.OIDCSettings"
+          },
+          "selfServicePassword": {
+            "type": "boolean"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.SiteSharedUsers"
+            },
+            "type": "array"
+          },
+          "ssoDomain": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.UsersView": {
+        "properties": {
+          "authUsers": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.AuthUser"
+            },
+            "type": "array"
+          },
+          "oidc": {
+            "$ref": "#/components/schemas/webservice.OIDCSettings"
+          },
+          "selfServicePassword": {
+            "type": "boolean"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.UserSite"
+            },
+            "type": "array"
+          },
+          "ssoDomain": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -28564,6 +28686,129 @@
           }
         ],
         "summary": "為共用使用者產生新的 TOTP 金鑰（不儲存，儲存設定後生效）",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/users": {
+      "get": {
+        "description": "回傳共用使用者（密碼與 TOTP 金鑰已遮罩）、`ssoDomain`、`selfServicePassword`、OIDC 身分提供者設定（用戶端金鑰已遮罩），以及可以使用共用使用者的站點清單 `sites`：`listener`、`site` 識別站點，`sharedUsers` 為是否使用共用使用者，`otherAuth` 表示站點還有本機使用者或第三方登入身分，`forwardAuth` 表示站點使用轉發認證。中斷連線的站點與停用的預設站點不列出。\n\n所需權限：`webservice:read`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.UsersView"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "讀取共用使用者與 OIDC 身分提供者",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "请求体 `{\"authUsers\": [], \"ssoDomain\": \"\", \"selfServicePassword\": false, \"oidc\": {}, \"sites\": [{\"listener\": \"l1\", \"site\": \"s1\", \"sharedUsers\": true}]}`，字段含义同全域設定，只修改这几项，全域設定的其他项保持不变；脱敏占位符表示保留原密码或密钥。`sites` 只需列出要修改的站点：启用时站点若未开启认证会同时开启网页认证；站点只通过共享用户认证时不能在这里取消（取消后将无需登录），使用转发认证的站点不能启用。任一项校验失败时不保存任何修改。\n\n所需權限：`webservice:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.UsersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.UsersView"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "儲存共用使用者與 OIDC 身分提供者，批次設定站點",
         "tags": [
           "Web 服務"
         ],

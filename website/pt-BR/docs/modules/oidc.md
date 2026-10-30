@@ -16,7 +16,7 @@ Os dois podem ser usados ao mesmo tempo: o mesmo usuário compartilhado passa pe
 
 ## Preparação
 
-1. Adicione usuários em "Serviço Web → Configurações globais → Usuários compartilhados". O OIDC aceita apenas usuários compartilhados; os usuários próprios de um site e as identidades de login de terceiros não podem ser usados no OIDC.
+1. Adicione usuários compartilhados na página "Web → Usuários de autenticação". O OIDC aceita apenas usuários compartilhados; os usuários próprios de um site e as identidades de login de terceiros não podem ser usados no OIDC.
 2. Preencha, conforme necessário, o e-mail, o nome de exibição e os grupos de cada usuário:
    - E-mail: enviado ao aplicativo como a claim `email` e marcado como verificado; o Gitea e outros aplicativos criam ou vinculam contas a partir dele;
    - Nome de exibição: enviado como a claim `name`; quando vazio, usa-se o nome de usuário;
@@ -27,7 +27,7 @@ Quando a URL do emissor usa `https`, as requisições GET aos caminhos OIDC por 
 
 ## Ativação
 
-Em "Serviço Web → Configurações globais → Provedor de identidade OIDC":
+No cartão "Provedor de identidade OIDC" da página "Web → Usuários de autenticação":
 
 | Campo | Descrição |
 | --- | --- |

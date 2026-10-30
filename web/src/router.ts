@@ -21,6 +21,7 @@ const router = createRouter({
         { path: 'cloudflared', name: 'cloudflared', component: () => import('./views/Cloudflared.vue'), meta: { titleKey: 'nav.items.cloudflared.title' } },
         { path: 'ssl', name: 'ssl', component: () => import('./views/SSL.vue'), meta: { titleKey: 'nav.items.ssl.title' } },
         { path: 'web', name: 'web', component: () => import('./views/Web.vue'), meta: { titleKey: 'nav.items.web.title' } },
+        { path: 'webusers', name: 'webusers', component: () => import('./views/WebUsers.vue'), meta: { titleKey: 'nav.items.webusers.title' } },
         { path: 'portforward', name: 'portforward', component: () => import('./views/PortForward.vue'), meta: { titleKey: 'nav.items.portforward.title' } },
         { path: 'waf', name: 'waf', component: () => import('./views/WAF.vue'), meta: { titleKey: 'nav.items.waf.title' } },
         { path: 'guard', name: 'guard', component: () => import('./views/Guard.vue'), meta: { titleKey: 'nav.items.guard.title' } },

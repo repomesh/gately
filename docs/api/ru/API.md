@@ -254,6 +254,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | Включить или отключить: Подписной список IP |
 | PUT | `/api/webservice/iplists-order` | `webservice:write` | Изменить порядок: Подписной список IP |
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Обновить подписной список IP сейчас |
+| GET | `/api/webservice/users` | `webservice:read` | Получить общих пользователей и поставщика удостоверений OIDC |
+| PUT | `/api/webservice/users` | `webservice:write` | Сохранить общих пользователей и поставщика удостоверений OIDC, массово настроить сайты |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | Импорт конфигурации nginx |
 | GET | `/api/webservice/settings` | `webservice:read` | Чтение глобальных настроек веб-службы |
 | GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | Показать секреты TOTP общих пользователей открытым текстом (по имени пользователя) |
@@ -1660,6 +1662,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `waf` | string |
 | `webAuth` | boolean |
 
+### webservice.SiteSharedUsers
+
+| Поле | Тип |
+| --- | --- |
+| `listener` | string |
+| `sharedUsers` | boolean |
+| `site` | string |
+
 ### webservice.SiteStatsView
 
 | Поле | Тип |
@@ -1694,6 +1704,47 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- |
 | `targets` | Массив из string |
 | `users` | Массив из string |
+
+### webservice.UserSite
+
+| Поле | Тип |
+| --- | --- |
+| `basicAuth` | boolean |
+| `default` | boolean |
+| `domains` | Массив из string |
+| `enable` | boolean |
+| `forwardAuth` | boolean |
+| `listener` | string |
+| `listenerEnable` | boolean |
+| `listenerName` | string |
+| `name` | string |
+| `otherAuth` | boolean |
+| `port` | integer |
+| `sharedUsers` | boolean |
+| `site` | string |
+| `tls` | boolean |
+| `type` | string |
+| `webAuth` | boolean |
+
+### webservice.UsersRequest
+
+| Поле | Тип |
+| --- | --- |
+| `authUsers` | Массив из `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | Массив из `webservice.SiteSharedUsers` |
+| `ssoDomain` | string |
+
+### webservice.UsersView
+
+| Поле | Тип |
+| --- | --- |
+| `authUsers` | Массив из `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | Массив из `webservice.UserSite` |
+| `ssoDomain` | string |
 
 ### webservice.banRequest
 

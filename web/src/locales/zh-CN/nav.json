@@ -52,6 +52,10 @@
       "title": "SSL 证书",
       "desc": "ACME 自动申请与续签"
     },
+    "webusers": {
+      "title": "认证用户",
+      "desc": "Web 服务的共享用户与 OIDC 身份提供方"
+    },
     "storage": {
       "title": "存储挂载",
       "desc": "挂载本地目录、远程 WebDAV 或 SMB 共享，在线管理文件"

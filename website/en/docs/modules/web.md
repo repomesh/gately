@@ -144,13 +144,13 @@ How it works:
 
 Define accounts once and use them on several sites, with optional TOTP two-step verification. It covers what many people run Authelia for.
 
-In "Global settings → Shared users":
+On the "Web → Auth users" page in the sidebar (the Web service global settings dialog only shows a summary and a link):
 
 - Add users with a username and a password. Passwords are stored as bcrypt hashes and never returned by the API. To add TOTP, click "Enable TOTP", scan the QR code with an authenticator app (Google Authenticator, 1Password and so on) and save. Regenerating the key invalidates the old one;
 - Optionally fill in an email, display name and groups; [OIDC single sign-on](/en/docs/modules/oidc) passes them to applications as the `email`, `name` and `groups` claims, and an OIDC client's allowed users can grant access by group with `group:name`;
 - SSO domain, such as `example.com`: after signing in on any site under that domain or its subdomains, the other sites there need no further sign-in. It uses a parent-domain cookie (`gately_sso`, valid for 7 days) that is never forwarded to backends. Leave it empty to sign in on each site separately.
 
-On a site, tick "Use shared users" next to web or Basic authentication. The site's own users keep working as well.
+On a site, tick "Use shared users" next to web or Basic authentication. The site's own users keep working as well. You can also select sites in bulk in the site list on the Auth users page, grouped by listener and filterable: selecting a site without authentication also turns on web auth; a site that authenticates only with shared users cannot be cleared there, so it never becomes public by accident (turn off authentication in the site settings if you want it public); sites using forward auth cannot use shared users. Changes to users, OIDC and sites on the page take effect together when you click Save at the bottom; if any of them fails validation nothing is saved, and leaving the page with unsaved changes asks for confirmation first.
 
 Behavior:
 
@@ -163,7 +163,7 @@ To let Gitea, OpenList, Grafana and other applications know which user signed in
 
 ### Self-service password change {#self-service-password}
 
-Turn on Self-service password change in Global settings → Shared users and shared users can change their own password without asking an administrator:
+Turn on Self-service password change on the Auth users page and shared users can change their own password without asking an administrator:
 
 - Visit `https://site-domain/__gately_auth/password` on a site with Use shared users enabled; the login page also shows a Change password link. Users of [OIDC single sign-on](/en/docs/modules/oidc) can use `/__gately_oidc/password` on the issuer domain;
 - Enter the username, the current password and the new password twice (8–128 characters, different from the current one); users with TOTP also enter a verification code;

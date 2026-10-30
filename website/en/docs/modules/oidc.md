@@ -16,7 +16,7 @@ You can use both at the same time: the same shared user can pass a site's web au
 
 ## Preparation
 
-1. Add users in "Web Service → Global settings → Shared users". OIDC only accepts shared users; a site's own users and third-party sign-in identities cannot be used for OIDC.
+1. Add shared users on the "Web → Auth users" page. OIDC only accepts shared users; a site's own users and third-party sign-in identities cannot be used for OIDC.
 2. Fill in each user's email, display name and groups as needed:
    - Email: given to applications as the `email` claim and marked as verified; Gitea and other applications use it to create or link accounts;
    - Display name: the `name` claim; the username is used when it is empty;
@@ -27,7 +27,7 @@ When the issuer URL uses `https`, GET requests to the OIDC paths over plain HTTP
 
 ## Enabling
 
-In "Web Service → Global settings → OIDC identity provider":
+In the "OIDC identity provider" card on the "Web → Auth users" page:
 
 | Field | Description |
 | --- | --- |

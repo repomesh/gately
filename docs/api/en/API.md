@@ -254,6 +254,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | Enable or disable Subscribed IP list |
 | PUT | `/api/webservice/iplists-order` | `webservice:write` | Reorder Subscribed IP list |
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Refresh a subscribed IP list now |
+| GET | `/api/webservice/users` | `webservice:read` | Read shared users and the OIDC identity provider |
+| PUT | `/api/webservice/users` | `webservice:write` | Save shared users and the OIDC identity provider, set sites in bulk |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | Import nginx config |
 | GET | `/api/webservice/settings` | `webservice:read` | Read Web service global settings |
 | GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | View the TOTP secrets of shared users in plain text (indexed by username) |
@@ -1660,6 +1662,14 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `waf` | string |
 | `webAuth` | boolean |
 
+### webservice.SiteSharedUsers
+
+| Field | Type |
+| --- | --- |
+| `listener` | string |
+| `sharedUsers` | boolean |
+| `site` | string |
+
 ### webservice.SiteStatsView
 
 | Field | Type |
@@ -1694,6 +1704,47 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | --- | --- |
 | `targets` | Array of string |
 | `users` | Array of string |
+
+### webservice.UserSite
+
+| Field | Type |
+| --- | --- |
+| `basicAuth` | boolean |
+| `default` | boolean |
+| `domains` | Array of string |
+| `enable` | boolean |
+| `forwardAuth` | boolean |
+| `listener` | string |
+| `listenerEnable` | boolean |
+| `listenerName` | string |
+| `name` | string |
+| `otherAuth` | boolean |
+| `port` | integer |
+| `sharedUsers` | boolean |
+| `site` | string |
+| `tls` | boolean |
+| `type` | string |
+| `webAuth` | boolean |
+
+### webservice.UsersRequest
+
+| Field | Type |
+| --- | --- |
+| `authUsers` | Array of `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | Array of `webservice.SiteSharedUsers` |
+| `ssoDomain` | string |
+
+### webservice.UsersView
+
+| Field | Type |
+| --- | --- |
+| `authUsers` | Array of `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | Array of `webservice.UserSite` |
+| `ssoDomain` | string |
 
 ### webservice.banRequest
 

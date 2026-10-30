@@ -2413,6 +2413,20 @@
         },
         "type": "object"
       },
+      "webservice.SiteSharedUsers": {
+        "properties": {
+          "listener": {
+            "type": "string"
+          },
+          "sharedUsers": {
+            "type": "boolean"
+          },
+          "site": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "webservice.SiteStatsView": {
         "properties": {
           "bytesOut": {
@@ -2495,6 +2509,114 @@
               "type": "string"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.UserSite": {
+        "properties": {
+          "basicAuth": {
+            "type": "boolean"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "domains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "forwardAuth": {
+            "type": "boolean"
+          },
+          "listener": {
+            "type": "string"
+          },
+          "listenerEnable": {
+            "type": "boolean"
+          },
+          "listenerName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "otherAuth": {
+            "type": "boolean"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "sharedUsers": {
+            "type": "boolean"
+          },
+          "site": {
+            "type": "string"
+          },
+          "tls": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          },
+          "webAuth": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.UsersRequest": {
+        "properties": {
+          "authUsers": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.AuthUser"
+            },
+            "type": "array"
+          },
+          "oidc": {
+            "$ref": "#/components/schemas/webservice.OIDCSettings"
+          },
+          "selfServicePassword": {
+            "type": "boolean"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.SiteSharedUsers"
+            },
+            "type": "array"
+          },
+          "ssoDomain": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.UsersView": {
+        "properties": {
+          "authUsers": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.AuthUser"
+            },
+            "type": "array"
+          },
+          "oidc": {
+            "$ref": "#/components/schemas/webservice.OIDCSettings"
+          },
+          "selfServicePassword": {
+            "type": "boolean"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.UserSite"
+            },
+            "type": "array"
+          },
+          "ssoDomain": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -28564,6 +28686,129 @@
           }
         ],
         "summary": "공유 사용자의 새 TOTP 키 생성(저장하지 않음, 설정 저장 후 적용)",
+        "tags": [
+          "Web 서비스"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/users": {
+      "get": {
+        "description": "공유 사용자(비밀번호와 TOTP 시크릿은 마스킹), `ssoDomain`, `selfServicePassword`, OIDC ID 공급자 설정(클라이언트 시크릿은 마스킹)과 공유 사용자를 쓸 수 있는 사이트 목록 `sites`를 반환합니다. `listener`와 `site`로 사이트를 식별하고, `sharedUsers`는 공유 사용자 사용 여부, `otherAuth`는 로컬 사용자나 서드파티 로그인 ID도 있음을, `forwardAuth`는 포워드 인증을 쓰는 사이트임을 뜻합니다. 연결을 끊는 사이트와 비활성 기본 사이트는 나열하지 않습니다.\n\n필요한 권한: `webservice:read`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.UsersView"
+                }
+              }
+            },
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "공유 사용자와 OIDC ID 공급자 조회",
+        "tags": [
+          "Web 서비스"
+        ],
+        "x-required-scope": "webservice:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "请求体 `{\"authUsers\": [], \"ssoDomain\": \"\", \"selfServicePassword\": false, \"oidc\": {}, \"sites\": [{\"listener\": \"l1\", \"site\": \"s1\", \"sharedUsers\": true}]}`，字段含义同전역 설정，只这几项，전역 설정的其他项保持不变；脱敏占位符表示保留原密码或密钥。`sites` 只需列出要的站点：启用时站点若未开启认证会同时开启网页认证；站点只通过共享用户认证时不能在这里取消（取消后将无需登录），使用转发认证的站点不能启用。任一项校验失败时不保存任何。\n\n필요한 권한: `webservice:write`. 수정 수정 수정",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.UsersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.UsersView"
+                }
+              }
+            },
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "공유 사용자와 OIDC ID 공급자 저장, 사이트 일괄 설정",
         "tags": [
           "Web 서비스"
         ],

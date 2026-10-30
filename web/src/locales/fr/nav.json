@@ -52,6 +52,10 @@
       "title": "Certificats SSL",
       "desc": "Émission et renouvellement automatiques via ACME"
     },
+    "webusers": {
+      "title": "Utilisateurs d'auth",
+      "desc": "Utilisateurs partagés et fournisseur d'identité OIDC du service web"
+    },
     "storage": {
       "title": "Montages de stockage",
       "desc": "Montez des dossiers locaux, du WebDAV distant ou des partages SMB et gérez les fichiers en ligne"

@@ -451,21 +451,15 @@
         </el-form-item>
         <OAuthProviders v-if="settings" v-model="settings.oauthProviders" secrets-url="/api/webservice/settings/secrets/oauth" />
         <el-divider content-position="left">{{ t('web.sharedUsersDivider') }}</el-divider>
+        <!-- 共享用户与 OIDC 身份提供方在「认证用户」页面集中管理，这里只显示摘要 -->
         <el-form-item :label="t('web.sharedUsers')">
-          <SharedUsers v-if="settings" v-model="settings.authUsers" />
-          <div class="form-help">{{ t('web.sharedUsersHelp') }}</div>
+          <div class="users-summary">
+            <span>{{ t('web.usersSummary', { users: settings.authUsers.length, clients: settings.oidc.clients.length }) }}</span>
+            <el-tag size="small" :type="settings.oidc.enable ? 'success' : 'info'">{{ settings.oidc.enable ? t('web.oidcOn') : t('web.oidcOff') }}</el-tag>
+            <router-link to="/webusers" class="users-link" @click="settingsVisible = false">{{ t('web.manageUsers') }}</router-link>
+          </div>
+          <div class="form-help">{{ t('web.manageUsersHelp') }}</div>
         </el-form-item>
-        <el-form-item :label="t('web.ssoDomain')">
-          <el-input v-if="settings" v-model="settings.ssoDomain" class="w-260" placeholder="example.com" />
-          <div class="form-help">{{ t('web.ssoDomainHelp') }}</div>
-        </el-form-item>
-        <el-form-item :label="t('web.selfServicePassword')">
-          <el-switch v-if="settings" v-model="settings.selfServicePassword" />
-          <div class="form-help">{{ t('web.selfServicePasswordHelp', { site: '/__gately_auth/password', oidc: '/__gately_oidc/password' }) }}</div>
-        </el-form-item>
-        <el-divider content-position="left">{{ t('web.oidcDivider') }}</el-divider>
-        <div class="form-help oidc-intro">{{ t('web.oidcIntro') }}</div>
-        <OIDCProvider v-if="settings" v-model="settings.oidc" />
         <AccessSettings v-if="settings" v-model:auto-ban-seconds="settings.autoBanSeconds" />
         <IPListsManager v-if="settings" @changed="loadIPLists" />
       </el-form>
@@ -511,8 +505,6 @@ import EntityCard from '../components/EntityCard.vue'
 import { useCompactView } from '../composables/useCompactView'
 import { useCollapsed } from '../composables/useCollapsed'
 import OAuthProviders from '../components/OAuthProviders.vue'
-import SharedUsers from '../components/SharedUsers.vue'
-import OIDCProvider from '../components/OIDCProvider.vue'
 import { oidcFromAPI, oidcToAPI, type OIDCSettings } from '../oidc'
 import { type AuthUser, fromAPI, toAPI } from '../sharedUsers'
 import AccessSettings from '../components/AccessSettings.vue'
@@ -1262,8 +1254,18 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.oidc-intro {
-  margin: -4px 0 14px;
+.users-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.users-link {
+  color: var(--el-color-primary);
+  text-decoration: none;
+}
+.users-link:hover {
+  text-decoration: underline;
 }
 .label-with-help {
   display: inline-flex;

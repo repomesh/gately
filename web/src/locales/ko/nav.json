@@ -52,6 +52,10 @@
       "title": "SSL 인증서",
       "desc": "ACME 자동 발급 및 갱신"
     },
+    "webusers": {
+      "title": "인증 사용자",
+      "desc": "웹 서비스의 공유 사용자와 OIDC ID 공급자"
+    },
     "storage": {
       "title": "스토리지 마운트",
       "desc": "로컬 디렉터리, 원격 WebDAV 또는 SMB 공유를 마운트하고 온라인으로 파일 관리"

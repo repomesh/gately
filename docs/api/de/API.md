@@ -254,6 +254,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | Abonnierte IP-Liste aktivieren oder deaktivieren |
 | PUT | `/api/webservice/iplists-order` | `webservice:write` | Abonnierte IP-Liste neu anordnen |
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Abonnierte IP-Liste jetzt aktualisieren |
+| GET | `/api/webservice/users` | `webservice:read` | Gemeinsame Benutzer und OIDC-Identitätsanbieter lesen |
+| PUT | `/api/webservice/users` | `webservice:write` | Gemeinsame Benutzer und OIDC-Identitätsanbieter speichern, Sites gesammelt einstellen |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | nginx-Konfiguration importieren |
 | GET | `/api/webservice/settings` | `webservice:read` | Globale Web-Dienst-Einstellungen lesen |
 | GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | TOTP-Geheimnisse der gemeinsamen Benutzer im Klartext anzeigen (nach Benutzername) |
@@ -1660,6 +1662,14 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `waf` | string |
 | `webAuth` | boolean |
 
+### webservice.SiteSharedUsers
+
+| Feld | Typ |
+| --- | --- |
+| `listener` | string |
+| `sharedUsers` | boolean |
+| `site` | string |
+
 ### webservice.SiteStatsView
 
 | Feld | Typ |
@@ -1694,6 +1704,47 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | --- | --- |
 | `targets` | Array von string |
 | `users` | Array von string |
+
+### webservice.UserSite
+
+| Feld | Typ |
+| --- | --- |
+| `basicAuth` | boolean |
+| `default` | boolean |
+| `domains` | Array von string |
+| `enable` | boolean |
+| `forwardAuth` | boolean |
+| `listener` | string |
+| `listenerEnable` | boolean |
+| `listenerName` | string |
+| `name` | string |
+| `otherAuth` | boolean |
+| `port` | integer |
+| `sharedUsers` | boolean |
+| `site` | string |
+| `tls` | boolean |
+| `type` | string |
+| `webAuth` | boolean |
+
+### webservice.UsersRequest
+
+| Feld | Typ |
+| --- | --- |
+| `authUsers` | Array von `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | Array von `webservice.SiteSharedUsers` |
+| `ssoDomain` | string |
+
+### webservice.UsersView
+
+| Feld | Typ |
+| --- | --- |
+| `authUsers` | Array von `webservice.AuthUser` |
+| `oidc` | `webservice.OIDCSettings` |
+| `selfServicePassword` | boolean |
+| `sites` | Array von `webservice.UserSite` |
+| `ssoDomain` | string |
 
 ### webservice.banRequest
 

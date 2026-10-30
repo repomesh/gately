@@ -1,0 +1,27 @@
+{
+  "title": "Auth users",
+  "desc": "Shared users and the OIDC identity provider of the Web service: site web auth, basic auth and apps signing in through OIDC all use these accounts",
+  "usersDesc": "Takes effect on all sites and OIDC apps once saved",
+  "sites": {
+    "title": "Sites using shared users",
+    "count": "{on} of {total} selected",
+    "help": "Selected sites accept shared users for web auth and basic auth, alongside their own users; selecting a site without authentication also turns on web auth. Whether an OIDC app can sign a user in is set by each client's allow list below.",
+    "search": "Filter by site name, domain or listener",
+    "checkVisible": "Select all shown",
+    "uncheckVisible": "Clear all shown",
+    "disabled": "Disabled",
+    "defaultSite": "Default site",
+    "forwardAuth": "Forward auth",
+    "webAuth": "Web auth",
+    "basicAuth": "Basic auth",
+    "noAuth": "No authentication",
+    "willEnableAuth": "Web auth turns on when saved",
+    "lockForward": "Sites using forward auth cannot use shared users",
+    "lockOnly": "This site authenticates only with shared users and would become public if cleared; to make it public, turn off authentication in the site settings",
+    "none": "No sites that can use authentication yet",
+    "noMatch": "No matching sites"
+  },
+  "leaveTitle": "Unsaved changes",
+  "leaveConfirm": "This page has unsaved changes that will be lost if you leave.",
+  "leave": "Discard and leave"
+}

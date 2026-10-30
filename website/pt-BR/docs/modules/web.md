@@ -144,13 +144,13 @@ Como funciona:
 
 Defina as contas uma só vez e use-as em vários sites, com verificação em dois fatores TOTP opcional. Cobre o que muita gente usa o Authelia para fazer.
 
-Em "Configurações globais → Usuários compartilhados":
+Na página "Web → Usuários de autenticação" da barra lateral (o diálogo de configurações globais do serviço web mostra apenas um resumo e um link):
 
 - Adicione usuários com um nome de usuário e uma senha. As senhas são armazenadas como hashes bcrypt e nunca são retornadas pela API. Para adicionar o TOTP, clique em "Ativar TOTP", escaneie o QR code com um app autenticador (Google Authenticator, 1Password etc.) e salve. Gerar a chave novamente invalida a anterior;
 - Opcionalmente, informe e-mail, nome de exibição e grupos; o [login único OIDC](/pt-BR/docs/modules/oidc) os entrega aos aplicativos como as declarações `email`, `name` e `groups`, e os usuários permitidos de um cliente OIDC podem liberar acesso por grupo com `group:nome`;
 - Domínio de SSO, como `example.com`: depois de entrar em qualquer site desse domínio ou de seus subdomínios, os outros sites ali não pedem novo login. Usa um cookie de domínio pai (`gately_sso`, válido por 7 dias) que nunca é repassado aos backends. Deixe vazio para entrar em cada site separadamente.
 
-Em um site, marque "Usar usuários compartilhados" junto à autenticação web ou básica. Os usuários próprios do site continuam funcionando também.
+Em um site, marque "Usar usuários compartilhados" junto à autenticação web ou básica. Os usuários próprios do site continuam funcionando também. Também é possível marcar sites em lote na lista de sites da página Usuários de autenticação, agrupada por escuta e com filtro: marcar um site sem autenticação também ativa a autenticação web; um site que autentica apenas com usuários compartilhados não pode ser desmarcado ali, para nunca ficar público por engano (para torná-lo público, desative a autenticação nas configurações do site); sites com autenticação delegada não podem usar usuários compartilhados. As alterações de usuários, OIDC e sites da página são aplicadas juntas ao clicar em Salvar, embaixo; se alguma falhar na validação nada é salvo, e sair da página com alterações não salvas pede confirmação antes.
 
 Comportamento:
 
@@ -163,7 +163,7 @@ Para que Gitea, OpenList, Grafana e outros aplicativos saibam qual usuário entr
 
 ### Troca de senha pelo próprio usuário {#self-service-password}
 
-Ative Troca de senha pelo próprio usuário em Configurações globais → Usuários compartilhados e os usuários compartilhados poderão trocar a própria senha sem recorrer ao administrador:
+Ative Troca de senha pelo próprio usuário na página Usuários de autenticação e os usuários compartilhados poderão trocar a própria senha sem recorrer ao administrador:
 
 - Acesse `https://dominio-do-site/__gately_auth/password` em um site com Usar usuários compartilhados ativado; a página de login também mostra o link Trocar senha. Usuários do [login único OIDC](/pt-BR/docs/modules/oidc) podem usar `/__gately_oidc/password` no domínio emissor;
 - Informe o nome de usuário, a senha atual e duas vezes a nova (de 8 a 128 caracteres, diferente da atual); usuários com TOTP também informam o código de verificação;
