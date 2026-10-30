@@ -295,6 +295,8 @@ func (a *App) issueGatewaySession(w http.ResponseWriter, r *http.Request, user s
 		Secure: r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https"),
 	})
 	ip := httpx.ClientIP(r)
+	// 先记录界面语言，随后的登录日志与通知即按该语言输出
+	a.rememberUILanguage(r)
 	a.sysLogs.Add(logbuf.LevelInfo, "auth", fmt.Sprintf("飞牛用户 %s 从 %s 经统一网关自动登录", user, ip))
 	a.audit.Record(audit.Entry{Actor: "fnOS:" + user, IP: ip, Via: audit.Via(r), Category: audit.CategoryLogin, Method: r.Method, Path: r.URL.Path, Status: http.StatusOK, Detail: "飞牛登录态自动登录"})
 	events.Publish(events.Event{Type: events.LoginSuccessful, Source: "管理后台", Level: events.LevelInfo,

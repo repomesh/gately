@@ -459,6 +459,10 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, status, "%v", err)
 		return
 	}
+	// 先记录界面语言，随后的登录日志与通知即按该语言输出；只读账号的界面语言不影响服务端输出
+	if req.Username == a.auth.Username() {
+		a.rememberUILanguage(r)
+	}
 	a.sysLogs.Add(logbuf.LevelInfo, "auth", fmt.Sprintf("%s 从 %s 登录", req.Username, ip))
 	a.audit.Record(audit.Entry{Actor: req.Username, IP: ip, Via: audit.Via(r), Category: audit.CategoryLogin, Method: "POST", Path: "/api/login", Status: http.StatusOK, Detail: "密码登录"})
 	events.Publish(events.Event{Type: events.LoginSuccessful, Source: "管理后台", Level: events.LevelInfo,

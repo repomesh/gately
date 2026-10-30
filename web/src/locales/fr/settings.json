@@ -142,7 +142,7 @@
     },
     "serverLanguage": "Langue du serveur",
     "serverLanguageAuto": "Suivre le système",
-    "serverLanguageHelp": "Langue des journaux, des notifications et des autres sorties sans contexte de page. Si le champ est vide, elle suit l'environnement du système (GATELY_LANG, LANG)."
+    "serverLanguageHelp": "Langue des journaux, des notifications et des autres sorties sans contexte de page. Si le champ est vide, elle suit l'environnement du système (GATELY_LANG, LANG) ; si l'environnement n'indique aucune langue, elle suit celle de la dernière connexion à la console d'administration."
   },
   "runtime": {
     "title": "Paramètres d'exécution",

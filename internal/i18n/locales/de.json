@@ -613,6 +613,7 @@
   "保存旧版本失败: %v": "Frühere Version konnte nicht gespeichert werden: %v",
   "保存程序路径": "Programmpfade speichern",
   "保存端口转发全局设置": "Globale Portweiterleitungs-Einstellungen speichern",
+  "保存管理界面语言失败: ": "Sprache der Verwaltungsoberfläche konnte nicht gespeichert werden: ",
   "保存证书全局设置": "Globale Zertifikatseinstellungen speichern",
   "保存证书失败: %v": "Zertifikat speichern fehlgeschlagen: %v",
   "保存迁移后的 frp 配置失败: %v": "Migrierte frp-Konfiguration konnte nicht gespeichert werden: %v",

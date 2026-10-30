@@ -142,7 +142,7 @@
     },
     "serverLanguage": "服务端语言",
     "serverLanguageAuto": "跟随系统",
-    "serverLanguageHelp": "日志、通知等没有页面上下文的输出所使用的语言；留空时按系统环境变量（GATELY_LANG、LANG）自动选择。"
+    "serverLanguageHelp": "日志、通知等没有页面上下文的输出所使用的语言；留空时按系统环境变量（GATELY_LANG、LANG）选择，环境变量未指定语言时跟随最近一次登录管理界面时使用的语言。"
   },
   "runtime": {
     "title": "运行参数",

@@ -194,6 +194,50 @@ func TestCatalogLazyLoad(t *testing.T) {
 	}
 }
 
+// 「跟随系统」且环境变量未指定语言时（Docker、飞牛 fpk、OpenWrt 的服务进程通常如此），服务端语言跟随管理界面语言。
+func TestServerLangFallsBackToUILang(t *testing.T) {
+	for _, k := range []string{"GATELY_LANG", "LC_ALL", "LC_MESSAGES", "LANG"} {
+		t.Setenv(k, "")
+	}
+	t.Cleanup(func() {
+		SetServerLang("")
+		SetUILang("")
+	})
+	SetServerLang("")
+	SetUILang("")
+	if got := ServerLang(); got != FallbackLang {
+		t.Fatalf("没有任何语言来源时应为 %s，得到 %s", FallbackLang, got)
+	}
+	SetUILang("zh-CN")
+	if got := ServerLang(); got != "zh-CN" {
+		t.Fatalf("环境未指定语言时应跟随界面语言，得到 %s", got)
+	}
+	// C.UTF-8 视为未指定
+	t.Setenv("LANG", "C.UTF-8")
+	if got := ServerLang(); got != "zh-CN" {
+		t.Fatalf("LANG=C.UTF-8 时应跟随界面语言，得到 %s", got)
+	}
+	t.Setenv("LANG", "ja_JP.UTF-8")
+	if got := ServerLang(); got != "ja" {
+		t.Fatalf("环境变量指定的语言优先于界面语言，得到 %s", got)
+	}
+	SetServerLang("ko")
+	if got := ServerLang(); got != "ko" {
+		t.Fatalf("设置中指定的语言优先，得到 %s", got)
+	}
+}
+
+func TestTrExactOnlyWholeString(t *testing.T) {
+	testCatalog(map[string]string{"配置备份": "Configuration backup"})
+	if got := TrExact("xx", "配置备份"); got != "Configuration backup" {
+		t.Fatalf("整句应翻译，得到 %q", got)
+	}
+	// 用户起的名称包含已知片段时保持原样
+	if got := TrExact("xx", "家里的配置备份"); got != "家里的配置备份" {
+		t.Fatalf("非整句不应被改写，得到 %q", got)
+	}
+}
+
 // 带前缀的日志行：通用模板（“%s失败: %v”）能整句匹配时，句中更具体的模板优先，避免前缀连同句子落进参数而漏翻。
 func TestSpecificTemplateInsidePrefixedLine(t *testing.T) {
 	testCatalog(map[string]string{

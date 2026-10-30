@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/wangwanjie/gately/internal/events"
+	"github.com/wangwanjie/gately/internal/i18n"
 )
 
 func testMsg() Message {
@@ -158,5 +159,27 @@ func TestNewChannelValidation(t *testing.T) {
 	ok := Channel{Name: "a", Kind: KindNtfy, Target: "t"}
 	if err := ok.Validate(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// 非中文时，程序生成的来源（“管理后台”）也要翻译，用户填写的来源名称保持原样。
+func TestNewMessageTranslatesSource(t *testing.T) {
+	i18n.SetServerLang("en")
+	t.Cleanup(func() { i18n.SetServerLang("") })
+	msg := NewMessage(events.Event{Type: events.LoginSuccessful, Source: "管理后台", Level: events.LevelInfo, Title: "管理后台登录成功"})
+	if !strings.Contains(msg.Text, "Source: Admin console") {
+		t.Fatalf("来源未翻译: %q", msg.Text)
+	}
+	if strings.ContainsFunc(msg.Title+msg.Text, func(r rune) bool { return r >= 0x4e00 && r <= 0x9fff }) {
+		t.Fatalf("英文通知中不应残留中文: %q %q", msg.Title, msg.Text)
+	}
+	msg = NewMessage(events.Event{Type: events.BackupDone, Source: "家里的配置备份", Level: events.LevelInfo, Title: "配置备份完成"})
+	if !strings.Contains(msg.Text, "家里的配置备份") {
+		t.Fatalf("用户填写的来源应保持原样: %q", msg.Text)
+	}
+	i18n.SetServerLang("zh-CN")
+	msg = NewMessage(events.Event{Type: events.LoginSuccessful, Source: "管理后台", Level: events.LevelInfo, Title: "管理后台登录成功"})
+	if msg.Title != "[Gately] 管理后台登录成功" || !strings.Contains(msg.Text, "来源：管理后台") {
+		t.Fatalf("中文通知内容不对: %q %q", msg.Title, msg.Text)
 	}
 }

@@ -142,7 +142,7 @@
     },
     "serverLanguage": "Server language",
     "serverLanguageAuto": "Follow system",
-    "serverLanguageHelp": "Language for logs, notifications and other output with no page context. When empty, it follows the system environment (GATELY_LANG, LANG)."
+    "serverLanguageHelp": "Language for logs, notifications and other output with no page context. When empty, it follows the system environment (GATELY_LANG, LANG); if the environment sets no language, it follows the language of the most recent admin console login."
   },
   "runtime": {
     "title": "Runtime parameters",

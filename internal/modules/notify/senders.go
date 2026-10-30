@@ -79,7 +79,8 @@ func NewMessage(e events.Event) Message {
 		b.WriteString("\n")
 	}
 	if e.Source != "" {
-		b.WriteString(tr("来源：") + e.Source + "\n")
+		// 来源可能是程序文案（“管理后台”“配置备份”），也可能是用户填写的任务名，只做整句匹配翻译，避免改写用户名称
+		b.WriteString(tr("来源：") + i18n.TrExact(lang, e.Source) + "\n")
 	}
 	b.WriteString(tr("级别：") + label + "\n")
 	b.WriteString(tr("时间：") + e.Time.Format("2006-01-02 15:04:05"))

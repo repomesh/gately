@@ -81,17 +81,27 @@ func FromAcceptLanguage(h string) string {
 
 // FromEnv 按 GATELY_LANG、LC_ALL、LC_MESSAGES、LANG 的顺序读取系统语言，识别不了时返回 FallbackLang。
 func FromEnv() string {
+	if l := envLang(); l != "" {
+		return l
+	}
+	return FallbackLang
+}
+
+// envLang 返回环境变量指定的语言，没有指定或识别不了（如 Docker 镜像常见的未设置、C.UTF-8）时返回空串。
+func envLang() string {
 	for _, k := range []string{"GATELY_LANG", "LC_ALL", "LC_MESSAGES", "LANG"} {
 		if l := Normalize(os.Getenv(k)); l != "" {
 			return l
 		}
 	}
-	return FallbackLang
+	return ""
 }
 
 var (
 	serverMu   sync.RWMutex
 	serverLang = ""
+	// uiLang 是管理界面最近一次登录时使用的语言，作为「跟随系统」且环境变量未指定语言时的选择
+	uiLang = ""
 )
 
 // SetServerLang 设置服务端语言（日志、通知等无请求上下文的输出）；传入空串表示按系统环境自动选择。
@@ -101,15 +111,29 @@ func SetServerLang(l string) {
 	serverMu.Unlock()
 }
 
-// ServerLang 返回服务端语言。
+// SetUILang 设置管理界面使用的语言，服务端语言为自动且环境变量未指定语言时按它输出。
+func SetUILang(l string) {
+	serverMu.Lock()
+	uiLang = Normalize(l)
+	serverMu.Unlock()
+}
+
+// ServerLang 返回服务端语言：优先使用设置中的语言，其次是环境变量，再次是管理界面的语言，都没有时为 FallbackLang。
+// Docker、飞牛 fpk、OpenWrt 等环境的服务进程通常没有 LANG，若直接回落到英文，界面是中文的用户会收到英文通知。
 func ServerLang() string {
 	serverMu.RLock()
-	l := serverLang
+	l, ui := serverLang, uiLang
 	serverMu.RUnlock()
 	if l != "" {
 		return l
 	}
-	return FromEnv()
+	if l = envLang(); l != "" {
+		return l
+	}
+	if ui != "" {
+		return ui
+	}
+	return FallbackLang
 }
 
 type catalog struct {
@@ -289,6 +313,22 @@ func Tr(lang, s string) string {
 		return s
 	}
 	return c.translate(lang, s, 0)
+}
+
+// TrExact 只按整句精确匹配翻译，用于可能是程序文案也可能是用户填写名称的字段（如事件来源）：
+// 程序文案（“管理后台”）能翻译，用户起的名称不会被句中片段替换改写。
+func TrExact(lang, s string) string {
+	if lang == "" || lang == SourceLang || s == "" || !hasHan(s) {
+		return s
+	}
+	c := catalogFor(lang)
+	if c == nil {
+		return s
+	}
+	if v, ok := c.exact[s]; ok {
+		return v
+	}
+	return s
 }
 
 func hasHan(s string) bool {

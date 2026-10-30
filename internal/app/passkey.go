@@ -214,6 +214,8 @@ func (a *App) handlePasskeyLoginFinish(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user := a.auth.Username()
+	// 先记录界面语言，随后的登录日志与通知即按该语言输出
+	a.rememberUILanguage(r)
 	a.sysLogs.Add(logbuf.LevelInfo, "auth", fmt.Sprintf("%s 使用 Passkey 从 %s 登录", user, ip))
 	a.audit.Record(audit.Entry{Actor: user, IP: ip, Via: audit.Via(r), Category: audit.CategoryLogin, Method: "POST", Path: "/api/login/passkey/finish", Status: http.StatusOK, Detail: "Passkey 登录"})
 	events.Publish(events.Event{Type: events.LoginSuccessful, Source: "管理后台", Level: events.LevelInfo,

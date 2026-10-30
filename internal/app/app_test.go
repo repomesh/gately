@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/auth"
+	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/luckyimport"
 	"github.com/wangwanjie/gately/internal/module"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
@@ -938,5 +939,47 @@ func TestSettingsListenOverride(t *testing.T) {
 	}
 	if got := fileListen(); got != "192.168.1.1:17500" {
 		t.Fatalf("再次保存后配置文件中的地址应保持，实际 %s", got)
+	}
+}
+
+// 登录时记录界面语言并写入设置文件；保存设置时忽略客户端提交的界面语言。
+func TestLoginRemembersUILanguage(t *testing.T) {
+	for _, k := range []string{"GATELY_LANG", "LC_ALL", "LC_MESSAGES", "LANG"} {
+		t.Setenv(k, "")
+	}
+	t.Cleanup(func() { i18n.SetUILang("") })
+	a, srv, c := loginApp(t)
+	req, _ := http.NewRequest("POST", srv.URL+"/api/login", strings.NewReader(`{"username":"admin","password":"test-password"}`))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept-Language", "zh-CN")
+	resp, err := c.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != 200 {
+		t.Fatalf("登录失败 %d", resp.StatusCode)
+	}
+	if got := a.settingsSnapshot().UILanguage; got != "zh-CN" {
+		t.Fatalf("界面语言未记录: %q", got)
+	}
+	if got := i18n.ServerLang(); got != "zh-CN" {
+		t.Fatalf("服务端语言应跟随界面语言: %s", got)
+	}
+	var saved Settings
+	if _, err := a.store.Load(settingsName, &saved); err != nil || saved.UILanguage != "zh-CN" {
+		t.Fatalf("界面语言未写入设置文件: %q %v", saved.UILanguage, err)
+	}
+	_, body := doJSON(t, c, "GET", srv.URL+"/api/system/settings", nil)
+	var data map[string]any
+	if err := json.Unmarshal(body, &data); err != nil {
+		t.Fatal(err)
+	}
+	data["uiLanguage"] = "en"
+	if code, out := doJSON(t, c, "PUT", srv.URL+"/api/system/settings", data); code != 200 {
+		t.Fatalf("保存设置失败 %d %s", code, out)
+	}
+	if got := a.settingsSnapshot().UILanguage; got != "zh-CN" {
+		t.Fatalf("保存设置不应改写界面语言: %q", got)
 	}
 }

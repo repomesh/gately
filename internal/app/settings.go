@@ -50,8 +50,11 @@ type Settings struct {
 	// LegacyAPIToken 是旧版的单个全局 API 令牌，仅用于启动时迁移为"遗留令牌"，迁移后清空。
 	// 现在的令牌由 apitoken 包管理，保存在 tokens.json。
 	LegacyAPIToken string `json:"apiToken,omitempty"`
-	// Language 为服务端语言（日志、通知等无请求上下文的输出）；为空时按系统环境（GATELY_LANG / LANG）自动选择
+	// Language 为服务端语言（日志、通知等无请求上下文的输出）；为空时按系统环境（GATELY_LANG / LANG）自动选择，
+	// 环境变量未指定语言时跟随 UILanguage
 	Language string `json:"language"`
+	// UILanguage 为最近一次登录管理界面时界面使用的语言，由服务端在登录成功时记录，客户端提交的值被忽略
+	UILanguage string `json:"uiLanguage,omitempty"`
 	// TimeZone 为 IANA 时区名，例如 Asia/Shanghai；为空使用系统时区
 	TimeZone string `json:"timeZone"`
 	// DNSServers 为自定义 DNS 服务器，影响所有出站域名解析（DDNS、Webhook、ACME 等）；
@@ -112,6 +115,7 @@ func (s *Settings) normalize() {
 	s.UpdateProxy = strings.TrimSpace(s.UpdateProxy)
 	s.ThirdLogin.Normalize()
 	s.Language = i18n.Normalize(s.Language)
+	s.UILanguage = i18n.Normalize(s.UILanguage)
 	// 去空、去重并排序，便于比较是否变化
 	var off []string
 	for _, id := range s.DisabledModules {
@@ -191,6 +195,7 @@ func restartRequired(old, cur Settings) bool {
 func (a *App) applyRuntime() {
 	s := a.settingsSnapshot()
 	i18n.SetServerLang(s.Language)
+	i18n.SetUILang(s.UILanguage)
 	a.auth.SetLimits(s.MaxLoginFailures, time.Duration(s.LockMinutes)*time.Minute)
 	// 已通过 Validate，解析不会失败
 	extra, _ := httpx.ParsePrefixes(s.TrustedProxies)
@@ -285,6 +290,8 @@ func (a *App) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	// 令牌不再通过全局设置管理，忽略客户端提交的旧字段
 	next.LegacyAPIToken = old.LegacyAPIToken
+	// 界面语言只由登录记录，不随表单提交改变
+	next.UILanguage = old.UILanguage
 	// 命令行 -listen 覆盖时（如 OpenWrt 的 LuCI 中设置了端口）：没改监听地址就保留配置文件中的原地址；
 	// 在界面上改了则写入配置文件，运行中仍以覆盖值为准，去掉覆盖后生效
 	if a.opts.Listen != "" && next.Listen == old.Listen {
@@ -403,4 +410,30 @@ func hostOnly(h string) string {
 		return host
 	}
 	return strings.Trim(h, "[]")
+}
+
+// rememberUILanguage 记录登录时管理界面使用的语言（前端请求的 Accept-Language 即界面语言）。
+// 服务端语言为「跟随系统」且环境变量未指定语言时，日志与通知按该语言输出；语言没变时不写配置文件。
+func (a *App) rememberUILanguage(r *http.Request) {
+	lang := i18n.FromAcceptLanguage(r.Header.Get("Accept-Language"))
+	if lang == "" {
+		return
+	}
+	a.settingsMu.Lock()
+	defer a.settingsMu.Unlock()
+	if a.settings.UILanguage == lang {
+		return
+	}
+	next := a.settings
+	next.UILanguage = lang
+	// 命令行 -listen 覆盖时写回配置文件中的原地址
+	if a.opts.Listen != "" {
+		next.Listen = a.fileListen
+	}
+	if err := a.store.Save(settingsName, next); err != nil {
+		a.sysLogs.Add(logbuf.LevelWarn, "settings", "保存管理界面语言失败: "+err.Error())
+		return
+	}
+	a.settings.UILanguage = lang
+	i18n.SetUILang(lang)
 }
