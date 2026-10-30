@@ -47,6 +47,8 @@
     "source": "Origen",
     "keyword": "Palabras clave",
     "keywordTip": "Los términos separados por espacios deben coincidir todos, las comillas dobles agrupan una frase y un - inicial excluye, p. ej. GET \"timeout\" -debug",
+    "exclude": "Excluir",
+    "excludeTip": "Oculta los registros que contienen cualquiera de estos términos, junto con las palabras clave; separados por espacios, las comillas dobles agrupan una frase, p. ej. debug \"health check\"",
     "moreFilters": "Más filtros",
     "reset": "Restablecer",
     "ip": "IP o rango, p. ej. 1.2.3.4, 10.0.0.0/8",

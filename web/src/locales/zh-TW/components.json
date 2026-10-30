@@ -47,6 +47,8 @@
     "source": "來源",
     "keyword": "關鍵字",
     "keywordTip": "空格分隔表示同時包含，雙引號包住短語，詞前加 - 表示排除，例如：GET \"timeout\" -debug",
+    "exclude": "不包含",
+    "excludeTip": "包含其中任意一個詞的日誌不顯示，與關鍵字同時生效；空格分隔，雙引號包住短語，例如：debug \"health check\"",
     "moreFilters": "更多篩選",
     "reset": "重設",
     "ip": "IP 或網段，如 1.2.3.4、10.0.0.0/8",

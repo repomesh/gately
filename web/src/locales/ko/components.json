@@ -47,6 +47,8 @@
     "source": "소스",
     "keyword": "키워드",
     "keywordTip": "공백으로 구분하면 모두 포함, 큰따옴표로 구문 묶기, 앞에 - 를 붙이면 제외. 예: GET \"timeout\" -debug",
+    "exclude": "제외",
+    "excludeTip": "이 중 하나라도 포함된 로그를 숨기며 키워드와 함께 적용됩니다. 공백으로 구분하고 큰따옴표로 구문을 묶습니다. 예: debug \"health check\"",
     "moreFilters": "추가 필터",
     "reset": "초기화",
     "ip": "IP 또는 대역 (예: 1.2.3.4, 10.0.0.0/8)",

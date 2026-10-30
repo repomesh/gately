@@ -47,6 +47,8 @@
     "source": "Source",
     "keyword": "Keywords",
     "keywordTip": "Space-separated terms must all match, double quotes group a phrase, a leading - excludes, e.g. GET \"timeout\" -debug",
+    "exclude": "Exclude",
+    "excludeTip": "Hides logs containing any of these terms, combined with the keywords; space-separated, double quotes group a phrase, e.g. debug \"health check\"",
     "moreFilters": "More filters",
     "reset": "Reset",
     "ip": "IP or range, e.g. 1.2.3.4, 10.0.0.0/8",

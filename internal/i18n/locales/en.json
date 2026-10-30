@@ -445,6 +445,7 @@
   "下载证书与私钥": "Download certificate and private key",
   "下载配置备份": "Download a configuration backup",
   "不使用内置转发时通道本地端口不能为 0": "Tunnel local port cannot be 0 when built-in forwarding is not used",
+  "不包含的关键词：空格分隔，双引号包住短语，包含其中任意一个即排除；与 q 同时生效": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
   "不支持的 DNS 服务商 %q": "Unsupported DNS provider %q",
   "不支持的 Docker 地址 %q": "Unsupported Docker address %q",
   "不支持的 PROXY 协议版本 %q": "unsupported PROXY protocol version %q",

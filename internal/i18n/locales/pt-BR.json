@@ -445,6 +445,7 @@
   "下载证书与私钥": "Baixar certificado e chave privada",
   "下载配置备份": "Baixar backup da configuração",
   "不使用内置转发时通道本地端口不能为 0": "A porta local do canal não pode ser 0 sem o encaminhamento integrado",
+  "不包含的关键词：空格分隔，双引号包住短语，包含其中任意一个即排除；与 q 同时生效": "Palavras-chave excluídas: separadas por espaço, aspas duplas agrupam uma frase; a entrada que contiver qualquer uma é excluída; aplica-se junto com q",
   "不支持的 DNS 服务商 %q": "Provedor de DNS %q não suportado",
   "不支持的 Docker 地址 %q": "Endereço Docker %q não suportado",
   "不支持的 PROXY 协议版本 %q": "versão do protocolo PROXY não suportada %q",

@@ -47,6 +47,8 @@
     "source": "Origem",
     "keyword": "Palavras-chave",
     "keywordTip": "Termos separados por espaço devem corresponder todos, aspas duplas agrupam uma frase e um - inicial exclui, ex.: GET \"timeout\" -debug",
+    "exclude": "Excluir",
+    "excludeTip": "Oculta os logs que contêm qualquer um destes termos, junto com as palavras-chave; separados por espaço, aspas duplas agrupam uma frase, ex.: debug \"health check\"",
     "moreFilters": "Mais filtros",
     "reset": "Redefinir",
     "ip": "IP ou faixa, ex.: 1.2.3.4, 10.0.0.0/8",

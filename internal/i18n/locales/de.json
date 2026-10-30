@@ -445,6 +445,7 @@
   "下载证书与私钥": "Zertifikat und privaten Schlüssel herunterladen",
   "下载配置备份": "Konfigurations-Backup herunterladen",
   "不使用内置转发时通道本地端口不能为 0": "Ohne integrierte Weiterleitung darf der lokale Tunnelport nicht 0 sein",
+  "不包含的关键词：空格分隔，双引号包住短语，包含其中任意一个即排除；与 q 同时生效": "Ausgeschlossene Stichwörter: durch Leerzeichen getrennt, doppelte Anführungszeichen bilden eine Phrase; ein Eintrag mit einem davon wird ausgeschlossen; gilt zusammen mit q",
   "不支持的 DNS 服务商 %q": "Nicht unterstützter DNS-Anbieter %q",
   "不支持的 Docker 地址 %q": "Nicht unterstützte Docker-Adresse %q",
   "不支持的 PROXY 协议版本 %q": "nicht unterstützte PROXY-Protokollversion %q",

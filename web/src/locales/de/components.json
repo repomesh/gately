@@ -47,6 +47,8 @@
     "source": "Quelle",
     "keyword": "Suchbegriffe",
     "keywordTip": "Durch Leerzeichen getrennte Begriffe müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus, z. B. GET \"timeout\" -debug",
+    "exclude": "Ausschließen",
+    "excludeTip": "Blendet Logs aus, die einen dieser Begriffe enthalten, zusätzlich zu den Stichwörtern; durch Leerzeichen getrennt, doppelte Anführungszeichen bilden eine Phrase, z. B. debug \"health check\"",
     "moreFilters": "Weitere Filter",
     "reset": "Zurücksetzen",
     "ip": "IP oder Bereich, z. B. 1.2.3.4, 10.0.0.0/8",

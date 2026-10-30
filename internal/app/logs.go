@@ -64,12 +64,13 @@ func tightenConfigDir(dir string) int {
 }
 
 // logFilterParams 是日志接口支持的过滤参数，接口文档据此列出查询参数。
-var logFilterParams = []string{"level", "source", "q", "ip", "host", "status", "from", "to"}
+var logFilterParams = []string{"level", "source", "q", "exclude", "ip", "host", "status", "from", "to"}
 
 // parseLogFilter 解析日志过滤参数：
 //   - level：最低级别（debug、info、warn、error）
 //   - source：来源标签，精确匹配
 //   - q：关键词，空格分隔表示同时包含，双引号包住短语，前缀 - 表示排除
+//   - exclude：不包含的关键词，空格分隔，双引号包住短语，包含其中任意一个即排除；与 q 为“且”的关系
 //   - ip：客户端地址，支持完整地址、CIDR 与地址片段，多个以逗号分隔
 //   - host：站点名称或域名的一部分
 //   - status：状态码，如 404、4xx、500-599，多个以逗号分隔
@@ -89,6 +90,9 @@ func parseLogFilter(q url.Values) (*logbuf.Filter, string) {
 		f.MinLevel = lv
 	}
 	f.Terms, f.Excludes = logbuf.ParseKeywords(q.Get("q"))
+	// exclude 中的词全部视为排除词，写不写前缀 - 都一样
+	exTerms, exExcludes := logbuf.ParseKeywords(q.Get("exclude"))
+	f.Excludes = append(append(f.Excludes, exTerms...), exExcludes...)
 	if v := strings.TrimSpace(q.Get("status")); v != "" {
 		st, ok := logbuf.ParseStatus(v)
 		if !ok {

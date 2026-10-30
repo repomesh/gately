@@ -3766,6 +3766,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -4988,6 +4996,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -5862,6 +5878,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -6671,6 +6695,14 @@
             "description": "Keywords: space-separated terms must all match, double quotes group a phrase, a leading - excludes",
             "in": "query",
             "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
             "schema": {
               "type": "string"
             }
@@ -10528,6 +10560,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -12514,6 +12554,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -13904,6 +13952,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -15248,6 +15304,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -16414,6 +16478,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -17022,6 +17094,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -17258,6 +17338,14 @@
             "description": "Keywords: space-separated terms must all match, double quotes group a phrase, a leading - excludes",
             "in": "query",
             "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
             "schema": {
               "type": "string"
             }
@@ -18538,6 +18626,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -19156,6 +19252,14 @@
             "description": "Keywords: space-separated terms must all match, double quotes group a phrase, a leading - excludes",
             "in": "query",
             "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
             "schema": {
               "type": "string"
             }
@@ -19948,6 +20052,14 @@
             "description": "Keywords: space-separated terms must all match, double quotes group a phrase, a leading - excludes",
             "in": "query",
             "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
             "schema": {
               "type": "string"
             }
@@ -21119,6 +21231,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -21904,6 +22024,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -22552,6 +22680,14 @@
             "description": "Keywords: space-separated terms must all match, double quotes group a phrase, a leading - excludes",
             "in": "query",
             "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
             "schema": {
               "type": "string"
             }
@@ -24453,6 +24589,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -25790,6 +25934,14 @@
             }
           },
           {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Client address: full address, CIDR or partial address, comma-separated",
             "in": "query",
             "name": "ip",
@@ -25975,6 +26127,14 @@
             "description": "Keywords: space-separated terms must all match, double quotes group a phrase, a leading - excludes",
             "in": "query",
             "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
             "schema": {
               "type": "string"
             }
@@ -27751,6 +27911,14 @@
             "description": "Keywords: space-separated terms must all match, double quotes group a phrase, a leading - excludes",
             "in": "query",
             "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
             "schema": {
               "type": "string"
             }
@@ -29710,6 +29878,14 @@
             "description": "Keywords: space-separated terms must all match, double quotes group a phrase, a leading - excludes",
             "in": "query",
             "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
             "schema": {
               "type": "string"
             }
@@ -32257,6 +32433,14 @@
             "description": "Keywords: space-separated terms must all match, double quotes group a phrase, a leading - excludes",
             "in": "query",
             "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Excluded keywords: space-separated, double quotes group a phrase, an entry containing any of them is excluded; applies together with q",
+            "in": "query",
+            "name": "exclude",
             "schema": {
               "type": "string"
             }

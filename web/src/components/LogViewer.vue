@@ -27,6 +27,14 @@
           </el-tooltip>
         </template>
       </el-input>
+      <!-- 不包含的关键词：包含其中任意一个即排除，与上面的关键词同时生效 -->
+      <el-input v-model="filters.exclude" size="small" class="f-q" clearable :prefix-icon="SearchX" :placeholder="t('components.logViewer.exclude')">
+        <template #suffix>
+          <el-tooltip :content="t('components.logViewer.excludeTip')" placement="top">
+            <CircleHelp :size="13" class="tip" />
+          </el-tooltip>
+        </template>
+      </el-input>
       <el-button size="small" :type="advancedCount ? 'primary' : 'default'" :plain="!!advancedCount" :icon="Filter" @click="showAdvanced = !showAdvanced">
         {{ t('components.logViewer.moreFilters') }}<span v-if="advancedCount" class="count">{{ advancedCount }}</span>
       </el-button>
@@ -80,7 +88,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CircleHelp, Filter, RotateCcw, Search, Trash2 } from 'lucide-vue-next'
+import { CircleHelp, Filter, RotateCcw, Search, SearchX, Trash2 } from 'lucide-vue-next'
 import { api, type LogEntry } from '../api'
 import { usePolling } from '../composables/usePolling'
 
@@ -111,7 +119,7 @@ type Range = (typeof ranges)[number]
 const rangeMs: Record<string, number> = { '15m': 15 * 60e3, '1h': 3600e3, '6h': 6 * 3600e3, '24h': 24 * 3600e3, '7d': 7 * 24 * 3600e3 }
 
 function emptyFilters() {
-  return { level: 'all', source: '', q: '', ip: '', host: '', status: '', range: 'all' as Range, custom: null as [Date, Date] | null }
+  return { level: 'all', source: '', q: '', exclude: '', ip: '', host: '', status: '', range: 'all' as Range, custom: null as [Date, Date] | null }
 }
 const filters = reactive(emptyFilters())
 const showAdvanced = ref(false)
@@ -147,7 +155,7 @@ const sourceOptions = computed(() => {
 // 高级过滤项中已填写的数量，显示在按钮上；自定义时间范围清空了日期时不会发出时间条件，不计入
 const rangeActive = computed(() => (filters.range === 'custom' ? !!filters.custom?.[0] : filters.range !== 'all'))
 const advancedCount = computed(() => [filters.ip, kinds.value.host && filters.host, kinds.value.status && filters.status, rangeActive.value].filter(Boolean).length)
-const active = computed(() => filters.level !== 'all' || !!filters.source || !!filters.q.trim() || advancedCount.value > 0)
+const active = computed(() => filters.level !== 'all' || !!filters.source || !!filters.q.trim() || !!filters.exclude.trim() || advancedCount.value > 0)
 
 // filterQuery 把过滤条件拼成查询参数（不含 since/before/limit）
 function filterQuery(): string {
@@ -162,6 +170,7 @@ function filterQuery(): string {
   }
   add('source', filters.source)
   add('q', filters.q)
+  add('exclude', filters.exclude)
   add('ip', filters.ip)
   if (kinds.value.host) {
     add('host', filters.host)

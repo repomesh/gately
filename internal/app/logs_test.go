@@ -102,6 +102,9 @@ func TestLogsFilterAPI(t *testing.T) {
 		{"level=warn", "[10.0.0.6 GET b.example.com/y 502 9ms 连接 192.168.1.9:80 失败]"},
 		{"source=" + url.QueryEscape("规则B"), "[连接 192.168.1.9:80 失败]"},
 		{"q=" + url.QueryEscape("GET -b.example"), "[10.0.0.5 GET a.example.com/x 404 1ms]"},
+		// exclude 与 q 同时生效；exclude 中的词带不带 - 都是排除，包含任意一个即排除
+		{"q=GET&exclude=" + url.QueryEscape("b.example"), "[10.0.0.5 GET a.example.com/x 404 1ms]"},
+		{"exclude=" + url.QueryEscape("-404 \"192.168.1.9:80 失败\""), "[10.0.0.6 GET b.example.com/y 502 9ms]"},
 		{"ip=10.0.0.0/24", "[10.0.0.5 GET a.example.com/x 404 1ms 10.0.0.6 GET b.example.com/y 502 9ms]"},
 		{"ip=192.168.1.9", "[连接 192.168.1.9:80 失败]"},
 		{"host=b.example", "[10.0.0.6 GET b.example.com/y 502 9ms]"},

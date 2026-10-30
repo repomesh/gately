@@ -47,6 +47,8 @@
     "source": "Source",
     "keyword": "Mots-clés",
     "keywordTip": "Les termes séparés par des espaces doivent tous correspondre, les guillemets doubles regroupent une expression, un - initial exclut, par ex. GET \"timeout\" -debug",
+    "exclude": "Exclure",
+    "excludeTip": "Masque les journaux contenant l’un de ces termes, en plus des mots-clés ; séparés par des espaces, les guillemets doubles regroupent une expression, ex. debug \"health check\"",
     "moreFilters": "Plus de filtres",
     "reset": "Réinitialiser",
     "ip": "IP ou plage, par ex. 1.2.3.4, 10.0.0.0/8",
