@@ -54,6 +54,25 @@ func maskDetailSecrets(d *ContainerDetail) {
 	}
 }
 
+// maskImageSecrets 对没有写权限的身份隐藏镜像配置中的敏感字段：容器提交为镜像时 Env 与 Cmd 会原样写入镜像，
+// 构建历史的 CreatedBy 也可能带有 ENV、ARG 中的密钥。环境变量保留变量名，Cmd、Entrypoint 与各层命令整体隐藏。
+func maskImageSecrets(d *ImageDetail) {
+	env := make([]string, len(d.Env))
+	for i, e := range d.Env {
+		env[i] = maskEnv(e)
+	}
+	d.Env = env
+	if len(d.Cmd) > 0 {
+		d.Cmd = []string{crud.SecretMask}
+	}
+	if len(d.Entrypoint) > 0 {
+		d.Entrypoint = []string{crud.SecretMask}
+	}
+	for i := range d.Layers {
+		d.Layers[i].CreatedBy = crud.Mask(d.Layers[i].CreatedBy)
+	}
+}
+
 // maskEnv 隐藏 KEY=VALUE 中非空的值；不含等号（只有变量名）或值为空时原样返回。
 func maskEnv(e string) string {
 	k, v, ok := strings.Cut(e, "=")

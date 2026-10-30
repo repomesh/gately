@@ -10185,7 +10185,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Erforderliche Berechtigung: `docker:read`.",
+        "description": "Ohne die Berechtigung docker:write werden Werte von Umgebungsvariablen, Cmd, Entrypoint und die Befehle im Build-Verlauf als Platzhalter ******** angezeigt.\n\nErforderliche Berechtigung: `docker:read`.",
         "parameters": [
           {
             "in": "path",

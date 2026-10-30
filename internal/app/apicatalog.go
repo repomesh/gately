@@ -128,7 +128,7 @@ var apiCatalog = map[string]epDoc{
 	"POST /api/docker/images/search":                     {Summary: "搜索镜像", Body: true},
 	"POST /api/docker/images/load":                       {Summary: "导入镜像文件"},
 	"POST /api/docker/images/build":                      {Summary: "构建镜像", Body: true},
-	"GET /api/docker/images/{id}":                        {Summary: "查看镜像详情"},
+	"GET /api/docker/images/{id}":                        {Summary: "查看镜像详情", Desc: "没有 docker:write 权限时，环境变量的值、Cmd、Entrypoint 与构建历史中的命令显示为占位符 ********。"},
 	"POST /api/docker/images/{id}/tag":                   {Summary: "为镜像打标签", Body: true},
 	"DELETE /api/docker/images/{id}":                     {Summary: "删除镜像"},
 	"GET /api/docker/images/{id}/export":                 {Summary: "导出镜像", Desc: "返回镜像归档文件，需要写权限。"},

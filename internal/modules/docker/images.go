@@ -390,6 +390,9 @@ func (m *Module) handleImageDetail(w http.ResponseWriter, r *http.Request) {
 			d.Layers = append(d.Layers, ImageLayer{CreatedBy: h.CreatedBy, Size: h.Size, Created: h.Created})
 		}
 	}
+	if !canViewSecrets(r) {
+		maskImageSecrets(&d)
+	}
 	httpx.OK(w, d)
 }
 

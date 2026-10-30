@@ -10185,7 +10185,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Required permission: `docker:read`.",
+        "description": "Without the docker:write permission, environment variable values, Cmd, Entrypoint and the commands in the build history are shown as the placeholder ********.\n\nRequired permission: `docker:read`.",
         "parameters": [
           {
             "in": "path",

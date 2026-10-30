@@ -10185,7 +10185,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Требуемое разрешение: `docker:read`.",
+        "description": "Без разрешения docker:write значения переменных окружения, Cmd, Entrypoint и команды в истории сборки показываются как заполнитель ********.\n\nТребуемое разрешение: `docker:read`.",
         "parameters": [
           {
             "in": "path",

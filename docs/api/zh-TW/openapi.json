@@ -10185,7 +10185,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "所需權限：`docker:read`。",
+        "description": "沒有 docker:write 權限時，環境變數的值、Cmd、Entrypoint 與建置歷史中的命令顯示為預留位置 ********。\n\n所需權限：`docker:read`。",
         "parameters": [
           {
             "in": "path",

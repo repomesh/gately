@@ -143,3 +143,35 @@ func TestMaskProcessCommandsWithoutCmdColumn(t *testing.T) {
 		t.Errorf("没有 CMD 列时不应改动: %v", procs)
 	}
 }
+
+// 容器提交为镜像后 Env 与 Cmd 会写进镜像配置，镜像详情同样只对有写权限的身份显示明文
+func TestImageDetailMasksSecretsWithoutWrite(t *testing.T) {
+	_, host := newCtrFake(t, map[string]http.HandlerFunc{
+		"GET /images/sha256:img/json": ctrJSON(map[string]any{"Id": "sha256:img", "Config": map[string]any{
+			"Env": []string{"PATH=/usr/bin", "API_TOKEN=s3cret"}, "Cmd": []string{"app", "--key=s3cret"}, "Entrypoint": []string{"/entry.sh"},
+		}}),
+		"GET /images/sha256:img/history": ctrJSON([]map[string]any{{"Created": 1, "CreatedBy": "/bin/sh -c #(nop) ENV API_TOKEN=s3cret", "Size": 0}}),
+	})
+	call := tokenRequester(t, host)
+	detail := func(scopes []string) ImageDetail {
+		t.Helper()
+		rec := call(scopes, "GET", "/images/sha256:img")
+		if rec.Code != 200 {
+			t.Fatalf("镜像详情失败: %d %s", rec.Code, rec.Body)
+		}
+		var d ImageDetail
+		_ = json.Unmarshal(rec.Body.Bytes(), &d)
+		return d
+	}
+	for _, scopes := range [][]string{{"docker:read"}, nil} {
+		d := detail(scopes)
+		if !reflect.DeepEqual(d.Env, []string{"PATH=********", "API_TOKEN=********"}) || !reflect.DeepEqual(d.Cmd, []string{"********"}) ||
+			!reflect.DeepEqual(d.Entrypoint, []string{"********"}) || len(d.Layers) != 1 || d.Layers[0].CreatedBy != "********" {
+			t.Errorf("%v: 镜像详情应脱敏: %+v", scopes, d)
+		}
+	}
+	d := detail([]string{"docker:write"})
+	if !reflect.DeepEqual(d.Env, []string{"PATH=/usr/bin", "API_TOKEN=s3cret"}) || !reflect.DeepEqual(d.Cmd, []string{"app", "--key=s3cret"}) || !strings.Contains(d.Layers[0].CreatedBy, "s3cret") {
+		t.Errorf("写权限应看到明文: %+v", d)
+	}
+}

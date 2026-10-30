@@ -152,3 +152,59 @@ func TestSelfContainerGuardByName(t *testing.T) {
 		t.Errorf("同一容器按名称与按 ID 的操作应互斥: %d %s", rec.Code, rec.Body)
 	}
 }
+
+// 项目包含 Gately 自身时 restart 可以执行，但自身放到最后重启，其余容器不会因进程退出而漏掉
+func TestComposeRestartSelfLast(t *testing.T) {
+	dir := t.TempDir()
+	f := composeFake(dir)
+	ok204 := func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(204) }
+	f.handlers["POST /containers/app1/restart"] = ok204
+	f.handlers["POST /containers/db1/restart"] = ok204
+	_, do := newResEnv(t, f)
+	fakeSelf(t, "app1")
+	if rec := do("POST", "/compose/web/restart", "", nil); rec.Code != 200 {
+		t.Fatalf("包含自身的项目 restart 应可执行: %d %s", rec.Code, rec.Body)
+	}
+	f.mu.Lock()
+	var order []string
+	for _, c := range f.calls {
+		if strings.Contains(c, "/restart?") {
+			order = append(order, c)
+		}
+	}
+	f.mu.Unlock()
+	if len(order) != 2 || !strings.Contains(order[0], "db1") || !strings.Contains(order[1], "app1") {
+		t.Fatalf("自身应最后重启: %v", order)
+	}
+}
+
+// 升级、编辑重建期间（容器已被占用）不能删除或启停该容器，避免打乱重建与回滚
+func TestBusyContainerRejectsDeleteAndActions(t *testing.T) {
+	info := ctrSampleInfo(t)
+	var id string
+	_ = json.Unmarshal(info["Id"], &id)
+	f, host := newCtrFake(t, map[string]http.HandlerFunc{
+		"GET /containers/web/json":        ctrJSON(info),
+		"GET /containers/" + id + "/json": ctrJSON(info),
+	})
+	m, api := ctrAPI(t, host)
+	fakeSelf(t, "other")
+	release, ok := m.acquire(id)
+	if !ok {
+		t.Fatal("占用失败")
+	}
+	defer release()
+	for _, c := range []struct{ method, path string }{
+		{"POST", "/containers/web/stop"},
+		{"POST", "/containers/" + id + "/kill"},
+		{"POST", "/containers/web/start"},
+		{"DELETE", "/containers/web"},
+	} {
+		if rec := api(c.method, c.path, "", nil); rec.Code != http.StatusConflict {
+			t.Errorf("%s %s 在重建期间应返回 409: %d %s", c.method, c.path, rec.Code, rec.Body)
+		}
+	}
+	if f.called("DELETE /containers/") != 0 || f.called("POST /containers/"+id+"/") != 0 {
+		t.Errorf("重建期间不应调用 Docker: %v", f.calls)
+	}
+}

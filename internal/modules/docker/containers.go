@@ -100,6 +100,13 @@ func (m *Module) acquire(id string) (release func(), ok bool) {
 	}, true
 }
 
+// isBusy 判断容器是否正在升级或编辑重建。
+func (m *Module) isBusy(id string) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.busy[id]
+}
+
 // ---------- 列表 ----------
 
 // listStartedConcurrency 是列表接口并发 inspect 获取启动时间的上限。
@@ -219,6 +226,11 @@ func (m *Module) handleAction(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "不能对 Gately 自身所在的容器执行 %s", action)
 		return
 	}
+	// 升级、编辑重建期间旧容器已停止并改名备份，此时启停会打乱重建与回滚
+	if m.isBusy(id) {
+		httpx.Error(w, http.StatusConflict, "容器 %s 正在升级或重建，请稍后再试", shortID(id))
+		return
+	}
 	if err := c.Action(r.Context(), id, action); err != nil {
 		writeCtrErr(w, err)
 		return
@@ -261,6 +273,11 @@ func (m *Module) handleDelete(w http.ResponseWriter, r *http.Request) {
 	}
 	if isSelfContainer(id) {
 		httpx.Error(w, http.StatusBadRequest, "不能删除 Gately 自身所在的容器")
+		return
+	}
+	// 重建期间删除备份的旧容器会导致失败时无法回滚
+	if m.isBusy(id) {
+		httpx.Error(w, http.StatusConflict, "容器 %s 正在升级或重建，请稍后再试", shortID(id))
 		return
 	}
 	vols := r.URL.Query().Get("volumes") == "1"

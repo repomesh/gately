@@ -10185,7 +10185,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "必要な権限: `docker:read`。",
+        "description": "docker:write 権限がない場合、環境変数の値、Cmd、Entrypoint、ビルド履歴のコマンドはプレースホルダー ******** で表示されます。\n\n必要な権限: `docker:read`。",
         "parameters": [
           {
             "in": "path",

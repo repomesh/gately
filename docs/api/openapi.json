@@ -10185,7 +10185,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "所需权限：`docker:read`。",
+        "description": "没有 docker:write 权限时，环境变量的值、Cmd、Entrypoint 与构建历史中的命令显示为占位符 ********。\n\n所需权限：`docker:read`。",
         "parameters": [
           {
             "in": "path",

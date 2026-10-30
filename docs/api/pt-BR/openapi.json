@@ -10185,7 +10185,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Permissão necessária: `docker:read`.",
+        "description": "Sem a permissão docker:write, os valores das variáveis de ambiente, Cmd, Entrypoint e os comandos do histórico de build aparecem como o marcador ********.\n\nPermissão necessária: `docker:read`.",
         "parameters": [
           {
             "in": "path",

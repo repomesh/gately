@@ -561,6 +561,20 @@ func (m *Module) composeDown(ctx context.Context, c *Client, p *composeProject, 
 	return nil
 }
 
+// selfLast 把 Gately 自身所在的容器移到列表末尾，其余顺序不变。
+func selfLast(cts []resContainer) []resContainer {
+	out := make([]resContainer, 0, len(cts))
+	var self []resContainer
+	for _, ct := range cts {
+		if isSelfContainer(ct.ID) {
+			self = append(self, ct)
+			continue
+		}
+		out = append(out, ct)
+	}
+	return append(out, self...)
+}
+
 // projectHasSelf 判断 Compose 项目是否包含 Gately 自身所在的容器。
 func projectHasSelf(p *composeProject) bool {
 	for _, ct := range p.Containers {
@@ -604,6 +618,9 @@ func (m *Module) handleComposeAction(w http.ResponseWriter, r *http.Request) {
 		err = m.composeDown(ctx, c, p, r.URL.Query().Get("volumes") == "1")
 	case "stop", "pause":
 		err = applyToContainers(ctx, c, sortComposeContainers(p.Containers, true), action)
+	case "restart":
+		// 重启到 Gately 自身时进程退出，排在后面的容器不会被重启，因此自身放到最后
+		err = applyToContainers(ctx, c, selfLast(sortComposeContainers(p.Containers, false)), action)
 	default:
 		err = applyToContainers(ctx, c, sortComposeContainers(p.Containers, false), action)
 	}

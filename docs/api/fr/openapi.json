@@ -10185,7 +10185,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Permission requise : `docker:read`.",
+        "description": "Sans la permission docker:write, les valeurs des variables d'environnement, Cmd, Entrypoint et les commandes de l'historique de construction s'affichent sous la forme ********.\n\nPermission requise : `docker:read`.",
         "parameters": [
           {
             "in": "path",

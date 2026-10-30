@@ -10185,7 +10185,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "필요한 권한: `docker:read`.",
+        "description": "docker:write 권한이 없으면 환경 변수 값, Cmd, Entrypoint, 빌드 기록의 명령이 자리표시자 ********로 표시됩니다.\n\n필요한 권한: `docker:read`.",
         "parameters": [
           {
             "in": "path",

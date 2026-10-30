@@ -354,7 +354,8 @@ func TestImageListAndDetail(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &d); err != nil || rec.Code != 200 {
 		t.Fatalf("%d %s", rec.Code, rec.Body.String())
 	}
-	if len(d.Layers) != 2 || d.Layers[1].CreatedBy != "ADD rootfs" || d.ExposedPorts[0] != "443/tcp" || d.Created != 1704067200 || d.Env == nil || d.Labels == nil {
+	// 请求不带身份，按没有写权限处理：Cmd 与各层命令脱敏（明文见 TestImageDetailMasksSecretsWithoutWrite）
+	if len(d.Layers) != 2 || d.Layers[1].CreatedBy != "********" || d.Layers[1].Size != 77 || d.ExposedPorts[0] != "443/tcp" || d.Created != 1704067200 || d.Env == nil || d.Labels == nil {
 		t.Fatalf("详情错误: %+v", d)
 	}
 }
